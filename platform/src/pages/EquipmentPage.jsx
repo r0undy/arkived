@@ -22,6 +22,18 @@ const initialMaintenance = {
   next_service_due: ''
 };
 
+const initialDetailForm = {
+  name: '',
+  description: '',
+  category: '',
+  daily_rate: 0,
+  deposit: 0,
+  quantity: 1,
+  status: 'available',
+  condition: 'good',
+  tags_text: ''
+};
+
 const fileToBase64 = (file) =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -40,9 +52,12 @@ export default function EquipmentPage() {
   const [status, setStatus] = useState({ loading: false, error: '' });
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
   const [selectedEquipmentDetail, setSelectedEquipmentDetail] = useState(null);
-  const [dragImageId, setDragImageId] = useState('');
+  const [detailForm, setDetailForm] = useState(initialDetailForm);
+  const [detailStatus, setDetailStatus] = useState({ loading: false, error: '', message: '' });
+  const [confirmArchiveId, setConfirmArchiveId] = useState('');
 
   const [imageStatus, setImageStatus] = useState({ loading: false, error: '' });
+  const [dragImageId, setDragImageId] = useState('');
 
   const [maintenanceLogs, setMaintenanceLogs] = useState([]);
   const [maintenanceForm, setMaintenanceForm] = useState(initialMaintenance);
@@ -109,12 +124,40 @@ export default function EquipmentPage() {
     loadMaintenanceLogs(selectedEquipmentId);
   }, [selectedEquipmentId]);
 
+  useEffect(() => {
+    if (!selectedEquipmentDetail) {
+      setDetailForm(initialDetailForm);
+      return;
+    }
+
+    setDetailForm({
+      name: selectedEquipmentDetail.name || '',
+      description: selectedEquipmentDetail.description || '',
+      category: selectedEquipmentDetail.category || '',
+      daily_rate: Number(selectedEquipmentDetail.daily_rate || 0),
+      deposit: Number(selectedEquipmentDetail.deposit || 0),
+      quantity: Number(selectedEquipmentDetail.quantity || 1),
+      status: selectedEquipmentDetail.status || 'available',
+      condition: selectedEquipmentDetail.condition || 'good',
+      tags_text: Array.isArray(selectedEquipmentDetail.tags) ? selectedEquipmentDetail.tags.join(', ') : ''
+    });
+    setDetailStatus({ loading: false, error: '', message: '' });
+  }, [selectedEquipmentDetail]);
+
   const updateForm = (key) => (event) => {
     const value = ['daily_rate', 'deposit', 'quantity'].includes(key)
       ? Number(event.target.value)
       : event.target.value;
 
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const updateDetail = (key) => (event) => {
+    const value = ['daily_rate', 'deposit', 'quantity'].includes(key)
+      ? Number(event.target.value)
+      : event.target.value;
+
+    setDetailForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const updateMaintenance = (key) => (event) => {
@@ -135,12 +178,54 @@ export default function EquipmentPage() {
     }
   };
 
-  const onArchive = async (id) => {
+  const onSaveEquipmentDetail = async (event) => {
+    event.preventDefault();
+    if (!selectedEquipmentId) return;
+
+    setDetailStatus({ loading: true, error: '', message: '' });
+
+    const payload = {
+      name: detailForm.name,
+      description: detailForm.description,
+      category: detailForm.category,
+      daily_rate: Number(detailForm.daily_rate),
+      deposit: Number(detailForm.deposit),
+      quantity: Number(detailForm.quantity),
+      status: detailForm.status,
+      condition: detailForm.condition,
+      tags: detailForm.tags_text
+        .split(',')
+        .map((entry) => entry.trim())
+        .filter(Boolean)
+    };
+
     try {
-      await api.archiveEquipment(id);
+      await api.updateEquipment(selectedEquipmentId, payload);
+      await Promise.all([loadItems(), loadEquipmentDetail(selectedEquipmentId)]);
+      setDetailStatus({ loading: false, error: '', message: 'Equipment details updated.' });
+    } catch (error) {
+      setDetailStatus({ loading: false, error: error.message || 'Failed to update equipment', message: '' });
+    }
+  };
+
+  const onRequestArchive = (equipmentId) => {
+    setConfirmArchiveId(equipmentId);
+  };
+
+  const onConfirmArchive = async () => {
+    if (!confirmArchiveId) return;
+
+    try {
+      await api.archiveEquipment(confirmArchiveId);
+      if (confirmArchiveId === selectedEquipmentId) {
+        setSelectedEquipmentDetail(null);
+        setMaintenanceLogs([]);
+      }
       await loadItems();
     } catch (_error) {
       // Keep current list if archive request fails.
+    } finally {
+      setConfirmArchiveId('');
     }
   };
 
@@ -356,7 +441,7 @@ export default function EquipmentPage() {
                   </button>
                   <button
                     className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
-                    onClick={() => onArchive(item.id)}
+                    onClick={() => onRequestArchive(item.id)}
                     type="button"
                   >
                     Archive
@@ -374,6 +459,82 @@ export default function EquipmentPage() {
           </tbody>
         </table>
       </div>
+
+      <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
+        <h2 className="text-lg font-semibold tracking-tight">Equipment Details</h2>
+        <p className="mt-1 text-sm text-neutral-400">
+          {selectedEquipment ? `Editing: ${selectedEquipment.name}` : 'Select an equipment item to edit details.'}
+        </p>
+
+        <form className="mt-4 grid gap-3 md:grid-cols-3" onSubmit={onSaveEquipmentDetail}>
+          <Field label="Name" value={detailForm.name} onChange={updateDetail('name')} required />
+          <Field label="Category" value={detailForm.category} onChange={updateDetail('category')} required />
+          <Field label="Daily rate" type="number" min="0" value={detailForm.daily_rate} onChange={updateDetail('daily_rate')} required />
+          <Field label="Deposit" type="number" min="0" value={detailForm.deposit} onChange={updateDetail('deposit')} />
+          <Field label="Quantity" type="number" min="1" value={detailForm.quantity} onChange={updateDetail('quantity')} required />
+
+          <label className="block text-sm text-neutral-200">
+            <span>Status (manual override)</span>
+            <select
+              className="mt-1 w-full rounded-md border border-neutral-750 bg-neutral-950 px-3 py-2"
+              value={detailForm.status}
+              onChange={updateDetail('status')}
+            >
+              <option value="available">available</option>
+              <option value="rented">rented</option>
+              <option value="maintenance">maintenance</option>
+              <option value="archived">archived</option>
+            </select>
+          </label>
+
+          <label className="block text-sm text-neutral-200">
+            <span>Condition</span>
+            <select
+              className="mt-1 w-full rounded-md border border-neutral-750 bg-neutral-950 px-3 py-2"
+              value={detailForm.condition}
+              onChange={updateDetail('condition')}
+            >
+              <option value="excellent">excellent</option>
+              <option value="good">good</option>
+              <option value="fair">fair</option>
+              <option value="needs_repair">needs_repair</option>
+            </select>
+          </label>
+
+          <Field label="Tags (comma-separated)" value={detailForm.tags_text} onChange={updateDetail('tags_text')} />
+
+          <label className="block text-sm text-neutral-200 md:col-span-3">
+            <span>Description</span>
+            <textarea
+              className="mt-1 w-full rounded-md border border-neutral-750 bg-neutral-950 px-3 py-2"
+              rows={3}
+              value={detailForm.description}
+              onChange={updateDetail('description')}
+            />
+          </label>
+
+          {detailStatus.error ? <p className="text-sm text-danger-500 md:col-span-3">{detailStatus.error}</p> : null}
+          {detailStatus.message ? <p className="text-sm text-success-500 md:col-span-3">{detailStatus.message}</p> : null}
+
+          <div className="md:col-span-3 flex gap-2">
+            <button
+              className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold hover:bg-brand-600 disabled:opacity-60"
+              disabled={detailStatus.loading || !selectedEquipmentId}
+              type="submit"
+            >
+              {detailStatus.loading ? 'Saving...' : 'Save equipment'}
+            </button>
+            <button
+              className="rounded-md border border-neutral-750 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700 disabled:opacity-50"
+              disabled={!selectedEquipmentId}
+              onClick={() => onRequestArchive(selectedEquipmentId)}
+              type="button"
+            >
+              Archive equipment
+            </button>
+          </div>
+        </form>
+      </section>
 
       <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
         <h2 className="text-lg font-semibold tracking-tight">Image Gallery</h2>
@@ -394,6 +555,8 @@ export default function EquipmentPage() {
           </label>
           {imageStatus.error ? <p className="text-sm text-danger-500">{imageStatus.error}</p> : null}
         </div>
+
+        <div className="mt-2 text-xs text-neutral-400">Drag and drop image cards to reorder display.</div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {selectedImages.map((image) => (
@@ -526,6 +689,33 @@ export default function EquipmentPage() {
           {maintenanceLogs.length === 0 ? <p className="text-sm text-neutral-400">No maintenance logs yet.</p> : null}
         </div>
       </section>
+
+      {confirmArchiveId ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-lg border border-neutral-750 bg-neutral-900 p-4">
+            <h3 className="text-lg font-semibold">Archive Equipment</h3>
+            <p className="mt-2 text-sm text-neutral-300">
+              This will soft-delete the equipment item and hide it from active lists. Existing history remains intact.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="rounded-md border border-neutral-750 px-3 py-2 text-sm text-neutral-200 hover:bg-neutral-800"
+                onClick={() => setConfirmArchiveId('')}
+                type="button"
+              >
+                Cancel
+              </button>
+              <button
+                className="rounded-md bg-danger-500 px-3 py-2 text-sm font-semibold text-white hover:brightness-95"
+                onClick={onConfirmArchive}
+                type="button"
+              >
+                Archive
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
