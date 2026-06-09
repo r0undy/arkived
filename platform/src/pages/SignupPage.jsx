@@ -9,8 +9,18 @@ const initialState = {
   password: ''
 };
 
+const slugify = (value) => String(value || '')
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, '-')
+  .replace(/^-+|-+$/g, '')
+  .replace(/-{2,}/g, '-')
+  .slice(0, 32)
+  .replace(/-+$/g, '');
+
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
+  const [slugTouched, setSlugTouched] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState('');
   const [status, setStatus] = useState({ loading: false, error: '', success: '' });
   const [provisioning, setProvisioning] = useState({
@@ -27,7 +37,24 @@ export default function SignupPage() {
     .replace(/\/+$/, '');
 
   const update = (key) => (event) => {
-    setForm((prev) => ({ ...prev, [key]: event.target.value }));
+    const value = event.target.value;
+
+    if (key === 'name') {
+      setForm((prev) => ({
+        ...prev,
+        name: value,
+        slug: slugTouched ? prev.slug : slugify(value)
+      }));
+      return;
+    }
+
+    if (key === 'slug') {
+      setSlugTouched(true);
+      setForm((prev) => ({ ...prev, slug: slugify(value) }));
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, [key]: value }));
   };
 
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -112,6 +139,7 @@ export default function SignupPage() {
         ...(turnstileToken ? { turnstile_token: turnstileToken } : {})
       });
       setForm(initialState);
+      setSlugTouched(false);
       setTurnstileToken('');
       await runProvisioningFlow(result.tenant.slug);
     } catch (error) {
