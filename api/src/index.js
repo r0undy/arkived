@@ -11,11 +11,55 @@ import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 
-app.use(helmet());
+const isAllowedProductionOrigin = (origin) => {
+  try {
+    const url = new URL(origin);
+    const host = url.hostname.toLowerCase();
+    const isHttps = url.protocol === 'https:';
+    return isHttps && (host === 'arkived.dev' || host.endsWith('.arkived.dev'));
+  } catch (_error) {
+    return false;
+  }
+};
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+
+  if (env.nodeEnv === 'production') {
+    return isAllowedProductionOrigin(origin);
+  }
+
+  if (env.corsOrigins.length === 0) {
+    return true;
+  }
+
+  return env.corsOrigins.includes(origin);
+};
+
+const cspConnectSrc = ["'self'"];
+if (env.supabaseUrl) {
+  cspConnectSrc.push(env.supabaseUrl);
+}
+if (env.nodeEnv !== 'production') {
+  cspConnectSrc.push('http://localhost:*', 'ws://localhost:*');
+}
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", 'https://challenges.cloudflare.com'],
+      frameSrc: ["'self'", 'https://challenges.cloudflare.com'],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+      connectSrc: cspConnectSrc
+    }
+  }
+}));
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || env.corsOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));

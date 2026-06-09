@@ -454,13 +454,13 @@ arkived/
 
 ### 7.1 Security
 
-- [ ] Confirm `helmet` is configured with appropriate CSP headers in `api/`
-- [ ] Confirm CORS allows only `arkived.dev` and `*.arkived.dev`
-- [ ] Confirm all Express routes have Zod validation on request bodies
-- [ ] Confirm RLS is enabled and tested on all Supabase tables — write test queries as a non-owner user to verify isolation
-- [ ] Set up Cloudflare WAF managed ruleset
-- [ ] Set up Cloudflare rate limiting on `/api/*`
-- [ ] Add Cloudflare Turnstile to `platform/` sign-up and login pages
+- [x] Confirm `helmet` is configured with appropriate CSP headers in `api/`
+- [x] Confirm CORS allows only `arkived.dev` and `*.arkived.dev`
+- [x] Confirm all Express routes have Zod validation on request bodies
+- [/] Confirm RLS is enabled and tested on all Supabase tables — write test queries as a non-owner user to verify isolation
+- [/] Set up Cloudflare WAF managed ruleset
+- [/] Set up Cloudflare rate limiting on `/api/*`
+- [x] Add Cloudflare Turnstile to `platform/` sign-up and login pages
 
 ### 7.2 Error Handling & Edge Cases
 

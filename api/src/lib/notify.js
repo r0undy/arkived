@@ -2,6 +2,40 @@ import { env } from '../config/env.js';
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const TWILIO_API_URL = (accountSid) => `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+const EMAIL_ADDRESS_PATTERN = /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/;
+const NAME_EMAIL_PATTERN = /^[^<>]+<\s*[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+\s*>$/;
+const DEFAULT_RESEND_FROM = 'onboarding@resend.dev';
+
+const cleanEnvValue = (value) => String(value || '')
+  .trim()
+  .replace(/^['"`]+|['"`]+$/g, '');
+
+const isValidEmailField = (value) => (
+  EMAIL_ADDRESS_PATTERN.test(value)
+  || NAME_EMAIL_PATTERN.test(value)
+);
+
+const resolveFrom = () => {
+  const candidate = cleanEnvValue(env.resendFrom);
+  if (isValidEmailField(candidate)) {
+    return candidate;
+  }
+
+  console.warn('[notify] invalid RESEND_FROM, using fallback onboarding@resend.dev');
+  return DEFAULT_RESEND_FROM;
+};
+
+const resolveReplyTo = () => {
+  const candidate = cleanEnvValue(env.resendReplyTo);
+  if (!candidate) {
+    return '';
+  }
+  if (isValidEmailField(candidate)) {
+    return candidate;
+  }
+  console.warn('[notify] invalid RESEND_REPLY_TO ignored');
+  return '';
+};
 
 const buildHtml = (title, payload) => `
   <div style="font-family:Inter,Arial,sans-serif;line-height:1.5;color:#111">
@@ -73,16 +107,18 @@ const sendSms = async (kind, subject, payload) => {
 
 const send = async (kind, subject, payload, options = {}) => {
   const to = resolveRecipient(payload);
+  const from = resolveFrom();
+  const replyTo = resolveReplyTo();
   const requestBody = {
-    from: env.resendFrom,
+    from,
     to: [to],
     subject,
     html: buildHtml(subject, payload),
     tags: [{ name: 'event', value: kind }]
   };
 
-  if (env.resendReplyTo) {
-    requestBody.reply_to = env.resendReplyTo;
+  if (replyTo) {
+    requestBody.reply_to = replyTo;
   }
 
   if (!canSend()) {

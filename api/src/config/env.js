@@ -15,12 +15,15 @@ export const env = {
   port: Number(process.env.PORT || 4000),
   schedulerEnabled: String(process.env.SCHEDULER_ENABLED || 'true') !== 'false',
   runDailyJobsOnBoot: String(process.env.RUN_DAILY_JOBS_ON_BOOT || 'true') !== 'false',
-  resendApiKey: process.env.RESEND_API_KEY || '',
+  turnstileSecretKey: (process.env.TURNSTILE_SECRET_KEY || '').trim(),
+  turnstileEnabled: String(process.env.TURNSTILE_ENABLED || (nodeEnv === 'production' ? 'true' : 'false')) !== 'false',
+  turnstileRequired: String(process.env.TURNSTILE_REQUIRED || (nodeEnv === 'production' ? 'true' : 'false')) !== 'false',
+  resendApiKey: (process.env.RESEND_API_KEY || '').trim(),
   resendEnabled: String(process.env.RESEND_ENABLED || 'true') !== 'false',
-  resendFrom: process.env.RESEND_FROM || 'onboarding@resend.dev',
-  resendReplyTo: process.env.RESEND_REPLY_TO || '',
-  resendDevInbox: process.env.RESEND_DEV_INBOX || 'delivered@resend.dev',
-  resendAdminInbox: process.env.RESEND_ADMIN_INBOX || '',
+  resendFrom: (process.env.RESEND_FROM || 'onboarding@resend.dev').trim(),
+  resendReplyTo: (process.env.RESEND_REPLY_TO || '').trim(),
+  resendDevInbox: (process.env.RESEND_DEV_INBOX || 'delivered@resend.dev').trim(),
+  resendAdminInbox: (process.env.RESEND_ADMIN_INBOX || '').trim(),
   resendTestMode: String(process.env.RESEND_TEST_MODE || (nodeEnv !== 'production' ? 'true' : 'false')) !== 'false',
   twilioEnabled: String(process.env.TWILIO_ENABLED || 'false') === 'true',
   twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
@@ -33,7 +36,7 @@ export const env = {
   supabaseUrl: process.env.SUPABASE_URL || '',
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
-  corsOrigins: (process.env.CORS_ORIGIN || 'http://localhost:5173,http://localhost:5174')
+  corsOrigins: (process.env.CORS_ORIGIN || '')
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean)

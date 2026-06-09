@@ -8,7 +8,8 @@ export const registerTenantSchema = z.object({
   name: z.string().min(2).max(120),
   slug: slugSchema,
   email: z.string().email(),
-  password: z.string().min(8)
+  password: z.string().min(8),
+  turnstile_token: z.string().min(1).optional()
 });
 
 export const updateTenantBrandingSchema = z

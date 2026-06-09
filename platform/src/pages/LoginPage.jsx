@@ -1,18 +1,21 @@
 import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
 import { hasSupabaseClient } from '../lib/supabase';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 export default function LoginPage() {
   const auth = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [status, setStatus] = useState({ loading: false, error: '' });
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setStatus({ loading: true, error: '' });
     try {
-      await auth.signInWithPassword(email, password);
+      await auth.signInWithPassword(email, password, turnstileToken);
     } catch (error) {
       setStatus({ loading: false, error: error.message });
     }
@@ -46,6 +49,11 @@ export default function LoginPage() {
             value={password}
           />
         </label>
+        <TurnstileWidget
+          onExpire={() => setTurnstileToken('')}
+          onToken={setTurnstileToken}
+          siteKey={turnstileSiteKey}
+        />
 
         {status.error ? <p className="text-sm text-danger-500">{status.error}</p> : null}
 

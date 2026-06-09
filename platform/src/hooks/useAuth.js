@@ -57,9 +57,17 @@ export const useAuth = () => {
     () => ({
       user,
       loading,
-      async signInWithPassword(email, password) {
+      async signInWithPassword(email, password, turnstileToken = '') {
         if (!hasSupabaseClient) {
           throw new Error('Supabase is not configured. Use demo sign in for local fallback.');
+        }
+
+        if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken) {
+          throw new Error('Please complete the captcha challenge.');
+        }
+
+        if (turnstileToken) {
+          await api.verifyTurnstile(turnstileToken);
         }
 
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
