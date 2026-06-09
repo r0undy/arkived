@@ -23,6 +23,7 @@
 
 ### Supporting Artifacts
 - [Implementation Task List](tasks-arkived.md) — The active project implementation checklist (Phases 0–7).
+- [Frontend Experience Roadmap](frontend-arkived.md) — Design-led roadmap for onboarding, branding studio, logo presets, storage, and the conversion-focused storefront (Phases F0–F7).
 - [Supabase Setup Guide](setup-supabase.md) — Step-by-step database, RLS, storage, and env setup.
 - [Security Hardening Runbook](setup-security.md) — RLS verification SQL + Cloudflare WAF/rate-limit setup.
 - [Resend Setup Guide](setup-resend.md) — Free-tier email setup, domain verification, env vars, and Arkived notification wiring.

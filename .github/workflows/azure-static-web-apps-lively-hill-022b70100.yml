@@ -38,6 +38,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "./storefront"
+          config_file_location: "./storefront"
           api_location: ""
           output_location: "dist"
 

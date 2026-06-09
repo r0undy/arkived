@@ -39,6 +39,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "./platform"
+          config_file_location: "./platform"
           api_location: ""
           output_location: "dist"
 
