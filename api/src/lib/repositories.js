@@ -480,6 +480,58 @@ export const equipmentRepository = {
     return data;
   },
 
+  async reorderImages(tenantId, equipmentId, imageIds) {
+    if (!hasSupabase) {
+      const images = inMemoryDb.reorderEquipmentImages(tenantId, equipmentId, imageIds);
+      if (!images) {
+        throw new AppError(400, 'Invalid image reorder payload', 'EQUIPMENT_IMAGE_REORDER_INVALID');
+      }
+      return images;
+    }
+
+    const { data: current, error: listError } = await supabase
+      .from('equipment_images')
+      .select('id')
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId);
+
+    if (listError) {
+      throw new AppError(500, listError.message, 'EQUIPMENT_IMAGE_LIST_FAILED');
+    }
+
+    const currentIds = new Set((current || []).map((entry) => entry.id));
+    if (currentIds.size !== imageIds.length || imageIds.some((id) => !currentIds.has(id))) {
+      throw new AppError(400, 'Invalid image reorder payload', 'EQUIPMENT_IMAGE_REORDER_INVALID');
+    }
+
+    for (let index = 0; index < imageIds.length; index += 1) {
+      const id = imageIds[index];
+      const { error } = await supabase
+        .from('equipment_images')
+        .update({ display_order: index })
+        .eq('tenant_id', tenantId)
+        .eq('equipment_id', equipmentId)
+        .eq('id', id);
+
+      if (error) {
+        throw new AppError(500, error.message, 'EQUIPMENT_IMAGE_REORDER_FAILED');
+      }
+    }
+
+    const { data, error } = await supabase
+      .from('equipment_images')
+      .select('id, tenant_id, equipment_id, storage_url, is_primary, display_order, created_at')
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId)
+      .order('display_order', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'EQUIPMENT_IMAGE_LIST_FAILED');
+    }
+
+    return data ?? [];
+  },
+
   async listMaintenanceLogs(tenantId, equipmentId) {
     if (!hasSupabase) {
       return inMemoryDb.listMaintenanceLogs(tenantId, equipmentId);

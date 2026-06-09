@@ -34,6 +34,10 @@ export const createEquipmentImageSchema = z.object({
   display_order: z.number().int().min(0).optional()
 });
 
+export const reorderEquipmentImagesSchema = z.object({
+  image_ids: z.array(z.string().uuid()).min(1)
+});
+
 const maintenanceTypeSchema = z.enum(['routine', 'repair', 'inspection', 'cleaning']);
 
 export const createMaintenanceLogSchema = z.object({

@@ -38,6 +38,11 @@ export const api = {
   deleteEquipmentImage: (equipmentId, imageId) => request(`/api/v1/equipment/${equipmentId}/images/${imageId}`, { method: 'DELETE' }),
   setPrimaryEquipmentImage: (equipmentId, imageId) =>
     request(`/api/v1/equipment/${equipmentId}/images/${imageId}/primary`, { method: 'PATCH' }),
+  reorderEquipmentImages: (equipmentId, imageIds) =>
+    request(`/api/v1/equipment/${equipmentId}/images/reorder`, {
+      method: 'PATCH',
+      body: { image_ids: imageIds }
+    }),
 
   maintenanceLogs: (equipmentId) => request(`/api/v1/equipment/${equipmentId}/maintenance`),
   createMaintenanceLog: (equipmentId, body) => request(`/api/v1/equipment/${equipmentId}/maintenance`, { method: 'POST', body }),

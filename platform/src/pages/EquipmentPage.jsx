@@ -40,6 +40,7 @@ export default function EquipmentPage() {
   const [status, setStatus] = useState({ loading: false, error: '' });
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
   const [selectedEquipmentDetail, setSelectedEquipmentDetail] = useState(null);
+  const [dragImageId, setDragImageId] = useState('');
 
   const [imageStatus, setImageStatus] = useState({ loading: false, error: '' });
 
@@ -183,6 +184,38 @@ export default function EquipmentPage() {
       await loadEquipmentDetail(selectedEquipmentId);
     } catch (_error) {
       // Keep current state if delete fails.
+    }
+  };
+
+  const onDragStartImage = (imageId) => {
+    setDragImageId(imageId);
+  };
+
+  const onDropImage = async (targetImageId) => {
+    if (!selectedEquipmentId || !dragImageId || dragImageId === targetImageId) {
+      setDragImageId('');
+      return;
+    }
+
+    const current = selectedImages.map((entry) => entry.id);
+    const from = current.indexOf(dragImageId);
+    const to = current.indexOf(targetImageId);
+    if (from < 0 || to < 0) {
+      setDragImageId('');
+      return;
+    }
+
+    const next = [...current];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    try {
+      await api.reorderEquipmentImages(selectedEquipmentId, next);
+      await loadEquipmentDetail(selectedEquipmentId);
+    } catch (_error) {
+      // Keep current order if request fails.
+    } finally {
+      setDragImageId('');
     }
   };
 
@@ -364,7 +397,14 @@ export default function EquipmentPage() {
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {selectedImages.map((image) => (
-            <article key={image.id} className="rounded-md border border-neutral-750 bg-neutral-900 p-3">
+            <article
+              key={image.id}
+              className={`rounded-md border bg-neutral-900 p-3 ${dragImageId === image.id ? 'border-brand-500' : 'border-neutral-750'}`}
+              draggable
+              onDragOver={(event) => event.preventDefault()}
+              onDragStart={() => onDragStartImage(image.id)}
+              onDrop={() => onDropImage(image.id)}
+            >
               <img alt="equipment" className="h-32 w-full rounded object-cover" src={image.storage_url} />
               <div className="mt-2 flex items-center justify-between gap-2">
                 <span className="text-xs text-neutral-400">{image.is_primary ? 'Primary image' : `Order ${image.display_order}`}</span>

@@ -274,6 +274,20 @@ export const inMemoryDb = {
     return found;
   },
 
+  reorderEquipmentImages(tenantId, equipmentId, imageIds) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    const current = item.images || [];
+    if (current.length !== imageIds.length) return null;
+
+    const byId = new Map(current.map((entry) => [entry.id, entry]));
+    if (imageIds.some((id) => !byId.has(id))) return null;
+
+    item.images = imageIds.map((id, index) => ({ ...byId.get(id), display_order: index }));
+    return item.images;
+  },
+
   listMaintenanceLogs(tenantId, equipmentId) {
     return state.maintenance_logs
       .filter((log) => log.tenant_id === tenantId && log.equipment_id === equipmentId)

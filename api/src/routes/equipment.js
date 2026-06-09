@@ -11,6 +11,7 @@ import {
   createMaintenanceLogSchema,
   createEquipmentSchema,
   equipmentFiltersSchema,
+  reorderEquipmentImagesSchema,
   updateMaintenanceLogSchema,
   updateEquipmentSchema
 } from '../validators/equipment.js';
@@ -108,6 +109,12 @@ equipmentRouter.delete('/:id/images/:imageId', requireRole('admin', 'staff'), as
 equipmentRouter.patch('/:id/images/:imageId/primary', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
   const image = await equipmentRepository.setPrimaryImage(req.user.tenant_id, req.params.id, req.params.imageId);
   res.json({ data: image });
+}));
+
+equipmentRouter.patch('/:id/images/reorder', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
+  const payload = reorderEquipmentImagesSchema.parse(req.body);
+  const data = await equipmentRepository.reorderImages(req.user.tenant_id, req.params.id, payload.image_ids);
+  res.json({ data });
 }));
 
 equipmentRouter.get('/:id/maintenance', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
