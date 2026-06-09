@@ -1,13 +1,19 @@
-name: Azure Static Web Apps CI/CD
+name: Deploy Platform (Azure SWA)
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "platform/**"
+      - ".github/workflows/azure-static-web-apps-nice-smoke-0e96efd00.yml"
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
+    paths:
+      - "platform/**"
+      - ".github/workflows/azure-static-web-apps-nice-smoke-0e96efd00.yml"
 
 jobs:
   build_and_deploy_job:
