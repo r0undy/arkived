@@ -7,6 +7,7 @@ import { tenantRouter } from './tenant.js';
 import { storefrontRouter } from './storefront.js';
 import { staffRouter } from './staff.js';
 import { customersRouter } from './customers.js';
+import { adminRouter } from './admin.js';
 import { requireAuth } from '../middleware/auth.js';
 
 export const apiRouter = Router();
@@ -22,3 +23,4 @@ apiRouter.use('/bookings', bookingsRouter);
 apiRouter.use('/customers', customersRouter);
 apiRouter.use('/analytics', analyticsRouter);
 apiRouter.use('/staff', staffRouter);
+apiRouter.use('/admin', adminRouter);

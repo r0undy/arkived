@@ -215,6 +215,10 @@ export const inMemoryDb = {
       .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   },
 
+  listAllBookings() {
+    return state.bookings.slice();
+  },
+
   listEquipment(tenantId, filters = {}) {
     return state.equipment.filter((item) => {
       if (item.tenant_id !== tenantId || item.deleted_at) return false;

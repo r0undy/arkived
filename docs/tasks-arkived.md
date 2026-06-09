@@ -353,16 +353,16 @@ arkived/
 
 ### 4.6 `platform/` — Availability Calendar Page
 
-- [ ] **Calendar Page** (`/dashboard/calendar`)
-  - [ ] Month / Week / Day views
-  - [ ] Color-coded events: 🟢 Available · 🔴 Rented · 🟡 Reserved · 🔵 In Maintenance
-  - [ ] Filter by equipment or category
-  - [ ] Click event → open booking detail slide-over
+- [x] **Calendar Page** (`/dashboard/calendar`)
+  - [x] Month / Week / Day views
+  - [x] Color-coded events: 🟢 Available · 🔴 Rented · 🟡 Reserved · 🔵 In Maintenance
+  - [x] Filter by equipment or category
+  - [x] Click event → open booking detail slide-over
 
 ### 4.7 `platform/` — Customer Directory Page
 
-- [ ] `/dashboard/customers` — searchable customer list with booking count and last activity
-- [ ] Customer profile view with booking history timeline
+- [x] `/dashboard/customers` — searchable customer list with booking count and last activity
+- [x] Customer profile view with booking history timeline
 
 ---
 
@@ -371,17 +371,17 @@ arkived/
 ### 5.1 API — Analytics Routes
 
 - [x] `GET /api/v1/analytics/overview` — KPIs: active bookings, overdue count, revenue MTD, utilization rate (global)
-- [ ] `GET /api/v1/analytics/revenue` — monthly revenue breakdown for the last 12 months
-- [ ] `GET /api/v1/analytics/revenue-by-category` — revenue split by equipment category
-- [ ] `GET /api/v1/analytics/top-equipment` — top 10 items by total revenue
-- [ ] `GET /api/v1/analytics/utilization` — per-equipment utilization rate; supports date range filter
-- [ ] `GET /api/v1/analytics/booking-volume` — booking count per week/month
+- [x] `GET /api/v1/analytics/revenue` — monthly revenue breakdown for the last 12 months
+- [x] `GET /api/v1/analytics/revenue-by-category` — revenue split by equipment category
+- [x] `GET /api/v1/analytics/top-equipment` — top 10 items by total revenue
+- [x] `GET /api/v1/analytics/utilization` — per-equipment utilization rate; supports date range filter
+- [x] `GET /api/v1/analytics/booking-volume` — booking count per week/month
 
 ### 5.2 API — Platform Owner Routes (Super-Admin)
 
-- [ ] Separate router mounted only when `req.user.role === 'platform_owner'`
-- [ ] `GET /api/v1/admin/tenants` — list all tenants with signup date and status
-- [ ] `GET /api/v1/admin/overview` — platform-wide KPIs: total tenants, new MTD, total bookings, churn rate
+- [x] Separate router mounted only when `req.user.role === 'platform_owner'`
+- [x] `GET /api/v1/admin/tenants` — list all tenants with signup date and status
+- [x] `GET /api/v1/admin/overview` — platform-wide KPIs: total tenants, new MTD, total bookings, churn rate
 
 ### 5.3 `platform/` — Tenant Admin Dashboard
 

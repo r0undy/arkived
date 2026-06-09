@@ -57,11 +57,17 @@ export const api = {
     return request(`/api/v1/customers${suffix}`);
   },
   createCustomer: (body) => request('/api/v1/customers', { method: 'POST', body }),
+  customerBookings: (id) => request(`/api/v1/customers/${id}/bookings`),
 
   bookings: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     const suffix = query ? `?${query}` : '';
     return request(`/api/v1/bookings${suffix}`);
+  },
+  bookingsCalendar: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/bookings/calendar${suffix}`);
   },
   bookingById: (id) => request(`/api/v1/bookings/${id}`),
   createBooking: (body) => request('/api/v1/bookings', { method: 'POST', body }),

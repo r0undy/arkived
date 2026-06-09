@@ -20,6 +20,9 @@ import EquipmentPage from './pages/EquipmentPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import BookingsPage from './pages/BookingsPage';
 import BookingDetailPage from './pages/BookingDetailPage';
+import CalendarPage from './pages/CalendarPage';
+import CustomersPage from './pages/CustomersPage';
+import CustomerDetailPage from './pages/CustomerDetailPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import TeamPage from './pages/TeamPage';
 import BrandingPage from './pages/BrandingPage';
@@ -51,6 +54,9 @@ const router = createBrowserRouter([
           { path: '/dashboard/equipment/:id', element: <EquipmentDetailPage /> },
           { path: '/dashboard/bookings', element: <BookingsPage /> },
           { path: '/dashboard/bookings/:id', element: <BookingDetailPage /> },
+          { path: '/dashboard/calendar', element: <CalendarPage /> },
+          { path: '/dashboard/customers', element: <CustomersPage /> },
+          { path: '/dashboard/customers/:id', element: <CustomerDetailPage /> },
           { path: '/dashboard/analytics', element: <AnalyticsPage /> },
           { path: '/dashboard/settings/branding', element: <BrandingPage /> },
           { path: '/dashboard/settings/team', element: <TeamPage /> },
