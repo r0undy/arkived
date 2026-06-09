@@ -1,21 +1,42 @@
 import { useEffect, useState } from 'react';
 import { storefrontApi } from '../lib/api';
 
-const inferSlug = () => {
-  const queryTenant = new URLSearchParams(window.location.search).get('tenant');
-  if (queryTenant) return queryTenant;
+const DEFAULT_LOCAL_TENANT = import.meta.env.VITE_DEFAULT_TENANT_SLUG || 'demo';
+const THEME_STYLE_ID = 'tenant-branding-overrides';
 
+const isLocalHost = (host) => host === 'localhost' || host === '127.0.0.1' || host === '0.0.0.0';
+const normalizeSlug = (value) => String(value || '')
+  .trim()
+  .toLowerCase()
+  .replace(/[^a-z0-9-]/g, '');
+
+const inferSlug = () => {
   const host = window.location.hostname;
-  if (host === 'localhost' || host === '127.0.0.1') return 'demo';
+  if (isLocalHost(host)) {
+    const queryTenant = new URLSearchParams(window.location.search).get('tenant');
+    return normalizeSlug(queryTenant) || DEFAULT_LOCAL_TENANT;
+  }
 
   const [first] = host.split('.');
-  return first || 'demo';
+  return normalizeSlug(first) || DEFAULT_LOCAL_TENANT;
 };
 
 const applyTenantTheme = (tenant) => {
-  const root = document.documentElement;
-  root.style.setProperty('--color-primary', tenant.accent_color || '#6366f1');
-  root.style.setProperty('--color-primary-hover', tenant.accent_color || '#4f46e5');
+  const accent = tenant?.accent_color || '#6366f1';
+  let styleTag = document.getElementById(THEME_STYLE_ID);
+
+  if (!styleTag) {
+    styleTag = document.createElement('style');
+    styleTag.id = THEME_STYLE_ID;
+    document.head.appendChild(styleTag);
+  }
+
+  styleTag.textContent = `
+    :root {
+      --color-primary: ${accent};
+      --color-primary-hover: ${accent};
+    }
+  `;
 };
 
 export const useTenant = () => {
@@ -46,7 +67,7 @@ export const useTenant = () => {
     ...state,
     slug,
     setSlug(nextSlug) {
-      const next = String(nextSlug || '').trim();
+      const next = normalizeSlug(nextSlug);
       if (!next || next === slug) return;
       const url = new URL(window.location.href);
       url.searchParams.set('tenant', next);

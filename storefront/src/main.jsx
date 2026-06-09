@@ -17,6 +17,7 @@ import CatalogPage from './pages/CatalogPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TenantDebugger from './components/TenantDebugger';
+import TenantLoadingScreen from './components/TenantLoadingScreen';
 
 function App() {
   const tenantState = useTenant();
@@ -34,7 +35,7 @@ function App() {
   }, [tenantState.tenant]);
 
   if (tenantState.loading) {
-    return <div className="p-8 text-slate-600">Loading storefront...</div>;
+    return <TenantLoadingScreen />;
   }
 
   if (tenantState.error || !tenantState.tenant) {

@@ -412,14 +412,14 @@ arkived/
 
 ### 6.1 Tenant Resolution & Theming
 
-- [ ] `useTenant` hook fully implemented:
-  - Extracts slug from `window.location.hostname` (first subdomain segment)
-  - Falls back to a `?tenant=` query param for local dev
-  - Calls `GET /api/v1/tenant/:slug/public`
-  - On success: injects CSS variable overrides into `:root` (`--color-primary`, `--color-primary-hover`)
-  - On error (tenant not found): renders a 404 page
-- [ ] Loading state: full-page skeleton while tenant config loads
-- [ ] "Powered by Arkived" badge component (conditionally rendered based on `show_watermark` flag from API)
+- [x] `useTenant` hook fully implemented:
+  - [x] Extracts slug from `window.location.hostname` (first subdomain segment)
+  - [x] Falls back to a `?tenant=` query param for local dev
+  - [x] Calls `GET /api/v1/tenant/:slug/public`
+  - [x] On success: injects CSS variable overrides into `:root` (`--color-primary`, `--color-primary-hover`)
+  - [x] On error (tenant not found): renders a 404 page
+- [x] Loading state: full-page skeleton while tenant config loads
+- [x] "Powered by Arkived" badge component (conditionally rendered based on `show_watermark` flag from API)
 
 ### 6.2 Storefront Pages
 

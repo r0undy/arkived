@@ -1,4 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import PoweredByArkivedBadge from '../components/PoweredByArkivedBadge';
 
 export default function StorefrontLayout({ tenant }) {
   return (
@@ -22,7 +23,7 @@ export default function StorefrontLayout({ tenant }) {
           <p>{tenant.contact_email || 'No support email configured'}</p>
           <p>{tenant.contact_phone || 'No support phone configured'}</p>
           <p>{tenant.contact_address || 'No shop address configured'}</p>
-          {tenant.show_watermark ? <p className="mt-2">Powered by Arkived</p> : null}
+          <PoweredByArkivedBadge enabled={tenant.show_watermark} />
         </div>
       </footer>
     </div>
