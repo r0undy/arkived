@@ -8,8 +8,10 @@ import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/requireRole.js';
 import {
   createEquipmentImageSchema,
+  createMaintenanceLogSchema,
   createEquipmentSchema,
   equipmentFiltersSchema,
+  updateMaintenanceLogSchema,
   updateEquipmentSchema
 } from '../validators/equipment.js';
 
@@ -106,4 +108,39 @@ equipmentRouter.delete('/:id/images/:imageId', requireRole('admin', 'staff'), as
 equipmentRouter.patch('/:id/images/:imageId/primary', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
   const image = await equipmentRepository.setPrimaryImage(req.user.tenant_id, req.params.id, req.params.imageId);
   res.json({ data: image });
+}));
+
+equipmentRouter.get('/:id/maintenance', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
+  await equipmentRepository.getById(req.user.tenant_id, req.params.id);
+  const data = await equipmentRepository.listMaintenanceLogs(req.user.tenant_id, req.params.id);
+  res.json({ data });
+}));
+
+equipmentRouter.post('/:id/maintenance', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
+  const payload = createMaintenanceLogSchema.parse(req.body);
+  await equipmentRepository.getById(req.user.tenant_id, req.params.id);
+  const data = await equipmentRepository.createMaintenanceLog({
+    ...payload,
+    tenant_id: req.user.tenant_id,
+    equipment_id: req.params.id
+  });
+
+  res.status(201).json({ data });
+}));
+
+equipmentRouter.patch('/:id/maintenance/:logId', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
+  const payload = updateMaintenanceLogSchema.parse(req.body);
+  const data = await equipmentRepository.updateMaintenanceLog(
+    req.user.tenant_id,
+    req.params.id,
+    req.params.logId,
+    payload
+  );
+
+  res.json({ data });
+}));
+
+equipmentRouter.delete('/:id/maintenance/:logId', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
+  await equipmentRepository.deleteMaintenanceLog(req.user.tenant_id, req.params.id, req.params.logId);
+  res.status(204).send();
 }));

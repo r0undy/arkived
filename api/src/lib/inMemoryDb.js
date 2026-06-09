@@ -22,6 +22,7 @@ const state = {
   ],
   users: [],
   equipment: [],
+  maintenance_logs: [],
   bookings: [],
   customers: []
 };
@@ -271,6 +272,56 @@ export const inMemoryDb = {
     });
 
     return found;
+  },
+
+  listMaintenanceLogs(tenantId, equipmentId) {
+    return state.maintenance_logs
+      .filter((log) => log.tenant_id === tenantId && log.equipment_id === equipmentId)
+      .sort((a, b) => String(b.service_date).localeCompare(String(a.service_date)));
+  },
+
+  createMaintenanceLog(payload) {
+    const log = {
+      id: crypto.randomUUID(),
+      tenant_id: payload.tenant_id,
+      equipment_id: payload.equipment_id,
+      service_date: payload.service_date,
+      service_type: payload.service_type,
+      performed_by: payload.performed_by || null,
+      notes: payload.notes || null,
+      cost: payload.cost ?? null,
+      next_service_due: payload.next_service_due || null,
+      created_at: now()
+    };
+
+    state.maintenance_logs.push(log);
+    return log;
+  },
+
+  updateMaintenanceLog(tenantId, equipmentId, logId, payload) {
+    const index = state.maintenance_logs.findIndex(
+      (log) => log.tenant_id === tenantId && log.equipment_id === equipmentId && log.id === logId
+    );
+
+    if (index < 0) return null;
+
+    state.maintenance_logs[index] = {
+      ...state.maintenance_logs[index],
+      ...payload
+    };
+
+    return state.maintenance_logs[index];
+  },
+
+  deleteMaintenanceLog(tenantId, equipmentId, logId) {
+    const index = state.maintenance_logs.findIndex(
+      (log) => log.tenant_id === tenantId && log.equipment_id === equipmentId && log.id === logId
+    );
+
+    if (index < 0) return null;
+
+    const [removed] = state.maintenance_logs.splice(index, 1);
+    return removed;
   },
 
   listBookings(tenantId) {

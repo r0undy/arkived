@@ -478,6 +478,90 @@ export const equipmentRepository = {
     }
 
     return data;
+  },
+
+  async listMaintenanceLogs(tenantId, equipmentId) {
+    if (!hasSupabase) {
+      return inMemoryDb.listMaintenanceLogs(tenantId, equipmentId);
+    }
+
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .select('id, tenant_id, equipment_id, service_date, service_type, performed_by, notes, cost, next_service_due, created_at')
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId)
+      .order('service_date', { ascending: false });
+
+    if (error) {
+      throw new AppError(500, error.message, 'MAINTENANCE_LIST_FAILED');
+    }
+
+    return data ?? [];
+  },
+
+  async createMaintenanceLog(payload) {
+    if (!hasSupabase) {
+      return inMemoryDb.createMaintenanceLog(payload);
+    }
+
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .insert(payload)
+      .select('id, tenant_id, equipment_id, service_date, service_type, performed_by, notes, cost, next_service_due, created_at')
+      .single();
+
+    if (error) {
+      throw new AppError(400, error.message, 'MAINTENANCE_CREATE_FAILED');
+    }
+
+    return data;
+  },
+
+  async updateMaintenanceLog(tenantId, equipmentId, logId, payload) {
+    if (!hasSupabase) {
+      const log = inMemoryDb.updateMaintenanceLog(tenantId, equipmentId, logId, payload);
+      if (!log) {
+        throw new AppError(404, 'Maintenance log not found', 'MAINTENANCE_NOT_FOUND');
+      }
+      return log;
+    }
+
+    return safeSingle(
+      supabase
+        .from('maintenance_logs')
+        .update(payload)
+        .eq('tenant_id', tenantId)
+        .eq('equipment_id', equipmentId)
+        .eq('id', logId)
+        .select('id, tenant_id, equipment_id, service_date, service_type, performed_by, notes, cost, next_service_due, created_at')
+        .single(),
+      'Maintenance log not found'
+    );
+  },
+
+  async deleteMaintenanceLog(tenantId, equipmentId, logId) {
+    if (!hasSupabase) {
+      const log = inMemoryDb.deleteMaintenanceLog(tenantId, equipmentId, logId);
+      if (!log) {
+        throw new AppError(404, 'Maintenance log not found', 'MAINTENANCE_NOT_FOUND');
+      }
+      return log;
+    }
+
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .delete()
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId)
+      .eq('id', logId)
+      .select('id')
+      .single();
+
+    if (error || !data) {
+      throw new AppError(404, 'Maintenance log not found', 'MAINTENANCE_NOT_FOUND');
+    }
+
+    return data;
   }
 };
 

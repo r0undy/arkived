@@ -271,10 +271,10 @@ arkived/
 
 ### 3.2 API — Maintenance Log Routes
 
-- [ ] `GET /api/v1/equipment/:id/maintenance` — list maintenance logs for an item
-- [ ] `POST /api/v1/equipment/:id/maintenance` — create maintenance log entry
-- [ ] `PATCH /api/v1/equipment/:id/maintenance/:logId` — update a log entry
-- [ ] `DELETE /api/v1/equipment/:id/maintenance/:logId` — delete a log entry
+- [x] `GET /api/v1/equipment/:id/maintenance` — list maintenance logs for an item
+- [x] `POST /api/v1/equipment/:id/maintenance` — create maintenance log entry
+- [x] `PATCH /api/v1/equipment/:id/maintenance/:logId` — update a log entry
+- [x] `DELETE /api/v1/equipment/:id/maintenance/:logId` — delete a log entry
 
 ### 3.3 `platform/` — Equipment Catalog Pages
 

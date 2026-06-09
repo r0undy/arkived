@@ -33,3 +33,19 @@ export const createEquipmentImageSchema = z.object({
   is_primary: z.boolean().optional().default(false),
   display_order: z.number().int().min(0).optional()
 });
+
+const maintenanceTypeSchema = z.enum(['routine', 'repair', 'inspection', 'cleaning']);
+
+export const createMaintenanceLogSchema = z.object({
+  service_date: z.string().date(),
+  service_type: maintenanceTypeSchema,
+  performed_by: z.string().max(120).optional().nullable(),
+  notes: z.string().max(4000).optional().nullable(),
+  cost: z.number().nonnegative().optional().nullable(),
+  next_service_due: z.string().date().optional().nullable()
+});
+
+export const updateMaintenanceLogSchema = createMaintenanceLogSchema.partial().refine(
+  (value) => Object.keys(value).length > 0,
+  'At least one field is required'
+);
