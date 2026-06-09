@@ -22,11 +22,27 @@ const initialMaintenance = {
   next_service_due: ''
 };
 
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const value = String(reader.result || '');
+      const base64 = value.includes(',') ? value.split(',')[1] : value;
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+
 export default function EquipmentPage() {
   const [items, setItems] = useState([]);
   const [form, setForm] = useState(initialForm);
   const [status, setStatus] = useState({ loading: false, error: '' });
   const [selectedEquipmentId, setSelectedEquipmentId] = useState('');
+  const [selectedEquipmentDetail, setSelectedEquipmentDetail] = useState(null);
+
+  const [imageStatus, setImageStatus] = useState({ loading: false, error: '' });
+
   const [maintenanceLogs, setMaintenanceLogs] = useState([]);
   const [maintenanceForm, setMaintenanceForm] = useState(initialMaintenance);
   const [maintenanceStatus, setMaintenanceStatus] = useState({ loading: false, error: '' });
@@ -36,6 +52,8 @@ export default function EquipmentPage() {
     () => items.find((item) => item.id === selectedEquipmentId) || null,
     [items, selectedEquipmentId]
   );
+
+  const selectedImages = selectedEquipmentDetail?.images || [];
 
   const loadItems = async () => {
     try {
@@ -50,6 +68,20 @@ export default function EquipmentPage() {
     } catch (_error) {
       setItems([]);
       setSelectedEquipmentId('');
+    }
+  };
+
+  const loadEquipmentDetail = async (equipmentId) => {
+    if (!equipmentId) {
+      setSelectedEquipmentDetail(null);
+      return;
+    }
+
+    try {
+      const result = await api.equipmentById(equipmentId);
+      setSelectedEquipmentDetail(result.data || null);
+    } catch (_error) {
+      setSelectedEquipmentDetail(null);
     }
   };
 
@@ -72,6 +104,7 @@ export default function EquipmentPage() {
   }, []);
 
   useEffect(() => {
+    loadEquipmentDetail(selectedEquipmentId);
     loadMaintenanceLogs(selectedEquipmentId);
   }, [selectedEquipmentId]);
 
@@ -107,6 +140,49 @@ export default function EquipmentPage() {
       await loadItems();
     } catch (_error) {
       // Keep current list if archive request fails.
+    }
+  };
+
+  const onUploadImage = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    if (!file || !selectedEquipmentId) return;
+
+    setImageStatus({ loading: true, error: '' });
+
+    try {
+      const base64 = await fileToBase64(file);
+      await api.uploadEquipmentImage(selectedEquipmentId, {
+        file_name: file.name,
+        mime_type: file.type || 'image/png',
+        content_base64: base64,
+        is_primary: selectedImages.length === 0
+      });
+
+      await loadEquipmentDetail(selectedEquipmentId);
+      setImageStatus({ loading: false, error: '' });
+    } catch (error) {
+      setImageStatus({ loading: false, error: error.message || 'Upload failed' });
+    }
+  };
+
+  const onSetPrimaryImage = async (imageId) => {
+    if (!selectedEquipmentId) return;
+    try {
+      await api.setPrimaryEquipmentImage(selectedEquipmentId, imageId);
+      await loadEquipmentDetail(selectedEquipmentId);
+    } catch (_error) {
+      // Keep current state if update fails.
+    }
+  };
+
+  const onDeleteImage = async (imageId) => {
+    if (!selectedEquipmentId) return;
+    try {
+      await api.deleteEquipmentImage(selectedEquipmentId, imageId);
+      await loadEquipmentDetail(selectedEquipmentId);
+    } catch (_error) {
+      // Keep current state if delete fails.
     }
   };
 
@@ -243,7 +319,7 @@ export default function EquipmentPage() {
                     onClick={() => setSelectedEquipmentId(item.id)}
                     type="button"
                   >
-                    Manage logs
+                    Manage
                   </button>
                   <button
                     className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
@@ -265,6 +341,57 @@ export default function EquipmentPage() {
           </tbody>
         </table>
       </div>
+
+      <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
+        <h2 className="text-lg font-semibold tracking-tight">Image Gallery</h2>
+        <p className="mt-1 text-sm text-neutral-400">
+          {selectedEquipment ? `Managing: ${selectedEquipment.name}` : 'Select an equipment item to manage images.'}
+        </p>
+
+        <div className="mt-4 flex items-center gap-3">
+          <label className="rounded border border-neutral-750 px-3 py-2 text-sm text-neutral-200 hover:bg-neutral-700">
+            <input
+              accept="image/*"
+              className="hidden"
+              disabled={!selectedEquipmentId || imageStatus.loading}
+              onChange={onUploadImage}
+              type="file"
+            />
+            {imageStatus.loading ? 'Uploading...' : 'Upload image'}
+          </label>
+          {imageStatus.error ? <p className="text-sm text-danger-500">{imageStatus.error}</p> : null}
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {selectedImages.map((image) => (
+            <article key={image.id} className="rounded-md border border-neutral-750 bg-neutral-900 p-3">
+              <img alt="equipment" className="h-32 w-full rounded object-cover" src={image.storage_url} />
+              <div className="mt-2 flex items-center justify-between gap-2">
+                <span className="text-xs text-neutral-400">{image.is_primary ? 'Primary image' : `Order ${image.display_order}`}</span>
+                <div className="space-x-2">
+                  {!image.is_primary ? (
+                    <button
+                      className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
+                      onClick={() => onSetPrimaryImage(image.id)}
+                      type="button"
+                    >
+                      Set primary
+                    </button>
+                  ) : null}
+                  <button
+                    className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
+                    onClick={() => onDeleteImage(image.id)}
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+          {selectedImages.length === 0 ? <p className="text-sm text-neutral-400">No images uploaded yet.</p> : null}
+        </div>
+      </section>
 
       <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
         <h2 className="text-lg font-semibold tracking-tight">Maintenance Logs</h2>

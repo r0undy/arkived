@@ -30,9 +30,15 @@ export const api = {
     const suffix = query ? `?${query}` : '';
     return request(`/api/v1/equipment${suffix}`);
   },
+  equipmentById: (id) => request(`/api/v1/equipment/${id}`),
   createEquipment: (body) => request('/api/v1/equipment', { method: 'POST', body }),
   updateEquipment: (id, body) => request(`/api/v1/equipment/${id}`, { method: 'PATCH', body }),
   archiveEquipment: (id) => request(`/api/v1/equipment/${id}`, { method: 'DELETE' }),
+  uploadEquipmentImage: (equipmentId, body) => request(`/api/v1/equipment/${equipmentId}/images`, { method: 'POST', body }),
+  deleteEquipmentImage: (equipmentId, imageId) => request(`/api/v1/equipment/${equipmentId}/images/${imageId}`, { method: 'DELETE' }),
+  setPrimaryEquipmentImage: (equipmentId, imageId) =>
+    request(`/api/v1/equipment/${equipmentId}/images/${imageId}/primary`, { method: 'PATCH' }),
+
   maintenanceLogs: (equipmentId) => request(`/api/v1/equipment/${equipmentId}/maintenance`),
   createMaintenanceLog: (equipmentId, body) => request(`/api/v1/equipment/${equipmentId}/maintenance`, { method: 'POST', body }),
   updateMaintenanceLog: (equipmentId, logId, body) =>

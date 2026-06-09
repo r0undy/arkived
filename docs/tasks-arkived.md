@@ -285,7 +285,7 @@ arkived/
   - [ ] Pagination or infinite scroll
 - [ ] **Equipment Detail / Edit Page** (`/dashboard/equipment/:id`)
   - [ ] All fields editable inline or via edit form (name, description, category, daily rate, deposit, quantity, condition, tags)
-  - [ ] Image gallery with drag-to-reorder, set-primary, delete controls
+  - [/] Image gallery with drag-to-reorder, set-primary, delete controls
   - [ ] Status badge with manual override dropdown
   - [/] Maintenance log section (inline log list + add log form)
   - [ ] Soft-delete (Archive) button with confirmation dialog
