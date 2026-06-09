@@ -480,10 +480,10 @@ arkived/
 
 ### 7.4 Performance
 
-- [ ] `platform/`: lazy-load route components with `React.lazy` + `<Suspense>`
-- [ ] `storefront/`: lazy-load catalog images with `loading="lazy"` attribute
-- [ ] `api/`: add database indexes on commonly queried columns (`tenant_id`, `status`, `start_date`, `end_date`)
-- [ ] Confirm Supabase connection pooling (PgBouncer) is enabled on the project
+- [x] `platform/`: lazy-load route components with `React.lazy` + `<Suspense>`
+- [x] `storefront/`: lazy-load catalog images with `loading="lazy"` attribute
+- [x] `api/`: add database indexes on commonly queried columns (`tenant_id`, `status`, `start_date`, `end_date`)
+- [/] Confirm Supabase connection pooling (PgBouncer) is enabled on the project
 
 ### 7.5 Environment & Deployment
 

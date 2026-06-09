@@ -132,6 +132,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
               <img
                 alt={item.name}
                 className="h-64 w-full rounded-lg border border-slate-200 object-cover"
+                loading="eager"
                 src={activeImage || item.images[0].storage_url}
               />
               <div className="mt-2 flex flex-wrap gap-2">
@@ -140,6 +141,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
                     <img
                       alt={`${item.name} thumbnail`}
                       className={`h-14 w-20 rounded border object-cover ${activeImage === image.storage_url ? 'border-slate-900' : 'border-slate-200'}`}
+                      loading="lazy"
                       src={image.storage_url}
                     />
                   </button>
