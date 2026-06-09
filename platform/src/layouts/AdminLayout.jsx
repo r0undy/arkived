@@ -1,36 +1,24 @@
-import { Link, NavLink, Navigate, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
-const navItems = [
-  { to: '/dashboard', label: 'Overview' },
-  { to: '/dashboard/equipment', label: 'Equipment' },
-  { to: '/dashboard/bookings', label: 'Bookings' },
-  { to: '/dashboard/calendar', label: 'Calendar' },
-  { to: '/dashboard/customers', label: 'Customers' },
-  { to: '/dashboard/analytics', label: 'Analytics' },
-  { to: '/dashboard/settings/branding', label: 'Branding' },
-  { to: '/dashboard/settings/team', label: 'Team' }
-];
+const navItems = [{ to: '/admin', label: 'Platform Overview' }];
 
-export default function DashboardLayout() {
+export default function AdminLayout() {
   const auth = useAuth();
 
-  if (auth.user?.role === 'platform_owner') {
-    return <Navigate to="/admin" replace />;
-  }
-
   return (
-    <div className="grid min-h-screen grid-cols-1 bg-neutral-900 text-neutral-50 md:grid-cols-[240px_1fr]">
+    <div className="grid min-h-screen grid-cols-1 bg-neutral-900 text-neutral-50 md:grid-cols-[260px_1fr]">
       <aside className="border-r border-neutral-750 bg-neutral-950 p-4">
-        <Link className="mb-6 block text-xl font-semibold tracking-tight" to="/dashboard">
+        <Link className="mb-2 block text-xl font-semibold tracking-tight" to="/admin">
           arkived
         </Link>
+        <p className="mb-6 text-xs uppercase tracking-wide text-brand-300">Platform Owner</p>
         <nav className="space-y-1">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
-              end={item.to === '/dashboard'}
+              end
               className={({ isActive }) =>
                 `block rounded-md px-3 py-2 text-sm transition ${
                   isActive ? 'bg-brand-500 text-white' : 'text-neutral-200 hover:bg-neutral-800'
@@ -49,9 +37,10 @@ export default function DashboardLayout() {
           Sign out
         </button>
       </aside>
+
       <div>
         <header className="border-b border-neutral-750 px-6 py-4">
-          <p className="text-sm text-neutral-400">Rent smarter. Grow faster.</p>
+          <p className="text-sm text-neutral-400">Platform-wide operations and growth metrics.</p>
         </header>
         <main className="mx-auto max-w-7xl p-6">
           <Outlet />

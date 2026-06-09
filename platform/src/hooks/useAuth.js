@@ -68,7 +68,13 @@ export const useAuth = () => {
         }
 
         localStorage.setItem('arkived_token', data.session.access_token);
-        window.location.assign('/dashboard');
+        try {
+          const me = await api.me();
+          const nextPath = me?.user?.role === 'platform_owner' ? '/admin' : '/dashboard';
+          window.location.assign(nextPath);
+        } catch (_error) {
+          window.location.assign('/dashboard');
+        }
       },
       signInAsDemo() {
         localStorage.setItem('arkived_token', 'dev-admin-token');

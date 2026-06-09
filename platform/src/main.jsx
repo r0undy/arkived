@@ -2,7 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
-  Navigate,
   Outlet,
   RouterProvider
 } from 'react-router-dom';
@@ -10,7 +9,9 @@ import {
 import './index.css';
 import MarketingLayout from './layouts/MarketingLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import PlatformOwnerRoute from './components/PlatformOwnerRoute';
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -26,12 +27,19 @@ import CustomerDetailPage from './pages/CustomerDetailPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import TeamPage from './pages/TeamPage';
 import BrandingPage from './pages/BrandingPage';
+import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const ProtectedShell = () => (
   <ProtectedRoute>
     <Outlet />
   </ProtectedRoute>
+);
+
+const AdminProtectedShell = () => (
+  <PlatformOwnerRoute>
+    <AdminLayout />
+  </PlatformOwnerRoute>
 );
 
 const router = createBrowserRouter([
@@ -59,8 +67,13 @@ const router = createBrowserRouter([
           { path: '/dashboard/customers/:id', element: <CustomerDetailPage /> },
           { path: '/dashboard/analytics', element: <AnalyticsPage /> },
           { path: '/dashboard/settings/branding', element: <BrandingPage /> },
-          { path: '/dashboard/settings/team', element: <TeamPage /> },
-          { path: '/admin', element: <Navigate to="/dashboard" replace /> }
+          { path: '/dashboard/settings/team', element: <TeamPage /> }
+        ]
+      },
+      {
+        element: <AdminProtectedShell />,
+        children: [
+          { path: '/admin', element: <AdminPage /> }
         ]
       }
     ]

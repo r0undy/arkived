@@ -102,5 +102,8 @@ export const api = {
   updateStaffRole: (id, role) => request(`/api/v1/staff/${id}/role`, { method: 'PATCH', body: { role } }),
   removeStaff: (id) => request(`/api/v1/staff/${id}`, { method: 'DELETE' }),
 
+  adminOverview: () => request('/api/v1/admin/overview'),
+  adminTenants: () => request('/api/v1/admin/tenants'),
+
   updateBranding: (body) => request('/api/v1/tenant', { method: 'PATCH', body })
 };

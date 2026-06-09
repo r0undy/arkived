@@ -400,9 +400,9 @@ arkived/
 
 ### 5.4 `platform/` — Platform Owner Admin Panel
 
-- [ ] `/admin` route (gated by `platform_owner` role)
-- [ ] Platform KPI cards: Total Tenants, New This Month, Total Bookings, Churn Rate
-- [ ] Tenant list table: name, slug, plan, signup date, status
+- [x] `/admin` route (gated by `platform_owner` role)
+- [x] Platform KPI cards: Total Tenants, New This Month, Total Bookings, Churn Rate
+- [x] Tenant list table: name, slug, plan, signup date, status
 
 ---
 
