@@ -321,33 +321,33 @@ arkived/
 
 ### 4.4 API — Notification Triggers
 
-- [/] Create `src/lib/notify.js` — helper that sends email via Resend/SendGrid API
-- [/] Trigger notifications on booking status changes:
-  - [/] Booking confirmed → email customer
-  - [/] Booking dispatched → email customer
-  - [/] Booking overdue (Day 1) → email + SMS customer and staff
-  - [ ] Booking overdue (Day 3+) → email tenant admin
-- [/] Scheduled notification job (cron):
-  - [/] 24h before `start_date` → remind customer
-  - [/] 24h before `end_date` → remind customer of return
+- [x] Create `src/lib/notify.js` — helper that sends email via Resend/SendGrid API
+- [x] Trigger notifications on booking status changes:
+  - [x] Booking confirmed → email customer
+  - [x] Booking dispatched → email customer
+  - [x] Booking overdue (Day 1) → email + SMS customer and staff
+  - [x] Booking overdue (Day 3+) → email tenant admin
+- [x] Scheduled notification job (cron):
+  - [x] 24h before `start_date` → remind customer
+  - [x] 24h before `end_date` → remind customer of return
 
 ### 4.5 `platform/` — Bookings Pages
 
-- [/] **Bookings List Page** (`/dashboard/bookings`)
+- [x] **Bookings List Page** (`/dashboard/bookings`)
   - [x] Table with columns: Customer, Equipment, Start, End, Status badge, Actions
   - [x] Filter by status, date range, equipment, customer
   - [x] "Overdue" alert banner if any bookings are flagged overdue
   - [x] Create Booking button
-- [/] **Booking Detail Page** (`/dashboard/bookings/:id`)
+- [x] **Booking Detail Page** (`/dashboard/bookings/:id`)
   - [x] Full booking info — customer, equipment, dates, amounts
   - [x] Status pipeline visualizer (step indicator showing current stage)
   - [x] Action buttons per stage: `Confirm Payment`, `Mark Dispatched`, `Mark Returned`, `Complete Inspection`, `Close Booking`
   - [x] Dispatch condition and return condition text areas (appear at appropriate stages)
   - [x] Payment reference field
-- [/] **Create Booking Modal / Page**
-  - [/] Customer selector (search existing or create new inline)
+- [x] **Create Booking Modal / Page**
+  - [x] Customer selector (search existing or create new inline)
   - [x] Equipment selector with availability check for selected date range
-  - [ ] Date range picker (blocks unavailable dates)
+  - [x] Date range picker (blocks unavailable dates)
   - [x] Auto-calculated total amount (daily rate × days)
   - [x] Deposit toggle
 

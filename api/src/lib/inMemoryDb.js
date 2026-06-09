@@ -182,6 +182,10 @@ export const inMemoryDb = {
     });
   },
 
+  getCustomerById(tenantId, id) {
+    return state.customers.find((customer) => customer.tenant_id === tenantId && customer.id === id) || null;
+  },
+
   createCustomer(payload) {
     const customer = {
       id: crypto.randomUUID(),

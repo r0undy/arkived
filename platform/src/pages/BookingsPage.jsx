@@ -9,6 +9,18 @@ const NEXT_STATUS = {
   returned: 'inspected',
   inspected: 'closed'
 };
+const BLOCKING_STATUSES = new Set(['reserved', 'payment', 'dispatched', 'returned', 'inspected']);
+const DAY_MS = 24 * 60 * 60 * 1000;
+const toYmd = (value) => new Date(value).toISOString().slice(0, 10);
+const addDays = (value, days) => {
+  const date = new Date(value);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date;
+};
+const overlapsRange = (start, end, ranges) => {
+  if (!start || !end) return false;
+  return ranges.some((range) => start <= range.end_date && end >= range.start_date);
+};
 
 export default function BookingsPage() {
   const [filters, setFilters] = useState({
@@ -29,6 +41,7 @@ export default function BookingsPage() {
   const [createForm, setCreateForm] = useState({
     customer_mode: 'existing',
     customer_id: '',
+    customer_search: '',
     customer_name: '',
     customer_email: '',
     customer_phone: '',
@@ -39,6 +52,7 @@ export default function BookingsPage() {
     deposit_paid: false
   });
   const [availability, setAvailability] = useState(null);
+  const [blockedRanges, setBlockedRanges] = useState([]);
 
   const loadBookings = async () => {
     try {
@@ -106,8 +120,27 @@ export default function BookingsPage() {
   const updateCreateField = (key) => (event) => {
     const target = event.target;
     const value = target.type === 'checkbox' ? target.checked : target.value;
-    setCreateForm((prev) => ({ ...prev, [key]: value }));
+    setCreateForm((prev) => {
+      if (key === 'customer_mode' && value === 'new') {
+        return { ...prev, customer_mode: value, customer_id: '', customer_search: '' };
+      }
+      if (key === 'customer_mode' && value === 'existing') {
+        return { ...prev, customer_mode: value, customer_name: '', customer_email: '', customer_phone: '' };
+      }
+      return { ...prev, [key]: value };
+    });
   };
+
+  const filteredCustomers = useMemo(() => {
+    if (createForm.customer_mode !== 'existing') return customers;
+    const query = String(createForm.customer_search || '').trim().toLowerCase();
+    if (!query) return customers;
+
+    return customers.filter((entry) => {
+      const hay = `${entry.full_name || ''} ${entry.email || ''} ${entry.phone || ''}`.toLowerCase();
+      return hay.includes(query);
+    });
+  }, [createForm.customer_mode, createForm.customer_search, customers]);
 
   useEffect(() => {
     const run = async () => {
@@ -130,6 +163,50 @@ export default function BookingsPage() {
     run();
   }, [createForm.equipment_id, createForm.start_date, createForm.end_date]);
 
+  useEffect(() => {
+    const run = async () => {
+      if (!createForm.equipment_id) {
+        setBlockedRanges([]);
+        return;
+      }
+
+      const today = new Date();
+      const nextYear = addDays(today, 365);
+      try {
+        const result = await api.bookingsCalendar({
+          equipment_id: createForm.equipment_id,
+          start: toYmd(today),
+          end: toYmd(nextYear)
+        });
+
+        setBlockedRanges(
+          (result.data || []).filter((entry) => BLOCKING_STATUSES.has(entry.status))
+        );
+      } catch (_error) {
+        setBlockedRanges([]);
+      }
+    };
+
+    run();
+  }, [createForm.equipment_id]);
+
+  const updateCreateDate = (key) => (event) => {
+    const value = event.target.value;
+    const next = { ...createForm, [key]: value };
+
+    if (key === 'start_date' && next.end_date && value > next.end_date) {
+      next.end_date = value;
+    }
+
+    if (next.start_date && next.end_date && overlapsRange(next.start_date, next.end_date, blockedRanges)) {
+      setCreateStatus({ loading: false, error: 'Selected date range is unavailable for this equipment.' });
+      return;
+    }
+
+    setCreateStatus((prev) => ({ ...prev, error: '' }));
+    setCreateForm(next);
+  };
+
   const computedTotal = useMemo(() => {
     const item = equipmentMap[createForm.equipment_id];
     if (!item || !createForm.start_date || !createForm.end_date) return 0;
@@ -145,6 +222,10 @@ export default function BookingsPage() {
     setCreateStatus({ loading: true, error: '' });
 
     try {
+      if (overlapsRange(createForm.start_date, createForm.end_date, blockedRanges)) {
+        throw new Error('Selected date range is unavailable for this equipment.');
+      }
+
       let customerId = createForm.customer_id;
       if (createForm.customer_mode === 'new') {
         const customerResult = await api.createCustomer({
@@ -170,6 +251,7 @@ export default function BookingsPage() {
       setCreateForm({
         customer_mode: 'existing',
         customer_id: '',
+        customer_search: '',
         customer_name: '',
         customer_email: '',
         customer_phone: '',
@@ -241,10 +323,18 @@ export default function BookingsPage() {
             </FilterSelect>
 
             {createForm.customer_mode === 'existing' ? (
-              <FilterSelect label="Customer" value={createForm.customer_id} onChange={updateCreateField('customer_id')} required>
-                <option value="">Select customer</option>
-                {customers.map((item) => <option key={item.id} value={item.id}>{item.full_name}</option>)}
-              </FilterSelect>
+              <>
+                <FilterInput
+                  label="Search Customer"
+                  onChange={updateCreateField('customer_search')}
+                  placeholder="Type name/email/phone"
+                  value={createForm.customer_search}
+                />
+                <FilterSelect label="Customer" value={createForm.customer_id} onChange={updateCreateField('customer_id')} required>
+                  <option value="">Select customer</option>
+                  {filteredCustomers.map((item) => <option key={item.id} value={item.id}>{item.full_name}</option>)}
+                </FilterSelect>
+              </>
             ) : (
               <>
                 <FilterInput label="Customer Name" value={createForm.customer_name} onChange={updateCreateField('customer_name')} required />
@@ -258,8 +348,8 @@ export default function BookingsPage() {
               {equipment.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
             </FilterSelect>
 
-            <FilterInput label="Start Date" type="date" value={createForm.start_date} onChange={updateCreateField('start_date')} required />
-            <FilterInput label="End Date" type="date" value={createForm.end_date} onChange={updateCreateField('end_date')} required />
+            <FilterInput label="Start Date" min={toYmd(new Date())} type="date" value={createForm.start_date} onChange={updateCreateDate('start_date')} required />
+            <FilterInput label="End Date" min={createForm.start_date || toYmd(new Date())} type="date" value={createForm.end_date} onChange={updateCreateDate('end_date')} required />
             <FilterInput label="Payment Reference" value={createForm.payment_reference} onChange={updateCreateField('payment_reference')} />
 
             <label className="flex items-center gap-2 text-sm text-neutral-200">
@@ -274,6 +364,17 @@ export default function BookingsPage() {
             {availability ? (
               <div className={`rounded-md px-3 py-2 text-sm ${availability.available ? 'bg-success-500/10 text-success-200' : 'bg-danger-500/10 text-danger-200'}`}>
                 {availability.available ? 'Selected range is available.' : 'Selected range has conflicts.'}
+              </div>
+            ) : null}
+
+            {blockedRanges.length > 0 ? (
+              <div className="rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-xs text-neutral-300">
+                Unavailable ranges:{' '}
+                {blockedRanges
+                  .slice(0, 5)
+                  .map((range) => `${range.start_date} to ${range.end_date}`)
+                  .join(' • ')}
+                {blockedRanges.length > 5 ? ' • …' : ''}
               </div>
             ) : null}
 

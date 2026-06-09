@@ -20,7 +20,16 @@ export const env = {
   resendFrom: process.env.RESEND_FROM || 'onboarding@resend.dev',
   resendReplyTo: process.env.RESEND_REPLY_TO || '',
   resendDevInbox: process.env.RESEND_DEV_INBOX || 'delivered@resend.dev',
+  resendAdminInbox: process.env.RESEND_ADMIN_INBOX || '',
   resendTestMode: String(process.env.RESEND_TEST_MODE || (nodeEnv !== 'production' ? 'true' : 'false')) !== 'false',
+  twilioEnabled: String(process.env.TWILIO_ENABLED || 'false') === 'true',
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
+  twilioFrom: process.env.TWILIO_FROM || '',
+  twilioSmsTo: (process.env.TWILIO_SMS_TO || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
   supabaseUrl: process.env.SUPABASE_URL || '',
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
