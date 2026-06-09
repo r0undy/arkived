@@ -278,18 +278,18 @@ arkived/
 
 ### 3.3 `platform/` — Equipment Catalog Pages
 
-- [ ] **Catalog List Page** (`/dashboard/equipment`)
-  - [ ] Filterable grid/table: search bar, category filter, status filter
-  - [ ] Equipment card with primary image, name, status badge, daily rate
-  - [ ] Add Equipment button → opens modal or navigates to add form
-  - [ ] Pagination or infinite scroll
-- [ ] **Equipment Detail / Edit Page** (`/dashboard/equipment/:id`)
+- [x] **Catalog List Page** (`/dashboard/equipment`)
+  - [x] Filterable grid/table: search bar, category filter, status filter
+  - [x] Equipment card with primary image, name, status badge, daily rate
+  - [x] Add Equipment button → opens modal or navigates to add form
+  - [x] Pagination or infinite scroll
+- [x] **Equipment Detail / Edit Page** (`/dashboard/equipment/:id`)
   - [x] All fields editable inline or via edit form (name, description, category, daily rate, deposit, quantity, condition, tags)
   - [x] Image gallery with drag-to-reorder, set-primary, delete controls
   - [x] Status badge with manual override dropdown
-  - [/] Maintenance log section (inline log list + add log form)
+  - [x] Maintenance log section (inline log list + add log form)
   - [x] Soft-delete (Archive) button with confirmation dialog
-- [ ] **Add Equipment Form** — create new equipment; validates all required fields before submit
+- [x] **Add Equipment Form** — create new equipment; validates all required fields before submit
 
 ---
 

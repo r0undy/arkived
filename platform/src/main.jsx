@@ -17,6 +17,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import DashboardHomePage from './pages/DashboardHomePage';
 import EquipmentPage from './pages/EquipmentPage';
+import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import BookingsPage from './pages/BookingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import TeamPage from './pages/TeamPage';
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/dashboard', element: <DashboardHomePage /> },
           { path: '/dashboard/equipment', element: <EquipmentPage /> },
+          { path: '/dashboard/equipment/:id', element: <EquipmentDetailPage /> },
           { path: '/dashboard/bookings', element: <BookingsPage /> },
           { path: '/dashboard/analytics', element: <AnalyticsPage /> },
           { path: '/dashboard/settings/branding', element: <BrandingPage /> },
