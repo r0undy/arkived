@@ -63,7 +63,11 @@ export const tenantRepository = {
 
   async registerTenant(payload) {
     if (!hasSupabase) {
-      return inMemoryDb.createTenant(payload);
+      const tenant = inMemoryDb.createTenant(payload);
+      if (!tenant) {
+        throw new AppError(409, 'Slug is already taken', 'SLUG_CONFLICT');
+      }
+      return tenant;
     }
 
     const { data, error } = await supabase

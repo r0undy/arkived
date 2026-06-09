@@ -86,6 +86,11 @@ export const inMemoryDb = {
   },
 
   createTenant(payload) {
+    const existing = this.getTenantBySlug(payload.slug);
+    if (existing) {
+      return null;
+    }
+
     const tenant = {
       id: crypto.randomUUID(),
       slug: payload.slug,
