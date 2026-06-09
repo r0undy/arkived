@@ -83,6 +83,19 @@ export const api = {
   },
 
   overview: () => request('/api/v1/analytics/overview'),
+  analyticsRevenue: () => request('/api/v1/analytics/revenue'),
+  analyticsRevenueByCategory: () => request('/api/v1/analytics/revenue-by-category'),
+  analyticsTopEquipment: () => request('/api/v1/analytics/top-equipment'),
+  analyticsUtilization: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/analytics/utilization${suffix}`);
+  },
+  analyticsBookingVolume: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/analytics/booking-volume${suffix}`);
+  },
 
   staff: () => request('/api/v1/staff'),
   inviteStaff: (body) => request('/api/v1/staff/invite', { method: 'POST', body }),

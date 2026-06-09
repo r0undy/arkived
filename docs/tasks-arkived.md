@@ -385,18 +385,18 @@ arkived/
 
 ### 5.3 `platform/` — Tenant Admin Dashboard
 
-- [ ] **Dashboard Home** (`/dashboard`)
-  - [ ] KPI cards: Utilization Rate, Active Bookings, Overdue Rentals (alert style), Revenue MTD
-  - [ ] Quick actions: `+ Add Equipment`, `+ New Booking`, `View Calendar`
-  - [ ] Recent bookings table (last 5)
-  - [ ] Underperforming assets list (utilization < 20%)
-- [ ] **Analytics Page** (`/dashboard/analytics`)
-  - [ ] Date range picker (7d / 30d / 90d / custom)
-  - [ ] Monthly Revenue bar chart (last 12 months)
-  - [ ] Revenue by Category donut chart
-  - [ ] Top 10 Performing Assets ranked list
-  - [ ] Booking Volume Trend line chart
-  - [ ] Average Rental Duration stat card
+- [x] **Dashboard Home** (`/dashboard`)
+  - [x] KPI cards: Utilization Rate, Active Bookings, Overdue Rentals (alert style), Revenue MTD
+  - [x] Quick actions: `+ Add Equipment`, `+ New Booking`, `View Calendar`
+  - [x] Recent bookings table (last 5)
+  - [x] Underperforming assets list (utilization < 20%)
+- [x] **Analytics Page** (`/dashboard/analytics`)
+  - [x] Date range picker (7d / 30d / 90d / custom)
+  - [x] Monthly Revenue bar chart (last 12 months)
+  - [x] Revenue by Category donut chart
+  - [x] Top 10 Performing Assets ranked list
+  - [x] Booking Volume Trend line chart
+  - [x] Average Rental Duration stat card
 
 ### 5.4 `platform/` — Platform Owner Admin Panel
 
