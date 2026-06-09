@@ -57,9 +57,17 @@ export const useAuth = () => {
     () => ({
       user,
       loading,
-      async signInWithPassword(email, password) {
+      async signInWithPassword(email, password, turnstileToken = '') {
         if (!hasSupabaseClient) {
           throw new Error('Supabase is not configured. Use demo sign in for local fallback.');
+        }
+
+        if (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken) {
+          throw new Error('Please complete the captcha challenge.');
+        }
+
+        if (turnstileToken) {
+          await api.verifyTurnstile(turnstileToken);
         }
 
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -68,7 +76,13 @@ export const useAuth = () => {
         }
 
         localStorage.setItem('arkived_token', data.session.access_token);
-        window.location.assign('/dashboard');
+        try {
+          const me = await api.me();
+          const nextPath = me?.user?.role === 'platform_owner' ? '/admin' : '/dashboard';
+          window.location.assign(nextPath);
+        } catch (_error) {
+          window.location.assign('/dashboard');
+        }
       },
       signInAsDemo() {
         localStorage.setItem('arkived_token', 'dev-admin-token');

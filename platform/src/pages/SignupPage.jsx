@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { api } from '../lib/api';
+import TurnstileWidget from '../components/TurnstileWidget';
 
 const initialState = {
   name: '',
@@ -10,7 +11,9 @@ const initialState = {
 
 export default function SignupPage() {
   const [form, setForm] = useState(initialState);
+  const [turnstileToken, setTurnstileToken] = useState('');
   const [status, setStatus] = useState({ loading: false, error: '', success: '' });
+  const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
 
   const update = (key) => (event) => {
     setForm((prev) => ({ ...prev, [key]: event.target.value }));
@@ -21,13 +24,21 @@ export default function SignupPage() {
     setStatus({ loading: true, error: '', success: '' });
 
     try {
-      const result = await api.registerTenant(form);
+      if (turnstileSiteKey && !turnstileToken) {
+        throw new Error('Please complete the captcha challenge.');
+      }
+
+      const result = await api.registerTenant({
+        ...form,
+        ...(turnstileToken ? { turnstile_token: turnstileToken } : {})
+      });
       setStatus({
         loading: false,
         error: '',
         success: `Workspace ${result.tenant.slug}.arkived.dev created. You can now sign in.`
       });
       setForm(initialState);
+      setTurnstileToken('');
     } catch (error) {
       setStatus({ loading: false, error: error.message, success: '' });
     }
@@ -41,6 +52,11 @@ export default function SignupPage() {
         <Field label="Slug" value={form.slug} onChange={update('slug')} placeholder="constructionpro" />
         <Field label="Email" type="email" value={form.email} onChange={update('email')} />
         <Field label="Password" type="password" value={form.password} onChange={update('password')} />
+        <TurnstileWidget
+          onExpire={() => setTurnstileToken('')}
+          onToken={setTurnstileToken}
+          siteKey={turnstileSiteKey}
+        />
 
         {status.error ? <p className="text-sm text-danger-500">{status.error}</p> : null}
         {status.success ? <p className="text-sm text-success-500">{status.success}</p> : null}

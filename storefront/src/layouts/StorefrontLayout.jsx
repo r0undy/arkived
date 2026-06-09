@@ -1,11 +1,12 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import PoweredByArkivedBadge from '../components/PoweredByArkivedBadge';
 
 export default function StorefrontLayout({ tenant }) {
   return (
     <div className="min-h-screen text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="text-xl font-bold tracking-tight" style={{ color: 'var(--color-primary)' }}>
+          <Link to="/" className="text-xl font-bold tracking-tight" style={{ color: 'var(--color-primary-on-white)' }}>
             {tenant.name}
           </Link>
           <nav className="flex items-center gap-5 text-sm font-medium">
@@ -22,7 +23,7 @@ export default function StorefrontLayout({ tenant }) {
           <p>{tenant.contact_email || 'No support email configured'}</p>
           <p>{tenant.contact_phone || 'No support phone configured'}</p>
           <p>{tenant.contact_address || 'No shop address configured'}</p>
-          {tenant.show_watermark ? <p className="mt-2">Powered by Arkived</p> : null}
+          <PoweredByArkivedBadge enabled={tenant.show_watermark} />
         </div>
       </footer>
     </div>

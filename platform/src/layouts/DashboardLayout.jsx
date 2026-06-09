@@ -1,10 +1,12 @@
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 const navItems = [
   { to: '/dashboard', label: 'Overview' },
   { to: '/dashboard/equipment', label: 'Equipment' },
   { to: '/dashboard/bookings', label: 'Bookings' },
+  { to: '/dashboard/calendar', label: 'Calendar' },
+  { to: '/dashboard/customers', label: 'Customers' },
   { to: '/dashboard/analytics', label: 'Analytics' },
   { to: '/dashboard/settings/branding', label: 'Branding' },
   { to: '/dashboard/settings/team', label: 'Team' }
@@ -12,6 +14,10 @@ const navItems = [
 
 export default function DashboardLayout() {
   const auth = useAuth();
+
+  if (auth.user?.role === 'platform_owner') {
+    return <Navigate to="/admin" replace />;
+  }
 
   return (
     <div className="grid min-h-screen grid-cols-1 bg-neutral-900 text-neutral-50 md:grid-cols-[240px_1fr]">

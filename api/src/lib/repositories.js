@@ -227,6 +227,110 @@ export const staffRepository = {
   }
 };
 
+export const customerRepository = {
+  async list(tenantId, filters = {}) {
+    if (!hasSupabase) {
+      return inMemoryDb.listCustomers(tenantId, filters);
+    }
+
+    let query = supabase
+      .from('customers')
+      .select('id, tenant_id, full_name, email, phone, notes, created_at')
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
+
+    if (filters.q) {
+      query = query.or(
+        `full_name.ilike.%${filters.q}%,email.ilike.%${filters.q}%,phone.ilike.%${filters.q}%`
+      );
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw new AppError(500, error.message, 'CUSTOMER_LIST_FAILED');
+    }
+    return data ?? [];
+  },
+
+  async create(payload) {
+    if (!hasSupabase) {
+      return inMemoryDb.createCustomer(payload);
+    }
+
+    const { data, error } = await supabase
+      .from('customers')
+      .insert(payload)
+      .select('id, tenant_id, full_name, email, phone, notes, created_at')
+      .single();
+
+    if (error) {
+      throw new AppError(400, error.message, 'CUSTOMER_CREATE_FAILED');
+    }
+
+    return data;
+  },
+
+  async getById(tenantId, id) {
+    if (!hasSupabase) {
+      const customer = inMemoryDb.getCustomerById(tenantId, id);
+      if (!customer) {
+        throw new AppError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
+      }
+      return customer;
+    }
+
+    return safeSingle(
+      supabase
+        .from('customers')
+        .select('id, tenant_id, full_name, email, phone, notes, created_at')
+        .eq('tenant_id', tenantId)
+        .eq('id', id)
+        .single(),
+      'Customer not found'
+    );
+  },
+
+  async update(tenantId, id, payload) {
+    if (!hasSupabase) {
+      const customer = inMemoryDb.updateCustomer(tenantId, id, payload);
+      if (!customer) {
+        throw new AppError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
+      }
+      return customer;
+    }
+
+    return safeSingle(
+      supabase
+        .from('customers')
+        .update(payload)
+        .eq('tenant_id', tenantId)
+        .eq('id', id)
+        .select('id, tenant_id, full_name, email, phone, notes, created_at')
+        .single(),
+      'Customer not found'
+    );
+  },
+
+  async listBookings(tenantId, customerId) {
+    if (!hasSupabase) {
+      return inMemoryDb.listBookingsByCustomer(tenantId, customerId);
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .eq('tenant_id', tenantId)
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new AppError(500, error.message, 'CUSTOMER_BOOKING_LIST_FAILED');
+    }
+
+    return data ?? [];
+  }
+};
+
 export const equipmentRepository = {
   async list(tenantId, filters = {}) {
     if (!hasSupabase) {
@@ -551,6 +655,24 @@ export const equipmentRepository = {
     return data ?? [];
   },
 
+  async listMaintenanceDue(referenceDate) {
+    if (!hasSupabase) {
+      return inMemoryDb.listMaintenanceDue(referenceDate);
+    }
+
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .select('id, tenant_id, equipment_id, service_type, next_service_due, notes, created_at')
+      .eq('next_service_due', referenceDate)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'MAINTENANCE_DUE_LIST_FAILED');
+    }
+
+    return data ?? [];
+  },
+
   async createMaintenanceLog(payload) {
     if (!hasSupabase) {
       return inMemoryDb.createMaintenanceLog(payload);
@@ -618,16 +740,24 @@ export const equipmentRepository = {
 };
 
 export const bookingRepository = {
-  async list(tenantId) {
+  async list(tenantId, filters = {}) {
     if (!hasSupabase) {
-      return inMemoryDb.listBookings(tenantId);
+      return inMemoryDb.listBookings(tenantId, filters);
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('bookings')
-      .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, payment_reference, dispatch_condition, return_condition, overdue, created_at')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
+
+    if (filters.status) query = query.eq('status', filters.status);
+    if (filters.equipmentId) query = query.eq('equipment_id', filters.equipmentId);
+    if (filters.customerId) query = query.eq('customer_id', filters.customerId);
+    if (filters.start) query = query.gte('end_date', filters.start);
+    if (filters.end) query = query.lte('start_date', filters.end);
+
+    const { data, error } = await query;
 
     if (error) {
       throw new AppError(500, error.message, 'BOOKING_LIST_FAILED');
@@ -648,7 +778,7 @@ export const bookingRepository = {
     return safeSingle(
       supabase
         .from('bookings')
-        .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+        .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, deposit_paid, payment_reference, dispatch_condition, return_condition, overdue, created_at')
         .eq('tenant_id', tenantId)
         .eq('id', id)
         .single(),
@@ -744,5 +874,91 @@ export const bookingRepository = {
         .single(),
       'Booking not found'
     );
+  },
+
+  async update(tenantId, id, payload) {
+    if (!hasSupabase) {
+      const booking = inMemoryDb.updateBooking(tenantId, id, payload);
+      if (!booking) {
+        throw new AppError(404, 'Booking not found', 'BOOKING_NOT_FOUND');
+      }
+      return booking;
+    }
+
+    return safeSingle(
+      supabase
+        .from('bookings')
+        .update(payload)
+        .eq('tenant_id', tenantId)
+        .eq('id', id)
+        .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, deposit_paid, payment_reference, dispatch_condition, return_condition, overdue, created_at')
+        .single(),
+      'Booking not found'
+    );
+  },
+
+  async markOverdue(referenceDate) {
+    if (!hasSupabase) {
+      return inMemoryDb.markOverdueBookings(referenceDate);
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .update({ overdue: true })
+      .lt('end_date', referenceDate)
+      .neq('status', 'closed')
+      .eq('overdue', false)
+      .select('id, tenant_id, equipment_id, customer_id, start_date, end_date, status, overdue, created_at');
+
+    if (error) {
+      throw new AppError(500, error.message, 'BOOKING_OVERDUE_UPDATE_FAILED');
+    }
+
+    return data ?? [];
+  },
+
+  async listReminderCandidates(referenceDate) {
+    if (!hasSupabase) {
+      return inMemoryDb.listBookingReminderCandidates(referenceDate);
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('id, tenant_id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .or(`start_date.eq.${referenceDate},end_date.eq.${referenceDate}`)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'BOOKING_REMINDER_LIST_FAILED');
+    }
+
+    return data ?? [];
+  },
+
+  async listOverdueEscalations(referenceDate, overdueDays = 3) {
+    const targetDate = new Date(`${referenceDate}T00:00:00Z`);
+    targetDate.setUTCDate(targetDate.getUTCDate() - overdueDays);
+    const endDate = targetDate.toISOString().slice(0, 10);
+
+    if (!hasSupabase) {
+      return inMemoryDb
+        .listAllBookings()
+        .filter((booking) => booking.overdue && booking.status !== 'closed' && booking.end_date === endDate)
+        .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('id, tenant_id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .eq('overdue', true)
+      .neq('status', 'closed')
+      .eq('end_date', endDate)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'BOOKING_OVERDUE_ESCALATION_LIST_FAILED');
+    }
+
+    return data ?? [];
   }
 };

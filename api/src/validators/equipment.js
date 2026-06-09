@@ -26,6 +26,16 @@ export const equipmentFiltersSchema = z.object({
   q: z.string().max(120).optional()
 });
 
+export const equipmentAvailabilityQuerySchema = z
+  .object({
+    from: z.string().date(),
+    to: z.string().date()
+  })
+  .refine((value) => value.from <= value.to, {
+    message: 'from must be on or before to',
+    path: ['to']
+  });
+
 export const createEquipmentImageSchema = z.object({
   file_name: z.string().min(1).max(140),
   mime_type: z.string().regex(/^image\/[a-z0-9.+-]+$/i, 'mime_type must be an image/* value'),

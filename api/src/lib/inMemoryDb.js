@@ -171,6 +171,58 @@ export const inMemoryDb = {
     return removed;
   },
 
+  listCustomers(tenantId, filters = {}) {
+    return state.customers.filter((customer) => {
+      if (customer.tenant_id !== tenantId) return false;
+      if (!filters.q) return true;
+
+      const query = String(filters.q).toLowerCase();
+      const hay = `${customer.full_name || ''} ${customer.email || ''} ${customer.phone || ''}`.toLowerCase();
+      return hay.includes(query);
+    });
+  },
+
+  getCustomerById(tenantId, id) {
+    return state.customers.find((customer) => customer.tenant_id === tenantId && customer.id === id) || null;
+  },
+
+  createCustomer(payload) {
+    const customer = {
+      id: crypto.randomUUID(),
+      tenant_id: payload.tenant_id,
+      full_name: payload.full_name,
+      email: payload.email ?? null,
+      phone: payload.phone ?? null,
+      notes: payload.notes ?? null,
+      created_at: now()
+    };
+
+    state.customers.push(customer);
+    return customer;
+  },
+
+  updateCustomer(tenantId, id, payload) {
+    const index = state.customers.findIndex((customer) => customer.tenant_id === tenantId && customer.id === id);
+    if (index < 0) return null;
+
+    state.customers[index] = {
+      ...state.customers[index],
+      ...payload
+    };
+
+    return state.customers[index];
+  },
+
+  listBookingsByCustomer(tenantId, customerId) {
+    return state.bookings
+      .filter((booking) => booking.tenant_id === tenantId && booking.customer_id === customerId)
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  },
+
+  listAllBookings() {
+    return state.bookings.slice();
+  },
+
   listEquipment(tenantId, filters = {}) {
     return state.equipment.filter((item) => {
       if (item.tenant_id !== tenantId || item.deleted_at) return false;
@@ -294,6 +346,12 @@ export const inMemoryDb = {
       .sort((a, b) => String(b.service_date).localeCompare(String(a.service_date)));
   },
 
+  listMaintenanceDue(referenceDate) {
+    return state.maintenance_logs
+      .filter((log) => log.next_service_due && log.next_service_due === referenceDate)
+      .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  },
+
   createMaintenanceLog(payload) {
     const log = {
       id: crypto.randomUUID(),
@@ -338,8 +396,18 @@ export const inMemoryDb = {
     return removed;
   },
 
-  listBookings(tenantId) {
-    return state.bookings.filter((booking) => booking.tenant_id === tenantId);
+  listBookings(tenantId, filters = {}) {
+    return state.bookings
+      .filter((booking) => {
+        if (booking.tenant_id !== tenantId) return false;
+        if (filters.status && booking.status !== filters.status) return false;
+        if (filters.equipmentId && booking.equipment_id !== filters.equipmentId) return false;
+        if (filters.customerId && booking.customer_id !== filters.customerId) return false;
+        if (filters.start && booking.end_date < filters.start) return false;
+        if (filters.end && booking.start_date > filters.end) return false;
+        return true;
+      })
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   },
 
   getBookingById(tenantId, id) {
@@ -388,5 +456,31 @@ export const inMemoryDb = {
     };
 
     return state.bookings[index];
+  },
+
+  markOverdueBookings(referenceDate) {
+    const updated = [];
+
+    state.bookings = state.bookings.map((booking) => {
+      const shouldMarkOverdue = booking.end_date < referenceDate
+        && booking.status !== 'closed'
+        && !booking.overdue;
+
+      if (!shouldMarkOverdue) {
+        return booking;
+      }
+
+      const next = { ...booking, overdue: true };
+      updated.push(next);
+      return next;
+    });
+
+    return updated;
+  },
+
+  listBookingReminderCandidates(referenceDate) {
+    return state.bookings
+      .filter((booking) => booking.start_date === referenceDate || booking.end_date === referenceDate)
+      .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
   }
 };

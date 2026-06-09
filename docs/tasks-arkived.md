@@ -278,18 +278,18 @@ arkived/
 
 ### 3.3 `platform/` — Equipment Catalog Pages
 
-- [ ] **Catalog List Page** (`/dashboard/equipment`)
-  - [ ] Filterable grid/table: search bar, category filter, status filter
-  - [ ] Equipment card with primary image, name, status badge, daily rate
-  - [ ] Add Equipment button → opens modal or navigates to add form
-  - [ ] Pagination or infinite scroll
-- [ ] **Equipment Detail / Edit Page** (`/dashboard/equipment/:id`)
+- [x] **Catalog List Page** (`/dashboard/equipment`)
+  - [x] Filterable grid/table: search bar, category filter, status filter
+  - [x] Equipment card with primary image, name, status badge, daily rate
+  - [x] Add Equipment button → opens modal or navigates to add form
+  - [x] Pagination or infinite scroll
+- [x] **Equipment Detail / Edit Page** (`/dashboard/equipment/:id`)
   - [x] All fields editable inline or via edit form (name, description, category, daily rate, deposit, quantity, condition, tags)
   - [x] Image gallery with drag-to-reorder, set-primary, delete controls
   - [x] Status badge with manual override dropdown
-  - [/] Maintenance log section (inline log list + add log form)
+  - [x] Maintenance log section (inline log list + add log form)
   - [x] Soft-delete (Archive) button with confirmation dialog
-- [ ] **Add Equipment Form** — create new equipment; validates all required fields before submit
+- [x] **Add Equipment Form** — create new equipment; validates all required fields before submit
 
 ---
 
@@ -297,72 +297,72 @@ arkived/
 
 ### 4.1 API — Customer Routes
 
-- [ ] `GET /api/v1/customers` — list customers (searchable by name, email, phone)
-- [ ] `POST /api/v1/customers` — create customer record
-- [ ] `PATCH /api/v1/customers/:id` — update customer details
-- [ ] `GET /api/v1/customers/:id/bookings` — booking history for a customer
+- [x] `GET /api/v1/customers` — list customers (searchable by name, email, phone)
+- [x] `POST /api/v1/customers` — create customer record
+- [x] `PATCH /api/v1/customers/:id` — update customer details
+- [x] `GET /api/v1/customers/:id/bookings` — booking history for a customer
 
 ### 4.2 API — Booking Routes
 
-- [/] `GET /api/v1/bookings` — list bookings with filters (status, date range, equipment, customer); paginated
-- [ ] `GET /api/v1/bookings/:id` — get single booking with full details
+- [x] `GET /api/v1/bookings` — list bookings with filters (status, date range, equipment, customer); paginated
+- [x] `GET /api/v1/bookings/:id` — get single booking with full details
 - [x] `POST /api/v1/bookings` — create booking; checks date overlap conflict before inserting
 - [x] `PATCH /api/v1/bookings/:id/status` — advance booking to next status stage with validation:
   - `reserved` → `payment` → `dispatched` → `returned` → `inspected` → `closed`
-- [ ] `PATCH /api/v1/bookings/:id` — update mutable booking fields (dispatch condition, return condition, payment reference)
+- [x] `PATCH /api/v1/bookings/:id` — update mutable booking fields (dispatch condition, return condition, payment reference)
 - [x] `GET /api/v1/bookings/calendar` — returns bookings within a date range, formatted for calendar display
-- [ ] Scheduled job (cron via `node-cron`):
-  - [ ] Daily: flag bookings where `end_date < today` and `status != closed` as `overdue = true`
-  - [ ] Daily: trigger maintenance-due notifications for equipment with `next_service_due = today`
+- [x] Scheduled job (cron via `node-cron`):
+  - [x] Daily: flag bookings where `end_date < today` and `status != closed` as `overdue = true`
+  - [x] Daily: trigger maintenance-due notifications for equipment with `next_service_due = today`
 
 ### 4.3 API — Availability Route
 
-- [ ] `GET /api/v1/equipment/:id/availability?from=&to=` — return available and booked date ranges for a given equipment item (used by storefront and admin calendar)
+- [x] `GET /api/v1/equipment/:id/availability?from=&to=` — return available and booked date ranges for a given equipment item (used by storefront and admin calendar)
 
 ### 4.4 API — Notification Triggers
 
-- [ ] Create `src/lib/notify.js` — helper that sends email via Resend/SendGrid API
-- [ ] Trigger notifications on booking status changes:
-  - [ ] Booking confirmed → email customer
-  - [ ] Booking dispatched → email customer
-  - [ ] Booking overdue (Day 1) → email + SMS customer and staff
-  - [ ] Booking overdue (Day 3+) → email tenant admin
-- [ ] Scheduled notification job (cron):
-  - [ ] 24h before `start_date` → remind customer
-  - [ ] 24h before `end_date` → remind customer of return
+- [x] Create `src/lib/notify.js` — helper that sends email via Resend/SendGrid API
+- [x] Trigger notifications on booking status changes:
+  - [x] Booking confirmed → email customer
+  - [x] Booking dispatched → email customer
+  - [x] Booking overdue (Day 1) → email + SMS customer and staff
+  - [x] Booking overdue (Day 3+) → email tenant admin
+- [x] Scheduled notification job (cron):
+  - [x] 24h before `start_date` → remind customer
+  - [x] 24h before `end_date` → remind customer of return
 
 ### 4.5 `platform/` — Bookings Pages
 
-- [ ] **Bookings List Page** (`/dashboard/bookings`)
-  - [ ] Table with columns: Customer, Equipment, Start, End, Status badge, Actions
-  - [ ] Filter by status, date range, equipment, customer
-  - [ ] "Overdue" alert banner if any bookings are flagged overdue
-  - [ ] Create Booking button
-- [ ] **Booking Detail Page** (`/dashboard/bookings/:id`)
-  - [ ] Full booking info — customer, equipment, dates, amounts
-  - [ ] Status pipeline visualizer (step indicator showing current stage)
-  - [ ] Action buttons per stage: `Confirm Payment`, `Mark Dispatched`, `Mark Returned`, `Complete Inspection`, `Close Booking`
-  - [ ] Dispatch condition and return condition text areas (appear at appropriate stages)
-  - [ ] Payment reference field
-- [ ] **Create Booking Modal / Page**
-  - [ ] Customer selector (search existing or create new inline)
-  - [ ] Equipment selector with availability check for selected date range
-  - [ ] Date range picker (blocks unavailable dates)
-  - [ ] Auto-calculated total amount (daily rate × days)
-  - [ ] Deposit toggle
+- [x] **Bookings List Page** (`/dashboard/bookings`)
+  - [x] Table with columns: Customer, Equipment, Start, End, Status badge, Actions
+  - [x] Filter by status, date range, equipment, customer
+  - [x] "Overdue" alert banner if any bookings are flagged overdue
+  - [x] Create Booking button
+- [x] **Booking Detail Page** (`/dashboard/bookings/:id`)
+  - [x] Full booking info — customer, equipment, dates, amounts
+  - [x] Status pipeline visualizer (step indicator showing current stage)
+  - [x] Action buttons per stage: `Confirm Payment`, `Mark Dispatched`, `Mark Returned`, `Complete Inspection`, `Close Booking`
+  - [x] Dispatch condition and return condition text areas (appear at appropriate stages)
+  - [x] Payment reference field
+- [x] **Create Booking Modal / Page**
+  - [x] Customer selector (search existing or create new inline)
+  - [x] Equipment selector with availability check for selected date range
+  - [x] Date range picker (blocks unavailable dates)
+  - [x] Auto-calculated total amount (daily rate × days)
+  - [x] Deposit toggle
 
 ### 4.6 `platform/` — Availability Calendar Page
 
-- [ ] **Calendar Page** (`/dashboard/calendar`)
-  - [ ] Month / Week / Day views
-  - [ ] Color-coded events: 🟢 Available · 🔴 Rented · 🟡 Reserved · 🔵 In Maintenance
-  - [ ] Filter by equipment or category
-  - [ ] Click event → open booking detail slide-over
+- [x] **Calendar Page** (`/dashboard/calendar`)
+  - [x] Month / Week / Day views
+  - [x] Color-coded events: 🟢 Available · 🔴 Rented · 🟡 Reserved · 🔵 In Maintenance
+  - [x] Filter by equipment or category
+  - [x] Click event → open booking detail slide-over
 
 ### 4.7 `platform/` — Customer Directory Page
 
-- [ ] `/dashboard/customers` — searchable customer list with booking count and last activity
-- [ ] Customer profile view with booking history timeline
+- [x] `/dashboard/customers` — searchable customer list with booking count and last activity
+- [x] Customer profile view with booking history timeline
 
 ---
 
@@ -371,38 +371,38 @@ arkived/
 ### 5.1 API — Analytics Routes
 
 - [x] `GET /api/v1/analytics/overview` — KPIs: active bookings, overdue count, revenue MTD, utilization rate (global)
-- [ ] `GET /api/v1/analytics/revenue` — monthly revenue breakdown for the last 12 months
-- [ ] `GET /api/v1/analytics/revenue-by-category` — revenue split by equipment category
-- [ ] `GET /api/v1/analytics/top-equipment` — top 10 items by total revenue
-- [ ] `GET /api/v1/analytics/utilization` — per-equipment utilization rate; supports date range filter
-- [ ] `GET /api/v1/analytics/booking-volume` — booking count per week/month
+- [x] `GET /api/v1/analytics/revenue` — monthly revenue breakdown for the last 12 months
+- [x] `GET /api/v1/analytics/revenue-by-category` — revenue split by equipment category
+- [x] `GET /api/v1/analytics/top-equipment` — top 10 items by total revenue
+- [x] `GET /api/v1/analytics/utilization` — per-equipment utilization rate; supports date range filter
+- [x] `GET /api/v1/analytics/booking-volume` — booking count per week/month
 
 ### 5.2 API — Platform Owner Routes (Super-Admin)
 
-- [ ] Separate router mounted only when `req.user.role === 'platform_owner'`
-- [ ] `GET /api/v1/admin/tenants` — list all tenants with signup date and status
-- [ ] `GET /api/v1/admin/overview` — platform-wide KPIs: total tenants, new MTD, total bookings, churn rate
+- [x] Separate router mounted only when `req.user.role === 'platform_owner'`
+- [x] `GET /api/v1/admin/tenants` — list all tenants with signup date and status
+- [x] `GET /api/v1/admin/overview` — platform-wide KPIs: total tenants, new MTD, total bookings, churn rate
 
 ### 5.3 `platform/` — Tenant Admin Dashboard
 
-- [ ] **Dashboard Home** (`/dashboard`)
-  - [ ] KPI cards: Utilization Rate, Active Bookings, Overdue Rentals (alert style), Revenue MTD
-  - [ ] Quick actions: `+ Add Equipment`, `+ New Booking`, `View Calendar`
-  - [ ] Recent bookings table (last 5)
-  - [ ] Underperforming assets list (utilization < 20%)
-- [ ] **Analytics Page** (`/dashboard/analytics`)
-  - [ ] Date range picker (7d / 30d / 90d / custom)
-  - [ ] Monthly Revenue bar chart (last 12 months)
-  - [ ] Revenue by Category donut chart
-  - [ ] Top 10 Performing Assets ranked list
-  - [ ] Booking Volume Trend line chart
-  - [ ] Average Rental Duration stat card
+- [x] **Dashboard Home** (`/dashboard`)
+  - [x] KPI cards: Utilization Rate, Active Bookings, Overdue Rentals (alert style), Revenue MTD
+  - [x] Quick actions: `+ Add Equipment`, `+ New Booking`, `View Calendar`
+  - [x] Recent bookings table (last 5)
+  - [x] Underperforming assets list (utilization < 20%)
+- [x] **Analytics Page** (`/dashboard/analytics`)
+  - [x] Date range picker (7d / 30d / 90d / custom)
+  - [x] Monthly Revenue bar chart (last 12 months)
+  - [x] Revenue by Category donut chart
+  - [x] Top 10 Performing Assets ranked list
+  - [x] Booking Volume Trend line chart
+  - [x] Average Rental Duration stat card
 
 ### 5.4 `platform/` — Platform Owner Admin Panel
 
-- [ ] `/admin` route (gated by `platform_owner` role)
-- [ ] Platform KPI cards: Total Tenants, New This Month, Total Bookings, Churn Rate
-- [ ] Tenant list table: name, slug, plan, signup date, status
+- [x] `/admin` route (gated by `platform_owner` role)
+- [x] Platform KPI cards: Total Tenants, New This Month, Total Bookings, Churn Rate
+- [x] Tenant list table: name, slug, plan, signup date, status
 
 ---
 
@@ -412,41 +412,41 @@ arkived/
 
 ### 6.1 Tenant Resolution & Theming
 
-- [ ] `useTenant` hook fully implemented:
-  - Extracts slug from `window.location.hostname` (first subdomain segment)
-  - Falls back to a `?tenant=` query param for local dev
-  - Calls `GET /api/v1/tenant/:slug/public`
-  - On success: injects CSS variable overrides into `:root` (`--color-primary`, `--color-primary-hover`)
-  - On error (tenant not found): renders a 404 page
-- [ ] Loading state: full-page skeleton while tenant config loads
-- [ ] "Powered by Arkived" badge component (conditionally rendered based on `show_watermark` flag from API)
+- [x] `useTenant` hook fully implemented:
+  - [x] Extracts slug from `window.location.hostname` (first subdomain segment)
+  - [x] Falls back to a `?tenant=` query param for local dev
+  - [x] Calls `GET /api/v1/tenant/:slug/public`
+  - [x] On success: injects CSS variable overrides into `:root` (`--color-primary`, `--color-primary-hover`)
+  - [x] On error (tenant not found): renders a 404 page
+- [x] Loading state: full-page skeleton while tenant config loads
+- [x] "Powered by Arkived" badge component (conditionally rendered based on `show_watermark` flag from API)
 
 ### 6.2 Storefront Pages
 
-- [ ] **Homepage** (`/`)
-  - [ ] Hero section: tenant banner image, shop name, tagline
-  - [ ] Equipment category grid (links to filtered catalog)
-  - [ ] Featured / recently added equipment carousel
-  - [ ] Contact info footer
-- [ ] **Catalog Page** (`/catalog`)
-  - [ ] Equipment grid with search bar and category filter chips
-  - [ ] Equipment card: primary image, name, condition badge, daily rate
-  - [ ] Pagination
-- [ ] **Equipment Detail Page** (`/catalog/:id`)
-  - [ ] Image gallery (primary + thumbnails)
-  - [ ] Name, description, category, condition, daily rate, deposit amount
-  - [ ] Read-only availability calendar (highlights unavailable date ranges)
-  - [ ] Inquiry / booking request form (name, email, phone, desired dates, message)
-    - On submit: creates a `reserved` booking record via `POST /api/v1/bookings/inquiry` (unauthenticated public endpoint)
-  - [ ] Related equipment section (same category)
-- [ ] **404 Page** — shown for invalid tenant slugs or unknown routes
+- [x] **Homepage** (`/`)
+  - [x] Hero section: tenant banner image, shop name, tagline
+  - [x] Equipment category grid (links to filtered catalog)
+  - [x] Featured / recently added equipment carousel
+  - [x] Contact info footer
+- [x] **Catalog Page** (`/catalog`)
+  - [x] Equipment grid with search bar and category filter chips
+  - [x] Equipment card: primary image, name, condition badge, daily rate
+  - [x] Pagination
+- [x] **Equipment Detail Page** (`/catalog/:id`)
+  - [x] Image gallery (primary + thumbnails)
+  - [x] Name, description, category, condition, daily rate, deposit amount
+  - [x] Read-only availability calendar (highlights unavailable date ranges)
+  - [x] Inquiry / booking request form (name, email, phone, desired dates, message)
+    - [x] On submit: creates a `reserved` booking record via `POST /api/v1/bookings/inquiry` (unauthenticated public endpoint)
+  - [x] Related equipment section (same category)
+- [x] **404 Page** — shown for invalid tenant slugs or unknown routes
 
 ### 6.3 Storefront SEO (React 19 Native)
 
-- [ ] Use React 19's native document metadata hoisting — render `<title>` and `<meta>` tags directly in page components; no external library needed
-- [ ] Each page sets a unique `<title>` using the tenant's shop name: e.g., `"Drill Press — ConstructionPro Rentals"`
-- [ ] `<meta name="description">` set per page
-- [ ] `<link rel="canonical">` on all pages
+- [x] Use React 19's native document metadata hoisting — render `<title>` and `<meta>` tags directly in page components; no external library needed
+- [x] Each page sets a unique `<title>` using the tenant's shop name: e.g., `"Drill Press — ConstructionPro Rentals"`
+- [x] `<meta name="description">` set per page
+- [x] `<link rel="canonical">` on all pages
 
 ---
 
@@ -454,42 +454,42 @@ arkived/
 
 ### 7.1 Security
 
-- [ ] Confirm `helmet` is configured with appropriate CSP headers in `api/`
-- [ ] Confirm CORS allows only `arkived.dev` and `*.arkived.dev`
-- [ ] Confirm all Express routes have Zod validation on request bodies
-- [ ] Confirm RLS is enabled and tested on all Supabase tables — write test queries as a non-owner user to verify isolation
-- [ ] Set up Cloudflare WAF managed ruleset
-- [ ] Set up Cloudflare rate limiting on `/api/*`
-- [ ] Add Cloudflare Turnstile to `platform/` sign-up and login pages
+- [x] Confirm `helmet` is configured with appropriate CSP headers in `api/`
+- [x] Confirm CORS allows only `arkived.dev` and `*.arkived.dev`
+- [x] Confirm all Express routes have Zod validation on request bodies
+- [/] Confirm RLS is enabled and tested on all Supabase tables — write test queries as a non-owner user to verify isolation
+- [/] Set up Cloudflare WAF managed ruleset
+- [/] Set up Cloudflare rate limiting on `/api/*`
+- [x] Add Cloudflare Turnstile to `platform/` sign-up and login pages
 
 ### 7.2 Error Handling & Edge Cases
 
-- [ ] API: global error handler returns `{ error: { message, code } }` — never leaks stack traces in production
-- [ ] `platform/`: global error boundary component wrapping the router
-- [ ] `storefront/`: loading and error states for all async data fetches
-- [ ] Handle booking conflict gracefully: if double-booking attempted, return clear 409 error with message
-- [ ] Handle Supabase Storage upload failures with retry UI
+- [x] API: global error handler returns `{ error: { message, code } }` — never leaks stack traces in production
+- [x] `platform/`: global error boundary component wrapping the router
+- [x] `storefront/`: loading and error states for all async data fetches
+- [x] Handle booking conflict gracefully: if double-booking attempted, return clear 409 error with message
+- [x] Handle Supabase Storage upload failures with retry UI
 
 ### 7.3 Accessibility (WCAG 2.1 AA)
 
-- [ ] All interactive elements keyboard-accessible and have visible focus rings
-- [ ] All images have meaningful `alt` text
-- [ ] All form inputs have associated `<label>` elements
-- [ ] Color contrast checked for all text/background combinations (use DSD §2.5 as reference)
-- [ ] Status badges and icons are not color-only — include text labels
+- [x] All interactive elements keyboard-accessible and have visible focus rings
+- [x] All images have meaningful `alt` text
+- [x] All form inputs have associated `<label>` elements
+- [x] Color contrast checked for all text/background combinations (use DSD §2.5 as reference)
+- [x] Status badges and icons are not color-only — include text labels
 
 ### 7.4 Performance
 
-- [ ] `platform/`: lazy-load route components with `React.lazy` + `<Suspense>`
-- [ ] `storefront/`: lazy-load catalog images with `loading="lazy"` attribute
-- [ ] `api/`: add database indexes on commonly queried columns (`tenant_id`, `status`, `start_date`, `end_date`)
-- [ ] Confirm Supabase connection pooling (PgBouncer) is enabled on the project
+- [x] `platform/`: lazy-load route components with `React.lazy` + `<Suspense>`
+- [x] `storefront/`: lazy-load catalog images with `loading="lazy"` attribute
+- [x] `api/`: add database indexes on commonly queried columns (`tenant_id`, `status`, `start_date`, `end_date`)
+- [/] Confirm Supabase connection pooling (PgBouncer) is enabled on the project
 
 ### 7.5 Environment & Deployment
 
-- [ ] `platform/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- [ ] `storefront/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- [ ] `api/.env.example` — `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ORIGIN`, `RESEND_API_KEY`, `TWILIO_*`
+- [x] `platform/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- [x] `storefront/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- [x] `api/.env.example` — `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ORIGIN`, `RESEND_API_KEY`, `TWILIO_*`
 - [ ] Deploy `api/` to Azure App Service; set environment variables
 - [ ] Deploy `platform/` to static host (Vercel / Cloudflare Pages); set `VITE_*` env vars
 - [ ] Deploy `storefront/` to static host; configure wildcard domain `*.arkived.dev`

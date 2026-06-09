@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
-  Navigate,
   Outlet,
   RouterProvider
 } from 'react-router-dom';
@@ -10,18 +9,33 @@ import {
 import './index.css';
 import MarketingLayout from './layouts/MarketingLayout';
 import DashboardLayout from './layouts/DashboardLayout';
+import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
+import PlatformOwnerRoute from './components/PlatformOwnerRoute';
+import AppErrorBoundary from './components/AppErrorBoundary';
 
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
-import DashboardHomePage from './pages/DashboardHomePage';
-import EquipmentPage from './pages/EquipmentPage';
-import BookingsPage from './pages/BookingsPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import TeamPage from './pages/TeamPage';
-import BrandingPage from './pages/BrandingPage';
-import NotFoundPage from './pages/NotFoundPage';
+const HomePage = lazy(() => import('./pages/HomePage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const SignupPage = lazy(() => import('./pages/SignupPage'));
+const DashboardHomePage = lazy(() => import('./pages/DashboardHomePage'));
+const EquipmentPage = lazy(() => import('./pages/EquipmentPage'));
+const EquipmentDetailPage = lazy(() => import('./pages/EquipmentDetailPage'));
+const BookingsPage = lazy(() => import('./pages/BookingsPage'));
+const BookingDetailPage = lazy(() => import('./pages/BookingDetailPage'));
+const CalendarPage = lazy(() => import('./pages/CalendarPage'));
+const CustomersPage = lazy(() => import('./pages/CustomersPage'));
+const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage'));
+const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
+const TeamPage = lazy(() => import('./pages/TeamPage'));
+const BrandingPage = lazy(() => import('./pages/BrandingPage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+const routeElement = (Component) => (
+  <Suspense fallback={<div className="p-6 text-sm text-neutral-300">Loading page...</div>}>
+    <Component />
+  </Suspense>
+);
 
 const ProtectedShell = () => (
   <ProtectedRoute>
@@ -29,13 +43,19 @@ const ProtectedShell = () => (
   </ProtectedRoute>
 );
 
+const AdminProtectedShell = () => (
+  <PlatformOwnerRoute>
+    <AdminLayout />
+  </PlatformOwnerRoute>
+);
+
 const router = createBrowserRouter([
   {
     element: <MarketingLayout />,
     children: [
-      { path: '/', element: <HomePage /> },
-      { path: '/login', element: <LoginPage /> },
-      { path: '/signup', element: <SignupPage /> }
+      { path: '/', element: routeElement(HomePage) },
+      { path: '/login', element: routeElement(LoginPage) },
+      { path: '/signup', element: routeElement(SignupPage) }
     ]
   },
   {
@@ -44,22 +64,34 @@ const router = createBrowserRouter([
       {
         element: <DashboardLayout />,
         children: [
-          { path: '/dashboard', element: <DashboardHomePage /> },
-          { path: '/dashboard/equipment', element: <EquipmentPage /> },
-          { path: '/dashboard/bookings', element: <BookingsPage /> },
-          { path: '/dashboard/analytics', element: <AnalyticsPage /> },
-          { path: '/dashboard/settings/branding', element: <BrandingPage /> },
-          { path: '/dashboard/settings/team', element: <TeamPage /> },
-          { path: '/admin', element: <Navigate to="/dashboard" replace /> }
+          { path: '/dashboard', element: routeElement(DashboardHomePage) },
+          { path: '/dashboard/equipment', element: routeElement(EquipmentPage) },
+          { path: '/dashboard/equipment/:id', element: routeElement(EquipmentDetailPage) },
+          { path: '/dashboard/bookings', element: routeElement(BookingsPage) },
+          { path: '/dashboard/bookings/:id', element: routeElement(BookingDetailPage) },
+          { path: '/dashboard/calendar', element: routeElement(CalendarPage) },
+          { path: '/dashboard/customers', element: routeElement(CustomersPage) },
+          { path: '/dashboard/customers/:id', element: routeElement(CustomerDetailPage) },
+          { path: '/dashboard/analytics', element: routeElement(AnalyticsPage) },
+          { path: '/dashboard/settings/branding', element: routeElement(BrandingPage) },
+          { path: '/dashboard/settings/team', element: routeElement(TeamPage) }
+        ]
+      },
+      {
+        element: <AdminProtectedShell />,
+        children: [
+          { path: '/admin', element: routeElement(AdminPage) }
         ]
       }
     ]
   },
-  { path: '*', element: <NotFoundPage /> }
+  { path: '*', element: routeElement(NotFoundPage) }
 ]);
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AppErrorBoundary>
+      <RouterProvider router={router} />
+    </AppErrorBoundary>
   </React.StrictMode>
 );

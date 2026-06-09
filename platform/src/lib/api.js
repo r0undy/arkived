@@ -14,13 +14,18 @@ const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
 
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload?.error?.message || 'Request failed');
+    const error = new Error(payload?.error?.message || 'Request failed');
+    error.status = response.status;
+    error.code = payload?.error?.code || 'REQUEST_FAILED';
+    error.payload = payload;
+    throw error;
   }
 
   return payload;
 };
 
 export const api = {
+  verifyTurnstile: (token) => request('/api/v1/auth/turnstile/verify', { method: 'POST', body: { token } }),
   registerTenant: (body) => request('/api/v1/auth/register', { method: 'POST', body }),
   me: () => request('/api/v1/auth/me'),
   tenant: () => request('/api/v1/tenant'),
@@ -51,19 +56,59 @@ export const api = {
   deleteMaintenanceLog: (equipmentId, logId) =>
     request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'DELETE' }),
 
-  bookings: () => request('/api/v1/bookings'),
+  customers: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/customers${suffix}`);
+  },
+  createCustomer: (body) => request('/api/v1/customers', { method: 'POST', body }),
+  customerBookings: (id) => request(`/api/v1/customers/${id}/bookings`),
+
+  bookings: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/bookings${suffix}`);
+  },
+  bookingsCalendar: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/bookings/calendar${suffix}`);
+  },
+  bookingById: (id) => request(`/api/v1/bookings/${id}`),
+  createBooking: (body) => request('/api/v1/bookings', { method: 'POST', body }),
+  updateBooking: (id, body) => request(`/api/v1/bookings/${id}`, { method: 'PATCH', body }),
   updateBookingStatus: (id, status) =>
     request(`/api/v1/bookings/${id}/status`, {
       method: 'PATCH',
       body: { status }
     }),
+  equipmentAvailability: (id, params) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/api/v1/equipment/${id}/availability?${query}`);
+  },
 
   overview: () => request('/api/v1/analytics/overview'),
+  analyticsRevenue: () => request('/api/v1/analytics/revenue'),
+  analyticsRevenueByCategory: () => request('/api/v1/analytics/revenue-by-category'),
+  analyticsTopEquipment: () => request('/api/v1/analytics/top-equipment'),
+  analyticsUtilization: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/analytics/utilization${suffix}`);
+  },
+  analyticsBookingVolume: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/analytics/booking-volume${suffix}`);
+  },
 
   staff: () => request('/api/v1/staff'),
   inviteStaff: (body) => request('/api/v1/staff/invite', { method: 'POST', body }),
   updateStaffRole: (id, role) => request(`/api/v1/staff/${id}/role`, { method: 'PATCH', body: { role } }),
   removeStaff: (id) => request(`/api/v1/staff/${id}`, { method: 'DELETE' }),
+
+  adminOverview: () => request('/api/v1/admin/overview'),
+  adminTenants: () => request('/api/v1/admin/tenants'),
 
   updateBranding: (body) => request('/api/v1/tenant', { method: 'PATCH', body })
 };
