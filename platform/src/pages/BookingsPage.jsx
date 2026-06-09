@@ -1,12 +1,41 @@
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 
+const NEXT_STATUS = {
+  reserved: 'payment',
+  payment: 'dispatched',
+  dispatched: 'returned',
+  returned: 'inspected',
+  inspected: 'closed'
+};
+
 export default function BookingsPage() {
   const [bookings, setBookings] = useState([]);
 
+  const loadBookings = async () => {
+    try {
+      const result = await api.bookings();
+      setBookings(result.data || []);
+    } catch (_error) {
+      setBookings([]);
+    }
+  };
+
   useEffect(() => {
-    api.bookings().then((result) => setBookings(result.data || [])).catch(() => setBookings([]));
+    loadBookings();
   }, []);
+
+  const moveForward = async (booking) => {
+    const next = NEXT_STATUS[booking.status];
+    if (!next) return;
+
+    try {
+      await api.updateBookingStatus(booking.id, next);
+      await loadBookings();
+    } catch (_error) {
+      // No-op: keep current state if request fails.
+    }
+  };
 
   return (
     <div>
@@ -22,6 +51,15 @@ export default function BookingsPage() {
               <span>{booking.start_date} to {booking.end_date}</span>
               <span>PHP {Number(booking.total_amount).toLocaleString()}</span>
             </div>
+            {NEXT_STATUS[booking.status] ? (
+              <button
+                className="mt-3 rounded-md bg-brand-500 px-3 py-2 text-xs font-semibold hover:bg-brand-600"
+                onClick={() => moveForward(booking)}
+                type="button"
+              >
+                Move to {NEXT_STATUS[booking.status]}
+              </button>
+            ) : null}
           </article>
         ))}
         {bookings.length === 0 ? <p className="text-sm text-neutral-400">No bookings yet.</p> : null}

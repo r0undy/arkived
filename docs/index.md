@@ -23,6 +23,7 @@
 
 ### Supporting Artifacts
 - [Implementation Task List](tasks-arkived.md) — The active project implementation checklist (Phases 0–7).
+- [Supabase Setup Guide](setup-supabase.md) — Step-by-step database, RLS, storage, and env setup.
 
 ---
 

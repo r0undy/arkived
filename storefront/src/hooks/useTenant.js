@@ -19,21 +19,39 @@ const applyTenantTheme = (tenant) => {
 };
 
 export const useTenant = () => {
+  const [slug, setSlug] = useState(() => inferSlug());
   const [state, setState] = useState({ loading: true, tenant: null, error: '' });
 
   useEffect(() => {
-    const slug = inferSlug();
+    let isMounted = true;
+    setState((prev) => ({ ...prev, loading: true, error: '' }));
 
     storefrontApi
       .tenant(slug)
       .then((result) => {
+        if (!isMounted) return;
         applyTenantTheme(result.tenant);
         setState({ loading: false, tenant: result.tenant, error: '' });
       })
       .catch((error) => {
+        if (!isMounted) return;
         setState({ loading: false, tenant: null, error: error.message });
       });
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, [slug]);
 
-  return state;
+  return {
+    ...state,
+    slug,
+    setSlug(nextSlug) {
+      const next = String(nextSlug || '').trim();
+      if (!next || next === slug) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set('tenant', next);
+      window.history.replaceState({}, '', url.toString());
+      setSlug(next);
+    }
+  };
 };
