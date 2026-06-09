@@ -33,6 +33,7 @@ const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
 };
 
 export const api = {
+  request,
   verifyTurnstile: (token) => request('/api/v1/auth/turnstile/verify', { method: 'POST', body: { token } }),
   registerTenant: (body) => request('/api/v1/auth/register', { method: 'POST', body }),
   me: () => request('/api/v1/auth/me'),
