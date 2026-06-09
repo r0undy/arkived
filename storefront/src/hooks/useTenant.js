@@ -10,6 +10,40 @@ const normalizeSlug = (value) => String(value || '')
   .toLowerCase()
   .replace(/[^a-z0-9-]/g, '');
 
+const hexToRgb = (hex) => {
+  const match = /^#([0-9a-f]{6})$/i.exec(String(hex || ''));
+  if (!match) return null;
+  const value = match[1];
+  return {
+    r: Number.parseInt(value.slice(0, 2), 16),
+    g: Number.parseInt(value.slice(2, 4), 16),
+    b: Number.parseInt(value.slice(4, 6), 16)
+  };
+};
+
+const linearize = (channel) => {
+  const normalized = channel / 255;
+  return normalized <= 0.03928
+    ? normalized / 12.92
+    : ((normalized + 0.055) / 1.055) ** 2.4;
+};
+
+const contrastRatio = (hexA, hexB) => {
+  const rgbA = hexToRgb(hexA);
+  const rgbB = hexToRgb(hexB);
+  if (!rgbA || !rgbB) return 1;
+
+  const lA = 0.2126 * linearize(rgbA.r) + 0.7152 * linearize(rgbA.g) + 0.0722 * linearize(rgbA.b);
+  const lB = 0.2126 * linearize(rgbB.r) + 0.7152 * linearize(rgbB.g) + 0.0722 * linearize(rgbB.b);
+  const lighter = Math.max(lA, lB);
+  const darker = Math.min(lA, lB);
+  return (lighter + 0.05) / (darker + 0.05);
+};
+
+const primaryForeground = (accent) => (
+  contrastRatio(accent, '#ffffff') >= 4.5 ? '#ffffff' : '#0f172a'
+);
+
 const inferSlug = () => {
   const host = window.location.hostname;
   if (isLocalHost(host)) {
@@ -23,6 +57,8 @@ const inferSlug = () => {
 
 const applyTenantTheme = (tenant) => {
   const accent = tenant?.accent_color || '#6366f1';
+  const foreground = primaryForeground(accent);
+  const onWhite = contrastRatio(accent, '#ffffff') >= 4.5 ? accent : '#0f172a';
   let styleTag = document.getElementById(THEME_STYLE_ID);
 
   if (!styleTag) {
@@ -35,6 +71,8 @@ const applyTenantTheme = (tenant) => {
     :root {
       --color-primary: ${accent};
       --color-primary-hover: ${accent};
+      --color-primary-foreground: ${foreground};
+      --color-primary-on-white: ${onWhite};
     }
   `;
 };

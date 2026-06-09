@@ -104,8 +104,8 @@ export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
               <div className="mt-4 flex items-center justify-between">
                 <p className="text-sm font-semibold text-slate-800">PHP {Number(item.daily_rate).toLocaleString()} / day</p>
                 <Link
-                  className="rounded-md px-3 py-2 text-sm font-semibold text-white"
-                  style={{ backgroundColor: 'var(--color-primary)' }}
+                  className="rounded-md px-3 py-2 text-sm font-semibold"
+                  style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
                   to={`/catalog/${item.id}`}
                 >
                   View

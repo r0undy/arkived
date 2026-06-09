@@ -418,7 +418,7 @@ export default function EquipmentDetailPage() {
               onDragStart={() => onDragStartImage(image.id)}
               onDrop={() => onDropImage(image.id)}
             >
-              <img alt="equipment" className="h-32 w-full rounded object-cover" src={image.storage_url} />
+              <img alt={`${detail?.name || 'Equipment'} image`} className="h-32 w-full rounded object-cover" src={image.storage_url} />
               <div className="mt-2 flex items-center justify-between gap-2">
                 <span className="text-xs text-neutral-400">{image.is_primary ? 'Primary image' : `Order ${image.display_order}`}</span>
                 <div className="space-x-2">

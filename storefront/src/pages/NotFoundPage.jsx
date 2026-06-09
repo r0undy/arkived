@@ -15,8 +15,8 @@ export default function NotFoundPage({ title = 'Not found', message = 'The page 
         <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
         <p className="mt-3 text-slate-600">{message}</p>
         <Link
-          className="mt-6 inline-block rounded-md px-4 py-2 font-semibold text-white"
-          style={{ backgroundColor: 'var(--color-primary)' }}
+          className="mt-6 inline-block rounded-md px-4 py-2 font-semibold"
+          style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
           to="/"
         >
           Go home

@@ -192,9 +192,9 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
             {status.success ? <p className="text-sm text-emerald-700 md:col-span-2">{status.success}</p> : null}
 
             <button
-              className="w-fit rounded-md px-4 py-2 text-sm font-semibold text-white"
+              className="w-fit rounded-md px-4 py-2 text-sm font-semibold"
               disabled={status.loading}
-              style={{ backgroundColor: 'var(--color-primary)' }}
+              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
               type="submit"
             >
               {status.loading ? 'Submitting...' : 'Submit inquiry'}

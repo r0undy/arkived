@@ -38,8 +38,8 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
             Browse available gear, compare rates, and submit a booking inquiry in minutes.
           </p>
           <Link
-            className="mt-7 inline-block rounded-md px-5 py-3 font-semibold text-white transition hover:brightness-95"
-            style={{ backgroundColor: 'var(--color-primary)' }}
+            className="mt-7 inline-block rounded-md px-5 py-3 font-semibold transition hover:brightness-95"
+            style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
             to="/catalog"
           >
             View catalog

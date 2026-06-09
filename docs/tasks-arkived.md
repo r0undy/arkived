@@ -472,11 +472,11 @@ arkived/
 
 ### 7.3 Accessibility (WCAG 2.1 AA)
 
-- [ ] All interactive elements keyboard-accessible and have visible focus rings
-- [ ] All images have meaningful `alt` text
-- [ ] All form inputs have associated `<label>` elements
-- [ ] Color contrast checked for all text/background combinations (use DSD §2.5 as reference)
-- [ ] Status badges and icons are not color-only — include text labels
+- [x] All interactive elements keyboard-accessible and have visible focus rings
+- [x] All images have meaningful `alt` text
+- [x] All form inputs have associated `<label>` elements
+- [x] Color contrast checked for all text/background combinations (use DSD §2.5 as reference)
+- [x] Status badges and icons are not color-only — include text labels
 
 ### 7.4 Performance
 
