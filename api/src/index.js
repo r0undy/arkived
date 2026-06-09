@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 
 import { env } from './config/env.js';
+import { startDailyScheduler } from './jobs/dailyScheduler.js';
 import { healthRouter } from './routes/health.js';
 import { apiRouter } from './routes/index.js';
 import { notFound } from './middleware/notFound.js';
@@ -33,3 +34,5 @@ app.use(errorHandler);
 app.listen(env.port, () => {
   console.log(`Arkived API listening on http://localhost:${env.port}`);
 });
+
+startDailyScheduler();

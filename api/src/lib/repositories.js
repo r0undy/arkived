@@ -635,6 +635,24 @@ export const equipmentRepository = {
     return data ?? [];
   },
 
+  async listMaintenanceDue(referenceDate) {
+    if (!hasSupabase) {
+      return inMemoryDb.listMaintenanceDue(referenceDate);
+    }
+
+    const { data, error } = await supabase
+      .from('maintenance_logs')
+      .select('id, tenant_id, equipment_id, service_type, next_service_due, notes, created_at')
+      .eq('next_service_due', referenceDate)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'MAINTENANCE_DUE_LIST_FAILED');
+    }
+
+    return data ?? [];
+  },
+
   async createMaintenanceLog(payload) {
     if (!hasSupabase) {
       return inMemoryDb.createMaintenanceLog(payload);
@@ -702,16 +720,24 @@ export const equipmentRepository = {
 };
 
 export const bookingRepository = {
-  async list(tenantId) {
+  async list(tenantId, filters = {}) {
     if (!hasSupabase) {
-      return inMemoryDb.listBookings(tenantId);
+      return inMemoryDb.listBookings(tenantId, filters);
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('bookings')
-      .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, payment_reference, dispatch_condition, return_condition, overdue, created_at')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false });
+
+    if (filters.status) query = query.eq('status', filters.status);
+    if (filters.equipmentId) query = query.eq('equipment_id', filters.equipmentId);
+    if (filters.customerId) query = query.eq('customer_id', filters.customerId);
+    if (filters.start) query = query.gte('end_date', filters.start);
+    if (filters.end) query = query.lte('start_date', filters.end);
+
+    const { data, error } = await query;
 
     if (error) {
       throw new AppError(500, error.message, 'BOOKING_LIST_FAILED');
@@ -732,7 +758,7 @@ export const bookingRepository = {
     return safeSingle(
       supabase
         .from('bookings')
-        .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+        .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, deposit_paid, payment_reference, dispatch_condition, return_condition, overdue, created_at')
         .eq('tenant_id', tenantId)
         .eq('id', id)
         .single(),
@@ -828,5 +854,64 @@ export const bookingRepository = {
         .single(),
       'Booking not found'
     );
+  },
+
+  async update(tenantId, id, payload) {
+    if (!hasSupabase) {
+      const booking = inMemoryDb.updateBooking(tenantId, id, payload);
+      if (!booking) {
+        throw new AppError(404, 'Booking not found', 'BOOKING_NOT_FOUND');
+      }
+      return booking;
+    }
+
+    return safeSingle(
+      supabase
+        .from('bookings')
+        .update(payload)
+        .eq('tenant_id', tenantId)
+        .eq('id', id)
+        .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, deposit_paid, payment_reference, dispatch_condition, return_condition, overdue, created_at')
+        .single(),
+      'Booking not found'
+    );
+  },
+
+  async markOverdue(referenceDate) {
+    if (!hasSupabase) {
+      return inMemoryDb.markOverdueBookings(referenceDate);
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .update({ overdue: true })
+      .lt('end_date', referenceDate)
+      .neq('status', 'closed')
+      .eq('overdue', false)
+      .select('id, tenant_id, equipment_id, customer_id, start_date, end_date, status, overdue, created_at');
+
+    if (error) {
+      throw new AppError(500, error.message, 'BOOKING_OVERDUE_UPDATE_FAILED');
+    }
+
+    return data ?? [];
+  },
+
+  async listReminderCandidates(referenceDate) {
+    if (!hasSupabase) {
+      return inMemoryDb.listBookingReminderCandidates(referenceDate);
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('id, tenant_id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .or(`start_date.eq.${referenceDate},end_date.eq.${referenceDate}`)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'BOOKING_REMINDER_LIST_FAILED');
+    }
+
+    return data ?? [];
   }
 };

@@ -338,6 +338,12 @@ export const inMemoryDb = {
       .sort((a, b) => String(b.service_date).localeCompare(String(a.service_date)));
   },
 
+  listMaintenanceDue(referenceDate) {
+    return state.maintenance_logs
+      .filter((log) => log.next_service_due && log.next_service_due === referenceDate)
+      .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
+  },
+
   createMaintenanceLog(payload) {
     const log = {
       id: crypto.randomUUID(),
@@ -382,8 +388,18 @@ export const inMemoryDb = {
     return removed;
   },
 
-  listBookings(tenantId) {
-    return state.bookings.filter((booking) => booking.tenant_id === tenantId);
+  listBookings(tenantId, filters = {}) {
+    return state.bookings
+      .filter((booking) => {
+        if (booking.tenant_id !== tenantId) return false;
+        if (filters.status && booking.status !== filters.status) return false;
+        if (filters.equipmentId && booking.equipment_id !== filters.equipmentId) return false;
+        if (filters.customerId && booking.customer_id !== filters.customerId) return false;
+        if (filters.start && booking.end_date < filters.start) return false;
+        if (filters.end && booking.start_date > filters.end) return false;
+        return true;
+      })
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
   },
 
   getBookingById(tenantId, id) {
@@ -432,5 +448,31 @@ export const inMemoryDb = {
     };
 
     return state.bookings[index];
+  },
+
+  markOverdueBookings(referenceDate) {
+    const updated = [];
+
+    state.bookings = state.bookings.map((booking) => {
+      const shouldMarkOverdue = booking.end_date < referenceDate
+        && booking.status !== 'closed'
+        && !booking.overdue;
+
+      if (!shouldMarkOverdue) {
+        return booking;
+      }
+
+      const next = { ...booking, overdue: true };
+      updated.push(next);
+      return next;
+    });
+
+    return updated;
+  },
+
+  listBookingReminderCandidates(referenceDate) {
+    return state.bookings
+      .filter((booking) => booking.start_date === referenceDate || booking.end_date === referenceDate)
+      .sort((a, b) => String(a.created_at).localeCompare(String(b.created_at)));
   }
 };

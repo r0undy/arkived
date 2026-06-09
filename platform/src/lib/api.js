@@ -51,12 +51,30 @@ export const api = {
   deleteMaintenanceLog: (equipmentId, logId) =>
     request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'DELETE' }),
 
-  bookings: () => request('/api/v1/bookings'),
+  customers: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/customers${suffix}`);
+  },
+  createCustomer: (body) => request('/api/v1/customers', { method: 'POST', body }),
+
+  bookings: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/bookings${suffix}`);
+  },
+  bookingById: (id) => request(`/api/v1/bookings/${id}`),
+  createBooking: (body) => request('/api/v1/bookings', { method: 'POST', body }),
+  updateBooking: (id, body) => request(`/api/v1/bookings/${id}`, { method: 'PATCH', body }),
   updateBookingStatus: (id, status) =>
     request(`/api/v1/bookings/${id}/status`, {
       method: 'PATCH',
       body: { status }
     }),
+  equipmentAvailability: (id, params) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/api/v1/equipment/${id}/availability?${query}`);
+  },
 
   overview: () => request('/api/v1/analytics/overview'),
 

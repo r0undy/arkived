@@ -3,10 +3,11 @@ import { Router } from 'express';
 import { hasSupabase, supabase } from '../config/supabase.js';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { AppError } from '../lib/errors.js';
-import { equipmentRepository } from '../lib/repositories.js';
+import { bookingRepository, equipmentRepository } from '../lib/repositories.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/requireRole.js';
 import {
+  equipmentAvailabilityQuerySchema,
   createEquipmentImageSchema,
   createMaintenanceLogSchema,
   createEquipmentSchema,
@@ -34,6 +35,36 @@ equipmentRouter.get('/', asyncHandler(async (req, res) => {
   const filters = equipmentFiltersSchema.parse(req.query);
   const items = await equipmentRepository.list(req.user.tenant_id, filters);
   res.json({ data: items });
+}));
+
+equipmentRouter.get('/:id/availability', asyncHandler(async (req, res) => {
+  const query = equipmentAvailabilityQuerySchema.parse(req.query);
+  await equipmentRepository.getById(req.user.tenant_id, req.params.id);
+
+  const bookings = await bookingRepository.listCalendar(req.user.tenant_id, {
+    start: query.from,
+    end: query.to,
+    equipmentId: req.params.id
+  });
+
+  const blockingStatuses = new Set(['reserved', 'payment', 'dispatched', 'returned', 'inspected']);
+  const hasConflict = bookings.some((entry) => blockingStatuses.has(entry.status));
+
+  res.json({
+    data: {
+      equipment_id: req.params.id,
+      from: query.from,
+      to: query.to,
+      available: !hasConflict,
+      booked_ranges: bookings.map((entry) => ({
+        booking_id: entry.id,
+        start_date: entry.start_date,
+        end_date: entry.end_date,
+        status: entry.status,
+        overdue: Boolean(entry.overdue)
+      }))
+    }
+  });
 }));
 
 equipmentRouter.get('/:id', asyncHandler(async (req, res) => {

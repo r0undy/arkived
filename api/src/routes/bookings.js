@@ -1,11 +1,14 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { AppError } from '../lib/errors.js';
+import { notify } from '../lib/notify.js';
 import { bookingRepository } from '../lib/repositories.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/requireRole.js';
 import {
+  bookingListQuerySchema,
   bookingCalendarQuerySchema,
+  bookingMutableUpdateSchema,
   bookingStatusUpdateSchema,
   createBookingSchema
 } from '../validators/booking.js';
@@ -15,8 +18,27 @@ export const bookingsRouter = Router();
 bookingsRouter.use(requireAuth);
 
 bookingsRouter.get('/', asyncHandler(async (req, res) => {
-  const bookings = await bookingRepository.list(req.user.tenant_id);
-  res.json({ data: bookings });
+  const query = bookingListQuerySchema.parse(req.query);
+  const bookings = await bookingRepository.list(req.user.tenant_id, {
+    status: query.status,
+    start: query.start,
+    end: query.end,
+    equipmentId: query.equipment_id,
+    customerId: query.customer_id
+  });
+
+  const offset = (query.page - 1) * query.limit;
+  const paged = bookings.slice(offset, offset + query.limit);
+
+  res.json({
+    data: paged,
+    meta: {
+      page: query.page,
+      limit: query.limit,
+      total: bookings.length,
+      total_pages: Math.max(1, Math.ceil(bookings.length / query.limit))
+    }
+  });
 }));
 
 bookingsRouter.get('/calendar', asyncHandler(async (req, res) => {
@@ -28,6 +50,11 @@ bookingsRouter.get('/calendar', asyncHandler(async (req, res) => {
   });
 
   res.json({ data });
+}));
+
+bookingsRouter.get('/:id', asyncHandler(async (req, res) => {
+  const booking = await bookingRepository.getById(req.user.tenant_id, req.params.id);
+  res.json({ data: booking });
 }));
 
 bookingsRouter.post('/', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
@@ -74,5 +101,17 @@ bookingsRouter.patch('/:id/status', requireRole('admin', 'staff'), asyncHandler(
   }
 
   const updated = await bookingRepository.updateStatus(req.user.tenant_id, req.params.id, status);
+  await notify.bookingStatusChanged({
+    tenant_id: req.user.tenant_id,
+    booking_id: updated.id,
+    previous_status: booking.status,
+    next_status: status
+  });
+  res.json({ data: updated });
+}));
+
+bookingsRouter.patch('/:id', requireRole('admin', 'staff'), asyncHandler(async (req, res) => {
+  const payload = bookingMutableUpdateSchema.parse(req.body);
+  const updated = await bookingRepository.update(req.user.tenant_id, req.params.id, payload);
   res.json({ data: updated });
 }));

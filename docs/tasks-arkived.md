@@ -304,52 +304,52 @@ arkived/
 
 ### 4.2 API — Booking Routes
 
-- [/] `GET /api/v1/bookings` — list bookings with filters (status, date range, equipment, customer); paginated
-- [ ] `GET /api/v1/bookings/:id` — get single booking with full details
+- [x] `GET /api/v1/bookings` — list bookings with filters (status, date range, equipment, customer); paginated
+- [x] `GET /api/v1/bookings/:id` — get single booking with full details
 - [x] `POST /api/v1/bookings` — create booking; checks date overlap conflict before inserting
 - [x] `PATCH /api/v1/bookings/:id/status` — advance booking to next status stage with validation:
   - `reserved` → `payment` → `dispatched` → `returned` → `inspected` → `closed`
-- [ ] `PATCH /api/v1/bookings/:id` — update mutable booking fields (dispatch condition, return condition, payment reference)
+- [x] `PATCH /api/v1/bookings/:id` — update mutable booking fields (dispatch condition, return condition, payment reference)
 - [x] `GET /api/v1/bookings/calendar` — returns bookings within a date range, formatted for calendar display
-- [ ] Scheduled job (cron via `node-cron`):
-  - [ ] Daily: flag bookings where `end_date < today` and `status != closed` as `overdue = true`
-  - [ ] Daily: trigger maintenance-due notifications for equipment with `next_service_due = today`
+- [x] Scheduled job (cron via `node-cron`):
+  - [x] Daily: flag bookings where `end_date < today` and `status != closed` as `overdue = true`
+  - [x] Daily: trigger maintenance-due notifications for equipment with `next_service_due = today`
 
 ### 4.3 API — Availability Route
 
-- [ ] `GET /api/v1/equipment/:id/availability?from=&to=` — return available and booked date ranges for a given equipment item (used by storefront and admin calendar)
+- [x] `GET /api/v1/equipment/:id/availability?from=&to=` — return available and booked date ranges for a given equipment item (used by storefront and admin calendar)
 
 ### 4.4 API — Notification Triggers
 
-- [ ] Create `src/lib/notify.js` — helper that sends email via Resend/SendGrid API
-- [ ] Trigger notifications on booking status changes:
-  - [ ] Booking confirmed → email customer
-  - [ ] Booking dispatched → email customer
-  - [ ] Booking overdue (Day 1) → email + SMS customer and staff
+- [/] Create `src/lib/notify.js` — helper that sends email via Resend/SendGrid API
+- [/] Trigger notifications on booking status changes:
+  - [/] Booking confirmed → email customer
+  - [/] Booking dispatched → email customer
+  - [/] Booking overdue (Day 1) → email + SMS customer and staff
   - [ ] Booking overdue (Day 3+) → email tenant admin
-- [ ] Scheduled notification job (cron):
-  - [ ] 24h before `start_date` → remind customer
-  - [ ] 24h before `end_date` → remind customer of return
+- [/] Scheduled notification job (cron):
+  - [/] 24h before `start_date` → remind customer
+  - [/] 24h before `end_date` → remind customer of return
 
 ### 4.5 `platform/` — Bookings Pages
 
-- [ ] **Bookings List Page** (`/dashboard/bookings`)
-  - [ ] Table with columns: Customer, Equipment, Start, End, Status badge, Actions
-  - [ ] Filter by status, date range, equipment, customer
-  - [ ] "Overdue" alert banner if any bookings are flagged overdue
-  - [ ] Create Booking button
-- [ ] **Booking Detail Page** (`/dashboard/bookings/:id`)
-  - [ ] Full booking info — customer, equipment, dates, amounts
-  - [ ] Status pipeline visualizer (step indicator showing current stage)
-  - [ ] Action buttons per stage: `Confirm Payment`, `Mark Dispatched`, `Mark Returned`, `Complete Inspection`, `Close Booking`
-  - [ ] Dispatch condition and return condition text areas (appear at appropriate stages)
-  - [ ] Payment reference field
-- [ ] **Create Booking Modal / Page**
-  - [ ] Customer selector (search existing or create new inline)
-  - [ ] Equipment selector with availability check for selected date range
+- [/] **Bookings List Page** (`/dashboard/bookings`)
+  - [x] Table with columns: Customer, Equipment, Start, End, Status badge, Actions
+  - [x] Filter by status, date range, equipment, customer
+  - [x] "Overdue" alert banner if any bookings are flagged overdue
+  - [x] Create Booking button
+- [/] **Booking Detail Page** (`/dashboard/bookings/:id`)
+  - [x] Full booking info — customer, equipment, dates, amounts
+  - [x] Status pipeline visualizer (step indicator showing current stage)
+  - [x] Action buttons per stage: `Confirm Payment`, `Mark Dispatched`, `Mark Returned`, `Complete Inspection`, `Close Booking`
+  - [x] Dispatch condition and return condition text areas (appear at appropriate stages)
+  - [x] Payment reference field
+- [/] **Create Booking Modal / Page**
+  - [/] Customer selector (search existing or create new inline)
+  - [x] Equipment selector with availability check for selected date range
   - [ ] Date range picker (blocks unavailable dates)
-  - [ ] Auto-calculated total amount (daily rate × days)
-  - [ ] Deposit toggle
+  - [x] Auto-calculated total amount (daily rate × days)
+  - [x] Deposit toggle
 
 ### 4.6 `platform/` — Availability Calendar Page
 

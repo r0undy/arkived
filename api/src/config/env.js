@@ -12,6 +12,8 @@ if (missing.length > 0 && process.env.NODE_ENV !== 'test') {
 export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 4000),
+  schedulerEnabled: String(process.env.SCHEDULER_ENABLED || 'true') !== 'false',
+  runDailyJobsOnBoot: String(process.env.RUN_DAILY_JOBS_ON_BOOT || 'true') !== 'false',
   supabaseUrl: process.env.SUPABASE_URL || '',
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
