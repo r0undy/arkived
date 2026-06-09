@@ -47,7 +47,7 @@ function App() {
       <Routes>
         <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
           <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} />} />
-          <Route path="/catalog" element={<CatalogPage equipment={equipment} />} />
+          <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} />} />
           <Route
             path="/catalog/:id"
             element={

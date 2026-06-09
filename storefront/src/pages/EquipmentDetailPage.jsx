@@ -11,11 +11,24 @@ const addDays = (value, days) => {
 };
 
 export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  const canonicalUrl = item?.id ? `${origin}/catalog/${item.id}` : `${origin}/catalog`;
+  const title = item ? `${item.name} | ${tenant?.name || 'Catalog'}` : 'Equipment not found';
+  const description = item
+    ? `View pricing, availability, and booking inquiry form for ${item.name}.`
+    : 'The selected equipment could not be found.';
+
   if (!item) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-6">
-        <p className="text-slate-600">Equipment not found.</p>
-      </div>
+      <>
+        <title>{title}</title>
+        <meta content={description} name="description" />
+        <link href={canonicalUrl} rel="canonical" />
+
+        <div className="rounded-lg border border-slate-200 bg-white p-6">
+          <p className="text-slate-600">Equipment not found.</p>
+        </div>
+      </>
     );
   }
 
@@ -94,99 +107,105 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
   };
 
   return (
-    <div className="space-y-6">
-      <article className="rounded-xl border border-slate-200 bg-white p-6">
-        <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight">{item.name}</h1>
+    <>
+      <title>{title}</title>
+      <meta content={description} name="description" />
+      <link href={canonicalUrl} rel="canonical" />
 
-        {(item.images?.length || 0) > 0 ? (
-          <div className="mt-4">
-            <img
-              alt={item.name}
-              className="h-64 w-full rounded-lg border border-slate-200 object-cover"
-              src={activeImage || item.images[0].storage_url}
-            />
-            <div className="mt-2 flex flex-wrap gap-2">
-              {item.images.map((image) => (
-                <button key={image.id} onClick={() => setActiveImage(image.storage_url)} type="button">
-                  <img
-                    alt={`${item.name} thumbnail`}
-                    className={`h-14 w-20 rounded border object-cover ${activeImage === image.storage_url ? 'border-slate-900' : 'border-slate-200'}`}
-                    src={image.storage_url}
-                  />
-                </button>
-              ))}
+      <div className="space-y-6">
+        <article className="rounded-xl border border-slate-200 bg-white p-6">
+          <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
+          <h1 className="mt-2 text-3xl font-bold tracking-tight">{item.name}</h1>
+
+          {(item.images?.length || 0) > 0 ? (
+            <div className="mt-4">
+              <img
+                alt={item.name}
+                className="h-64 w-full rounded-lg border border-slate-200 object-cover"
+                src={activeImage || item.images[0].storage_url}
+              />
+              <div className="mt-2 flex flex-wrap gap-2">
+                {item.images.map((image) => (
+                  <button key={image.id} onClick={() => setActiveImage(image.storage_url)} type="button">
+                    <img
+                      alt={`${item.name} thumbnail`}
+                      className={`h-14 w-20 rounded border object-cover ${activeImage === image.storage_url ? 'border-slate-900' : 'border-slate-200'}`}
+                      src={image.storage_url}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
+          ) : null}
+
+          <p className="mt-4 max-w-3xl text-slate-700">{item.description || 'No description yet.'}</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <Stat label="Daily rate" value={`PHP ${Number(item.daily_rate).toLocaleString()}`} />
+            <Stat label="Deposit" value={`PHP ${Number(item.deposit || 0).toLocaleString()}`} />
+            <Stat label="Condition" value={item.condition || 'good'} />
+            <Stat label="Status" value={item.status || 'available'} />
           </div>
-        ) : null}
+        </article>
 
-        <p className="mt-4 max-w-3xl text-slate-700">{item.description || 'No description yet.'}</p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Stat label="Daily rate" value={`PHP ${Number(item.daily_rate).toLocaleString()}`} />
-          <Stat label="Deposit" value={`PHP ${Number(item.deposit || 0).toLocaleString()}`} />
-          <Stat label="Condition" value={item.condition || 'good'} />
-          <Stat label="Status" value={item.status || 'available'} />
-        </div>
-      </article>
+        <section className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="text-xl font-semibold tracking-tight">Availability (Read-only)</h2>
+          <div className="mt-3 grid gap-2">
+            {unavailableRanges.map((entry) => (
+              <p key={entry.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                Unavailable: {entry.start_date} to {entry.end_date} ({entry.status})
+              </p>
+            ))}
+            {unavailableRanges.length === 0 ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
+          </div>
+        </section>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Availability (Read-only)</h2>
-        <div className="mt-3 grid gap-2">
-          {unavailableRanges.map((entry) => (
-            <p key={entry.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-              Unavailable: {entry.start_date} to {entry.end_date} ({entry.status})
-            </p>
-          ))}
-          {unavailableRanges.length === 0 ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
-        </div>
-      </section>
+        <section className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="text-xl font-semibold tracking-tight">Inquiry / Booking Request</h2>
+          <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={submitInquiry}>
+            <Field label="Name" onChange={updateField('name')} required value={form.name} />
+            <Field label="Email" onChange={updateField('email')} required type="email" value={form.email} />
+            <Field label="Phone" onChange={updateField('phone')} value={form.phone} />
+            <Field label="Start Date" min={toYmd(new Date())} onChange={updateField('start_date')} required type="date" value={form.start_date} />
+            <Field label="End Date" min={form.start_date || toYmd(new Date())} onChange={updateField('end_date')} required type="date" value={form.end_date} />
+            <label className="block text-sm text-slate-700 md:col-span-2">
+              <span>Message</span>
+              <textarea
+                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+                onChange={updateField('message')}
+                rows={3}
+                value={form.message}
+              />
+            </label>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Inquiry / Booking Request</h2>
-        <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={submitInquiry}>
-          <Field label="Name" onChange={updateField('name')} required value={form.name} />
-          <Field label="Email" onChange={updateField('email')} required type="email" value={form.email} />
-          <Field label="Phone" onChange={updateField('phone')} value={form.phone} />
-          <Field label="Start Date" min={toYmd(new Date())} onChange={updateField('start_date')} required type="date" value={form.start_date} />
-          <Field label="End Date" min={form.start_date || toYmd(new Date())} onChange={updateField('end_date')} required type="date" value={form.end_date} />
-          <label className="block text-sm text-slate-700 md:col-span-2">
-            <span>Message</span>
-            <textarea
-              className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2"
-              onChange={updateField('message')}
-              rows={3}
-              value={form.message}
-            />
-          </label>
+            {status.error ? <p className="text-sm text-red-600 md:col-span-2">{status.error}</p> : null}
+            {status.success ? <p className="text-sm text-emerald-700 md:col-span-2">{status.success}</p> : null}
 
-          {status.error ? <p className="text-sm text-red-600 md:col-span-2">{status.error}</p> : null}
-          {status.success ? <p className="text-sm text-emerald-700 md:col-span-2">{status.success}</p> : null}
+            <button
+              className="w-fit rounded-md px-4 py-2 text-sm font-semibold text-white"
+              disabled={status.loading}
+              style={{ backgroundColor: 'var(--color-primary)' }}
+              type="submit"
+            >
+              {status.loading ? 'Submitting...' : 'Submit inquiry'}
+            </button>
+          </form>
+        </section>
 
-          <button
-            className="w-fit rounded-md px-4 py-2 text-sm font-semibold text-white"
-            disabled={status.loading}
-            style={{ backgroundColor: 'var(--color-primary)' }}
-            type="submit"
-          >
-            {status.loading ? 'Submitting...' : 'Submit inquiry'}
-          </button>
-        </form>
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="text-xl font-semibold tracking-tight">Related Equipment</h2>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {related.map((entry) => (
-            <Link key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100" to={`/catalog/${entry.id}`}>
-              <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
-              <p className="mt-1 font-semibold">{entry.name}</p>
-              <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
-            </Link>
-          ))}
-          {related.length === 0 ? <p className="text-sm text-slate-600">No related items available.</p> : null}
-        </div>
-      </section>
-    </div>
+        <section className="rounded-xl border border-slate-200 bg-white p-6">
+          <h2 className="text-xl font-semibold tracking-tight">Related Equipment</h2>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {related.map((entry) => (
+              <Link key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100" to={`/catalog/${entry.id}`}>
+                <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
+                <p className="mt-1 font-semibold">{entry.name}</p>
+                <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
+              </Link>
+            ))}
+            {related.length === 0 ? <p className="text-sm text-slate-600">No related items available.</p> : null}
+          </div>
+        </section>
+      </div>
+    </>
   );
 }
 

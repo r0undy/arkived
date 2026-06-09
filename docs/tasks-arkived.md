@@ -443,10 +443,10 @@ arkived/
 
 ### 6.3 Storefront SEO (React 19 Native)
 
-- [ ] Use React 19's native document metadata hoisting — render `<title>` and `<meta>` tags directly in page components; no external library needed
-- [ ] Each page sets a unique `<title>` using the tenant's shop name: e.g., `"Drill Press — ConstructionPro Rentals"`
-- [ ] `<meta name="description">` set per page
-- [ ] `<link rel="canonical">` on all pages
+- [x] Use React 19's native document metadata hoisting — render `<title>` and `<meta>` tags directly in page components; no external library needed
+- [x] Each page sets a unique `<title>` using the tenant's shop name: e.g., `"Drill Press — ConstructionPro Rentals"`
+- [x] `<meta name="description">` set per page
+- [x] `<link rel="canonical">` on all pages
 
 ---
 
