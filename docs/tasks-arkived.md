@@ -297,10 +297,10 @@ arkived/
 
 ### 4.1 API — Customer Routes
 
-- [ ] `GET /api/v1/customers` — list customers (searchable by name, email, phone)
-- [ ] `POST /api/v1/customers` — create customer record
-- [ ] `PATCH /api/v1/customers/:id` — update customer details
-- [ ] `GET /api/v1/customers/:id/bookings` — booking history for a customer
+- [x] `GET /api/v1/customers` — list customers (searchable by name, email, phone)
+- [x] `POST /api/v1/customers` — create customer record
+- [x] `PATCH /api/v1/customers/:id` — update customer details
+- [x] `GET /api/v1/customers/:id/bookings` — booking history for a customer
 
 ### 4.2 API — Booking Routes
 

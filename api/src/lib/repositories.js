@@ -227,6 +227,90 @@ export const staffRepository = {
   }
 };
 
+export const customerRepository = {
+  async list(tenantId, filters = {}) {
+    if (!hasSupabase) {
+      return inMemoryDb.listCustomers(tenantId, filters);
+    }
+
+    let query = supabase
+      .from('customers')
+      .select('id, tenant_id, full_name, email, phone, notes, created_at')
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
+
+    if (filters.q) {
+      query = query.or(
+        `full_name.ilike.%${filters.q}%,email.ilike.%${filters.q}%,phone.ilike.%${filters.q}%`
+      );
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw new AppError(500, error.message, 'CUSTOMER_LIST_FAILED');
+    }
+    return data ?? [];
+  },
+
+  async create(payload) {
+    if (!hasSupabase) {
+      return inMemoryDb.createCustomer(payload);
+    }
+
+    const { data, error } = await supabase
+      .from('customers')
+      .insert(payload)
+      .select('id, tenant_id, full_name, email, phone, notes, created_at')
+      .single();
+
+    if (error) {
+      throw new AppError(400, error.message, 'CUSTOMER_CREATE_FAILED');
+    }
+
+    return data;
+  },
+
+  async update(tenantId, id, payload) {
+    if (!hasSupabase) {
+      const customer = inMemoryDb.updateCustomer(tenantId, id, payload);
+      if (!customer) {
+        throw new AppError(404, 'Customer not found', 'CUSTOMER_NOT_FOUND');
+      }
+      return customer;
+    }
+
+    return safeSingle(
+      supabase
+        .from('customers')
+        .update(payload)
+        .eq('tenant_id', tenantId)
+        .eq('id', id)
+        .select('id, tenant_id, full_name, email, phone, notes, created_at')
+        .single(),
+      'Customer not found'
+    );
+  },
+
+  async listBookings(tenantId, customerId) {
+    if (!hasSupabase) {
+      return inMemoryDb.listBookingsByCustomer(tenantId, customerId);
+    }
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('id, equipment_id, customer_id, start_date, end_date, status, total_amount, overdue, created_at')
+      .eq('tenant_id', tenantId)
+      .eq('customer_id', customerId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw new AppError(500, error.message, 'CUSTOMER_BOOKING_LIST_FAILED');
+    }
+
+    return data ?? [];
+  }
+};
+
 export const equipmentRepository = {
   async list(tenantId, filters = {}) {
     if (!hasSupabase) {

@@ -171,6 +171,50 @@ export const inMemoryDb = {
     return removed;
   },
 
+  listCustomers(tenantId, filters = {}) {
+    return state.customers.filter((customer) => {
+      if (customer.tenant_id !== tenantId) return false;
+      if (!filters.q) return true;
+
+      const query = String(filters.q).toLowerCase();
+      const hay = `${customer.full_name || ''} ${customer.email || ''} ${customer.phone || ''}`.toLowerCase();
+      return hay.includes(query);
+    });
+  },
+
+  createCustomer(payload) {
+    const customer = {
+      id: crypto.randomUUID(),
+      tenant_id: payload.tenant_id,
+      full_name: payload.full_name,
+      email: payload.email ?? null,
+      phone: payload.phone ?? null,
+      notes: payload.notes ?? null,
+      created_at: now()
+    };
+
+    state.customers.push(customer);
+    return customer;
+  },
+
+  updateCustomer(tenantId, id, payload) {
+    const index = state.customers.findIndex((customer) => customer.tenant_id === tenantId && customer.id === id);
+    if (index < 0) return null;
+
+    state.customers[index] = {
+      ...state.customers[index],
+      ...payload
+    };
+
+    return state.customers[index];
+  },
+
+  listBookingsByCustomer(tenantId, customerId) {
+    return state.bookings
+      .filter((booking) => booking.tenant_id === tenantId && booking.customer_id === customerId)
+      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+  },
+
   listEquipment(tenantId, filters = {}) {
     return state.equipment.filter((item) => {
       if (item.tenant_id !== tenantId || item.deleted_at) return false;
