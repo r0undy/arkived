@@ -1,11 +1,11 @@
 import { z } from 'zod';
 
-export const analyticsDateRangeSchema = z
-  .object({
-    start: z.string().date().optional(),
-    end: z.string().date().optional()
-  })
-  .refine((value) => {
+const analyticsDateRangeShape = {
+  start: z.string().date().optional(),
+  end: z.string().date().optional()
+};
+
+const withOrderedDates = (schema) => schema.refine((value) => {
     if (!value.start || !value.end) return true;
     return value.start <= value.end;
   }, {
@@ -13,6 +13,9 @@ export const analyticsDateRangeSchema = z
     path: ['end']
   });
 
-export const bookingVolumeQuerySchema = analyticsDateRangeSchema.extend({
+export const analyticsDateRangeSchema = withOrderedDates(z.object(analyticsDateRangeShape));
+
+export const bookingVolumeQuerySchema = withOrderedDates(z.object({
+  ...analyticsDateRangeShape,
   granularity: z.enum(['week', 'month']).optional().default('month')
-});
+}));
