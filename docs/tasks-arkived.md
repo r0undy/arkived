@@ -228,13 +228,13 @@ arkived/
 
 ### 2.4 `platform/` — Onboarding Wizard
 
-- [ ] **Onboarding Checklist Component** — shown after first login if setup is incomplete
-  - [ ] Step 1: Upload logo
-  - [ ] Step 2: Set accent color (with live contrast preview and WCAG pass/fail indicator)
-  - [ ] Step 3: Add first equipment item
-  - [ ] Step 4: Invite a team member
-- [ ] Mark steps as complete in `tenants` table via a `onboarding_completed_steps` JSON column
-- [ ] Dismiss wizard once all steps are done
+- [x] **Onboarding Checklist Component** — shown after first login if setup is incomplete
+  - [x] Step 1: Upload logo
+  - [x] Step 2: Set accent color (with live contrast preview and WCAG pass/fail indicator)
+  - [x] Step 3: Add first equipment item
+  - [x] Step 4: Invite a team member
+- [x] Mark steps as complete in `tenants` table via a `onboarding_completed_steps` JSON column
+- [x] Dismiss wizard once all steps are done
 
 ### 2.5 `platform/` — Branding Settings Page
 
@@ -265,9 +265,9 @@ arkived/
 - [x] `POST /api/v1/equipment` — create new equipment item (admin/staff)
 - [x] `PATCH /api/v1/equipment/:id` — update equipment fields (admin/staff)
 - [x] `DELETE /api/v1/equipment/:id` — soft delete (sets `deleted_at`; admin only)
-- [ ] `POST /api/v1/equipment/:id/images` — upload image to Supabase Storage, insert into `equipment_images`
-- [ ] `DELETE /api/v1/equipment/:id/images/:imageId` — delete image from storage and DB
-- [ ] `PATCH /api/v1/equipment/:id/images/:imageId/primary` — set as primary image
+- [x] `POST /api/v1/equipment/:id/images` — upload image to Supabase Storage, insert into `equipment_images`
+- [x] `DELETE /api/v1/equipment/:id/images/:imageId` — delete image from storage and DB
+- [x] `PATCH /api/v1/equipment/:id/images/:imageId/primary` — set as primary image
 
 ### 3.2 API — Maintenance Log Routes
 

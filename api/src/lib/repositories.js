@@ -22,6 +22,14 @@ const safeSingle = async (queryPromise, notFoundMessage) => {
   return data;
 };
 
+const storagePathFromPublicUrl = (url) => {
+  if (!url) return null;
+  const marker = '/tenant-assets/';
+  const index = url.indexOf(marker);
+  if (index < 0) return null;
+  return url.slice(index + marker.length);
+};
+
 export const tenantRepository = {
   async listPublicTenants() {
     if (!hasSupabase) {
@@ -73,7 +81,7 @@ export const tenantRepository = {
     return safeSingle(
       supabase
         .from('tenants')
-        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, onboarding_completed_steps')
         .eq('id', id)
         .single(),
       'Tenant not found'
@@ -120,7 +128,7 @@ export const tenantRepository = {
         .from('tenants')
         .update(payload)
         .eq('id', tenantId)
-        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, onboarding_completed_steps')
         .single(),
       'Tenant not found'
     );
@@ -254,7 +262,7 @@ export const equipmentRepository = {
       return item;
     }
 
-    return safeSingle(
+    const item = await safeSingle(
       supabase
         .from('equipment')
         .select('id, name, description, category, daily_rate, deposit, quantity, status, condition, tags, created_at')
@@ -264,6 +272,19 @@ export const equipmentRepository = {
         .single(),
       'Equipment not found'
     );
+
+    const { data: images, error: imageError } = await supabase
+      .from('equipment_images')
+      .select('id, storage_url, is_primary, display_order, created_at')
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', id)
+      .order('display_order', { ascending: true });
+
+    if (imageError) {
+      throw new AppError(500, imageError.message, 'EQUIPMENT_IMAGE_LIST_FAILED');
+    }
+
+    return { ...item, images: images ?? [] };
   },
 
   async create(payload) {
@@ -326,6 +347,137 @@ export const equipmentRepository = {
         .single(),
       'Equipment not found'
     );
+  },
+
+  async addImage(tenantId, equipmentId, payload) {
+    if (!hasSupabase) {
+      const image = inMemoryDb.addEquipmentImage(tenantId, equipmentId, payload);
+      if (!image) {
+        throw new AppError(404, 'Equipment not found', 'EQUIPMENT_NOT_FOUND');
+      }
+      return image;
+    }
+
+    await this.getById(tenantId, equipmentId);
+
+    const { data, error } = await supabase
+      .from('equipment_images')
+      .insert({
+        tenant_id: tenantId,
+        equipment_id: equipmentId,
+        storage_url: payload.storage_url,
+        is_primary: payload.is_primary,
+        display_order: payload.display_order
+      })
+      .select('id, tenant_id, equipment_id, storage_url, is_primary, display_order, created_at')
+      .single();
+
+    if (error) {
+      throw new AppError(400, error.message, 'EQUIPMENT_IMAGE_CREATE_FAILED');
+    }
+
+    if (payload.is_primary) {
+      const { error: resetError } = await supabase
+        .from('equipment_images')
+        .update({ is_primary: false })
+        .eq('tenant_id', tenantId)
+        .eq('equipment_id', equipmentId)
+        .neq('id', data.id);
+
+      if (resetError) {
+        throw new AppError(500, resetError.message, 'EQUIPMENT_IMAGE_PRIMARY_RESET_FAILED');
+      }
+    }
+
+    return data;
+  },
+
+  async removeImage(tenantId, equipmentId, imageId) {
+    if (!hasSupabase) {
+      const image = inMemoryDb.deleteEquipmentImage(tenantId, equipmentId, imageId);
+      if (!image) {
+        throw new AppError(404, 'Equipment image not found', 'EQUIPMENT_IMAGE_NOT_FOUND');
+      }
+      return image;
+    }
+
+    const image = await safeSingle(
+      supabase
+        .from('equipment_images')
+        .select('id, storage_url')
+        .eq('tenant_id', tenantId)
+        .eq('equipment_id', equipmentId)
+        .eq('id', imageId)
+        .single(),
+      'Equipment image not found'
+    );
+
+    const { error: deleteDbError } = await supabase
+      .from('equipment_images')
+      .delete()
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId)
+      .eq('id', imageId);
+
+    if (deleteDbError) {
+      throw new AppError(500, deleteDbError.message, 'EQUIPMENT_IMAGE_DELETE_FAILED');
+    }
+
+    const path = storagePathFromPublicUrl(image.storage_url);
+    if (path) {
+      const { error: storageError } = await supabase.storage.from('tenant-assets').remove([path]);
+      if (storageError) {
+        throw new AppError(500, storageError.message, 'EQUIPMENT_IMAGE_STORAGE_DELETE_FAILED');
+      }
+    }
+
+    return image;
+  },
+
+  async setPrimaryImage(tenantId, equipmentId, imageId) {
+    if (!hasSupabase) {
+      const image = inMemoryDb.setPrimaryEquipmentImage(tenantId, equipmentId, imageId);
+      if (!image) {
+        throw new AppError(404, 'Equipment image not found', 'EQUIPMENT_IMAGE_NOT_FOUND');
+      }
+      return image;
+    }
+
+    const image = await safeSingle(
+      supabase
+        .from('equipment_images')
+        .select('id, tenant_id, equipment_id, storage_url, is_primary, display_order, created_at')
+        .eq('tenant_id', tenantId)
+        .eq('equipment_id', equipmentId)
+        .eq('id', imageId)
+        .single(),
+      'Equipment image not found'
+    );
+
+    const { error: resetError } = await supabase
+      .from('equipment_images')
+      .update({ is_primary: false })
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId);
+
+    if (resetError) {
+      throw new AppError(500, resetError.message, 'EQUIPMENT_IMAGE_PRIMARY_RESET_FAILED');
+    }
+
+    const { data, error } = await supabase
+      .from('equipment_images')
+      .update({ is_primary: true })
+      .eq('tenant_id', tenantId)
+      .eq('equipment_id', equipmentId)
+      .eq('id', image.id)
+      .select('id, tenant_id, equipment_id, storage_url, is_primary, display_order, created_at')
+      .single();
+
+    if (error || !data) {
+      throw new AppError(500, error?.message || 'Failed to set primary image', 'EQUIPMENT_IMAGE_PRIMARY_SET_FAILED');
+    }
+
+    return data;
   }
 };
 

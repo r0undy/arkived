@@ -16,6 +16,7 @@ const state = {
       contact_phone: '+63 900 000 0000',
       contact_address: 'Makati, Metro Manila',
       show_watermark: true,
+      onboarding_completed_steps: [],
       created_at: now()
     }
   ],
@@ -116,6 +117,7 @@ export const inMemoryDb = {
       contact_phone: '',
       contact_address: '',
       show_watermark: true,
+      onboarding_completed_steps: [],
       created_at: now()
     };
     state.tenants.push(tenant);
@@ -185,6 +187,7 @@ export const inMemoryDb = {
   createEquipment(payload) {
     const item = {
       ...payload,
+      images: payload.images || [],
       id: crypto.randomUUID(),
       created_at: now(),
       deleted_at: null
@@ -212,6 +215,62 @@ export const inMemoryDb = {
     item.deleted_at = now();
     item.status = 'archived';
     return item;
+  },
+
+  addEquipmentImage(tenantId, equipmentId, payload) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    const images = item.images || [];
+    const image = {
+      id: crypto.randomUUID(),
+      tenant_id: tenantId,
+      equipment_id: equipmentId,
+      storage_url: payload.storage_url,
+      is_primary: Boolean(payload.is_primary),
+      display_order: Number(payload.display_order ?? images.length),
+      created_at: now()
+    };
+
+    if (image.is_primary) {
+      item.images = images.map((entry) => ({ ...entry, is_primary: false }));
+      item.images.push(image);
+    } else {
+      item.images = [...images, image];
+    }
+
+    return image;
+  },
+
+  getEquipmentImage(tenantId, equipmentId, imageId) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+    return (item.images || []).find((entry) => entry.id === imageId) || null;
+  },
+
+  deleteEquipmentImage(tenantId, equipmentId, imageId) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    const index = (item.images || []).findIndex((entry) => entry.id === imageId);
+    if (index < 0) return null;
+
+    const [removed] = item.images.splice(index, 1);
+    return removed;
+  },
+
+  setPrimaryEquipmentImage(tenantId, equipmentId, imageId) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    let found = null;
+    item.images = (item.images || []).map((entry) => {
+      const isPrimary = entry.id === imageId;
+      if (isPrimary) found = { ...entry, is_primary: true };
+      return { ...entry, is_primary: isPrimary };
+    });
+
+    return found;
   },
 
   listBookings(tenantId) {
