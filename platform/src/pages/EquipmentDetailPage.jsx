@@ -45,6 +45,7 @@ export default function EquipmentDetailPage() {
   const [confirmArchive, setConfirmArchive] = useState(false);
 
   const [imageStatus, setImageStatus] = useState({ loading: false, error: '' });
+  const [lastFailedImageFile, setLastFailedImageFile] = useState(null);
   const [dragImageId, setDragImageId] = useState('');
 
   const [maintenanceLogs, setMaintenanceLogs] = useState([]);
@@ -151,11 +152,8 @@ export default function EquipmentDetailPage() {
     }
   };
 
-  const onUploadImage = async (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = '';
+  const uploadImageFile = async (file) => {
     if (!file || !id) return;
-
     setImageStatus({ loading: true, error: '' });
 
     try {
@@ -169,9 +167,17 @@ export default function EquipmentDetailPage() {
 
       await loadDetail();
       setImageStatus({ loading: false, error: '' });
+      setLastFailedImageFile(null);
     } catch (error) {
       setImageStatus({ loading: false, error: error.message || 'Upload failed' });
+      setLastFailedImageFile(file);
     }
+  };
+
+  const onUploadImage = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+    await uploadImageFile(file);
   };
 
   const onSetPrimaryImage = async (imageId) => {
@@ -388,6 +394,16 @@ export default function EquipmentDetailPage() {
             {imageStatus.loading ? 'Uploading...' : 'Upload image'}
           </label>
           {imageStatus.error ? <p className="text-sm text-danger-500">{imageStatus.error}</p> : null}
+          {imageStatus.error && lastFailedImageFile ? (
+            <button
+              className="rounded border border-neutral-750 px-3 py-2 text-xs text-neutral-200 hover:bg-neutral-700"
+              disabled={imageStatus.loading}
+              onClick={() => uploadImageFile(lastFailedImageFile)}
+              type="button"
+            >
+              Retry upload
+            </button>
+          ) : null}
         </div>
 
         <div className="mt-2 text-xs text-neutral-400">Drag and drop image cards to reorder display.</div>

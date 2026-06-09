@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-export default function CatalogPage({ equipment, tenant }) {
+export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
   const location = useLocation();
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const canonicalUrl = `${origin}/catalog`;
@@ -53,6 +53,9 @@ export default function CatalogPage({ equipment, tenant }) {
 
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Catalog</h1>
+        {catalogError ? (
+          <p className="mt-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{catalogError}</p>
+        ) : null}
 
         <div className="mt-4 flex flex-wrap gap-2">
           <input

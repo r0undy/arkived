@@ -11,7 +11,11 @@ const request = async (path, { method = 'GET', body } = {}) => {
   const payload = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(payload?.error?.message || 'Request failed');
+    const error = new Error(payload?.error?.message || 'Request failed');
+    error.status = response.status;
+    error.code = payload?.error?.code || 'REQUEST_FAILED';
+    error.payload = payload;
+    throw error;
   }
 
   return payload;

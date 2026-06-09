@@ -34,6 +34,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
 
   const [activeImage, setActiveImage] = useState(item.images?.[0]?.storage_url || '');
   const [availability, setAvailability] = useState([]);
+  const [availabilityError, setAvailabilityError] = useState('');
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -56,8 +57,10 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
       try {
         const result = await storefrontApi.equipmentAvailability(tenant.slug, item.id, { start, end });
         setAvailability(result.data || []);
+        setAvailabilityError('');
       } catch (_error) {
         setAvailability([]);
+        setAvailabilityError('Failed to load availability. Please refresh this page.');
       }
     };
     run();
@@ -102,7 +105,14 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
         message: ''
       });
     } catch (error) {
-      setStatus({ loading: false, error: error.message || 'Failed to submit inquiry', success: '' });
+      const isConflict = error?.status === 409 || error?.code === 'BOOKING_CONFLICT';
+      setStatus({
+        loading: false,
+        error: isConflict
+          ? 'Selected dates are no longer available. Please choose a different date range.'
+          : (error.message || 'Failed to submit inquiry'),
+        success: ''
+      });
     }
   };
 
@@ -150,12 +160,13 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
         <section className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="text-xl font-semibold tracking-tight">Availability (Read-only)</h2>
           <div className="mt-3 grid gap-2">
+            {availabilityError ? <p className="text-sm text-red-700">{availabilityError}</p> : null}
             {unavailableRanges.map((entry) => (
               <p key={entry.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
                 Unavailable: {entry.start_date} to {entry.end_date} ({entry.status})
               </p>
             ))}
-            {unavailableRanges.length === 0 ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
+            {unavailableRanges.length === 0 && !availabilityError ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
           </div>
         </section>
 

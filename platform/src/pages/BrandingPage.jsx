@@ -59,6 +59,7 @@ export default function BrandingPage() {
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState({ saving: false, error: '', message: '' });
   const [uploading, setUploading] = useState({ logo: false, banner: false });
+  const [lastFailedUpload, setLastFailedUpload] = useState(null);
 
   const loadBranding = async () => {
     setLoading(true);
@@ -140,8 +141,10 @@ export default function BrandingPage() {
       }));
 
       setStatus({ saving: false, error: '', message: `${kind === 'logo' ? 'Logo' : 'Banner'} uploaded.` });
+      setLastFailedUpload(null);
     } catch (err) {
       setStatus({ saving: false, error: err.message || 'Upload failed', message: '' });
+      setLastFailedUpload({ kind, file });
     } finally {
       setUploading((prev) => ({ ...prev, [kind]: false }));
     }
@@ -238,6 +241,15 @@ export default function BrandingPage() {
 
           {status.error ? <p className="text-sm text-danger-500">{status.error}</p> : null}
           {status.message ? <p className="text-sm text-success-500">{status.message}</p> : null}
+          {status.error && lastFailedUpload ? (
+            <button
+              className="rounded-md border border-neutral-750 px-3 py-2 text-xs font-semibold text-neutral-200 hover:bg-neutral-700"
+              onClick={() => uploadAsset(lastFailedUpload.kind, lastFailedUpload.file)}
+              type="button"
+            >
+              Retry failed upload
+            </button>
+          ) : null}
 
           <button
             className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold hover:bg-brand-600 disabled:opacity-60"

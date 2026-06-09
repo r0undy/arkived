@@ -263,7 +263,13 @@ export default function BookingsPage() {
       });
       await Promise.all([loadLookups(), loadBookings()]);
     } catch (error) {
-      setCreateStatus({ loading: false, error: error.message || 'Failed to create booking' });
+      const isConflict = error?.status === 409 || error?.code === 'BOOKING_CONFLICT';
+      setCreateStatus({
+        loading: false,
+        error: isConflict
+          ? 'Booking conflict: this equipment is already reserved for the selected dates. Please choose another date range.'
+          : (error.message || 'Failed to create booking')
+      });
     }
   };
 

@@ -23,14 +23,19 @@ function App() {
   const tenantState = useTenant();
   const [equipment, setEquipment] = useState([]);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
+  const [catalogError, setCatalogError] = useState('');
 
   useEffect(() => {
     if (!tenantState.tenant) return;
     setLoadingCatalog(true);
+    setCatalogError('');
     storefrontApi
       .catalog(tenantState.tenant.slug)
       .then((result) => setEquipment(result.data || []))
-      .catch(() => setEquipment([]))
+      .catch((error) => {
+        setEquipment([]);
+        setCatalogError(error.message || 'Failed to load catalog.');
+      })
       .finally(() => setLoadingCatalog(false));
   }, [tenantState.tenant]);
 
@@ -46,8 +51,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
-          <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} />} />
-          <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} />} />
+          <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
+          <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
           <Route
             path="/catalog/:id"
             element={
@@ -57,6 +62,7 @@ function App() {
                 slug={tenantState.tenant.slug}
                 tenant={tenantState.tenant}
                 loadingCatalog={loadingCatalog}
+                catalogError={catalogError}
               />
             }
           />
@@ -70,12 +76,14 @@ function App() {
   );
 }
 
-function CatalogDetailRoute({ equipment, equipmentList, slug, tenant, loadingCatalog }) {
+function CatalogDetailRoute({ equipment, equipmentList, slug, tenant, loadingCatalog, catalogError }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(() => equipment.find((entry) => entry.id === id) || null);
+  const [itemError, setItemError] = useState('');
 
   useEffect(() => {
+    setItemError('');
     const fromCatalog = equipment.find((entry) => entry.id === id);
     if (fromCatalog) {
       setItem(fromCatalog);
@@ -85,11 +93,36 @@ function CatalogDetailRoute({ equipment, equipmentList, slug, tenant, loadingCat
     storefrontApi
       .equipment(slug, id)
       .then((result) => setItem(result.data || null))
-      .catch(() => navigate('/catalog', { replace: true }));
+      .catch((error) => {
+        setItemError(error.message || 'Failed to load equipment details.');
+      });
   }, [equipment, id, navigate, slug]);
 
   if (loadingCatalog && !item) {
     return <div className="text-slate-600">Loading item...</div>;
+  }
+
+  if (catalogError && !item) {
+    return (
+      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {catalogError}
+      </div>
+    );
+  }
+
+  if (itemError && !item) {
+    return (
+      <div className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <p>{itemError}</p>
+        <button
+          className="rounded-md border border-red-300 bg-white px-3 py-2 text-xs font-semibold text-red-700"
+          onClick={() => navigate('/catalog', { replace: true })}
+          type="button"
+        >
+          Back to catalog
+        </button>
+      </div>
+    );
   }
 
   return <EquipmentDetailPage equipment={equipmentList} item={item} tenant={tenant} />;

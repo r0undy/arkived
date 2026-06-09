@@ -464,11 +464,11 @@ arkived/
 
 ### 7.2 Error Handling & Edge Cases
 
-- [ ] API: global error handler returns `{ error: { message, code } }` — never leaks stack traces in production
-- [ ] `platform/`: global error boundary component wrapping the router
-- [ ] `storefront/`: loading and error states for all async data fetches
-- [ ] Handle booking conflict gracefully: if double-booking attempted, return clear 409 error with message
-- [ ] Handle Supabase Storage upload failures with retry UI
+- [x] API: global error handler returns `{ error: { message, code } }` — never leaks stack traces in production
+- [x] `platform/`: global error boundary component wrapping the router
+- [x] `storefront/`: loading and error states for all async data fetches
+- [x] Handle booking conflict gracefully: if double-booking attempted, return clear 409 error with message
+- [x] Handle Supabase Storage upload failures with retry UI
 
 ### 7.3 Accessibility (WCAG 2.1 AA)
 

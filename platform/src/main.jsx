@@ -12,6 +12,7 @@ import DashboardLayout from './layouts/DashboardLayout';
 import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlatformOwnerRoute from './components/PlatformOwnerRoute';
+import AppErrorBoundary from './components/AppErrorBoundary';
 
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -83,6 +84,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AppErrorBoundary>
+      <RouterProvider router={router} />
+    </AppErrorBoundary>
   </React.StrictMode>
 );

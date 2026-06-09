@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function HomePage({ tenant, equipment = [] }) {
+export default function HomePage({ tenant, equipment = [], catalogError = '' }) {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const canonicalUrl = `${origin}/`;
   const title = `${tenant.name} | Equipment Rentals`;
@@ -25,6 +25,12 @@ export default function HomePage({ tenant, equipment = [] }) {
       <link href={canonicalUrl} rel="canonical" />
 
       <div className="space-y-6">
+        {catalogError ? (
+          <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {catalogError}
+          </div>
+        ) : null}
+
         <section className="rounded-2xl border border-slate-200 bg-white p-8 md:p-10" style={heroStyle}>
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Equipment rentals</p>
           <h1 className="mt-3 max-w-3xl text-4xl font-extrabold tracking-tight text-slate-900">{tenant.name}</h1>
