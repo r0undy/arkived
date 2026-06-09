@@ -46,14 +46,16 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
-          <Route path="/" element={<HomePage tenant={tenantState.tenant} />} />
+          <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} />} />
           <Route path="/catalog" element={<CatalogPage equipment={equipment} />} />
           <Route
             path="/catalog/:id"
             element={
               <CatalogDetailRoute
+                equipmentList={equipment}
                 equipment={equipment}
                 slug={tenantState.tenant.slug}
+                tenant={tenantState.tenant}
                 loadingCatalog={loadingCatalog}
               />
             }
@@ -68,7 +70,7 @@ function App() {
   );
 }
 
-function CatalogDetailRoute({ equipment, slug, loadingCatalog }) {
+function CatalogDetailRoute({ equipment, equipmentList, slug, tenant, loadingCatalog }) {
   const { id } = useParams();
   const navigate = useNavigate();
   const [item, setItem] = useState(() => equipment.find((entry) => entry.id === id) || null);
@@ -90,7 +92,7 @@ function CatalogDetailRoute({ equipment, slug, loadingCatalog }) {
     return <div className="text-slate-600">Loading item...</div>;
   }
 
-  return <EquipmentDetailPage item={item} />;
+  return <EquipmentDetailPage equipment={equipmentList} item={item} tenant={tenant} />;
 }
 
 createRoot(document.getElementById('root')).render(

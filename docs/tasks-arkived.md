@@ -423,23 +423,23 @@ arkived/
 
 ### 6.2 Storefront Pages
 
-- [ ] **Homepage** (`/`)
-  - [ ] Hero section: tenant banner image, shop name, tagline
-  - [ ] Equipment category grid (links to filtered catalog)
-  - [ ] Featured / recently added equipment carousel
-  - [ ] Contact info footer
-- [ ] **Catalog Page** (`/catalog`)
-  - [ ] Equipment grid with search bar and category filter chips
-  - [ ] Equipment card: primary image, name, condition badge, daily rate
-  - [ ] Pagination
-- [ ] **Equipment Detail Page** (`/catalog/:id`)
-  - [ ] Image gallery (primary + thumbnails)
-  - [ ] Name, description, category, condition, daily rate, deposit amount
-  - [ ] Read-only availability calendar (highlights unavailable date ranges)
-  - [ ] Inquiry / booking request form (name, email, phone, desired dates, message)
-    - On submit: creates a `reserved` booking record via `POST /api/v1/bookings/inquiry` (unauthenticated public endpoint)
-  - [ ] Related equipment section (same category)
-- [ ] **404 Page** — shown for invalid tenant slugs or unknown routes
+- [x] **Homepage** (`/`)
+  - [x] Hero section: tenant banner image, shop name, tagline
+  - [x] Equipment category grid (links to filtered catalog)
+  - [x] Featured / recently added equipment carousel
+  - [x] Contact info footer
+- [x] **Catalog Page** (`/catalog`)
+  - [x] Equipment grid with search bar and category filter chips
+  - [x] Equipment card: primary image, name, condition badge, daily rate
+  - [x] Pagination
+- [x] **Equipment Detail Page** (`/catalog/:id`)
+  - [x] Image gallery (primary + thumbnails)
+  - [x] Name, description, category, condition, daily rate, deposit amount
+  - [x] Read-only availability calendar (highlights unavailable date ranges)
+  - [x] Inquiry / booking request form (name, email, phone, desired dates, message)
+    - [x] On submit: creates a `reserved` booking record via `POST /api/v1/bookings/inquiry` (unauthenticated public endpoint)
+  - [x] Related equipment section (same category)
+- [x] **404 Page** — shown for invalid tenant slugs or unknown routes
 
 ### 6.3 Storefront SEO (React 19 Native)
 

@@ -69,3 +69,19 @@ export const bookingMutableUpdateSchema = z.object({
   (value) => Object.keys(value).length > 0,
   'At least one field is required'
 );
+
+export const publicBookingInquirySchema = z
+  .object({
+    tenant_slug: z.string().min(2).max(120),
+    equipment_id: z.string().uuid(),
+    start_date: z.string().date(),
+    end_date: z.string().date(),
+    name: z.string().min(2).max(160),
+    email: z.string().email(),
+    phone: z.string().max(40).optional().nullable(),
+    message: z.string().max(2000).optional().nullable()
+  })
+  .refine((value) => value.start_date <= value.end_date, {
+    message: 'start_date must be on or before end_date',
+    path: ['end_date']
+  });
