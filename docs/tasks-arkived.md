@@ -1,7 +1,7 @@
 # Implementation Plan — Arkived
 
 > **Version:** 1.0.0
-> **Status:** Not Started
+> **Status:** In Progress
 > **Last Updated:** 2026-06-06
 > **References:** [prd-arkived.md](./prd-arkived.md) · [dsd-arkived.md](./dsd-arkived.md)
 
@@ -184,17 +184,17 @@ arkived/
 
 ### 1.3 API Middleware
 
-- [ ] `src/middleware/auth.js` — verify Supabase JWT from `Authorization: Bearer` header; attach `req.user` (id, tenant_id, role)
-- [ ] `src/middleware/requireRole.js` — factory middleware: `requireRole('admin')`, `requireRole('platform_owner')`, etc.
-- [ ] `src/middleware/errorHandler.js` — global Express error handler; returns structured JSON errors
-- [ ] `src/middleware/notFound.js` — 404 handler for unknown routes
-- [ ] Apply middleware in `src/index.js`: `helmet` → `cors` → routes → `notFound` → `errorHandler`
+- [x] `src/middleware/auth.js` — verify Supabase JWT from `Authorization: Bearer` header; attach `req.user` (id, tenant_id, role)
+- [x] `src/middleware/requireRole.js` — factory middleware: `requireRole('admin')`, `requireRole('platform_owner')`, etc.
+- [x] `src/middleware/errorHandler.js` — global Express error handler; returns structured JSON errors
+- [x] `src/middleware/notFound.js` — 404 handler for unknown routes
+- [x] Apply middleware in `src/index.js`: `helmet` → `cors` → routes → `notFound` → `errorHandler`
 
 ### 1.4 API Versioning & Base Routes
 
-- [ ] Create `src/routes/index.js` mounting all route groups under `/api/v1/`
-- [ ] `GET /health` — returns `{ status: 'ok', timestamp }`
-- [ ] `GET /api/v1/tenant/:slug/public` — returns public branding data for storefront (no auth required)
+- [x] Create `src/routes/index.js` mounting all route groups under `/api/v1/`
+- [x] `GET /health` — returns `{ status: 'ok', timestamp }`
+- [x] `GET /api/v1/tenant/:slug/public` — returns public branding data for storefront (no auth required)
 
 ---
 
@@ -204,27 +204,27 @@ arkived/
 
 ### 2.1 API — Tenant & Auth Routes
 
-- [ ] `POST /api/v1/auth/register` — create Supabase auth user + insert into `users` and `tenants` tables; seed default categories and notification templates; create `{tenant_id}/` folder path in `tenant-assets` storage
+- [/] `POST /api/v1/auth/register` — create Supabase auth user + insert into `users` and `tenants` tables; seed default categories and notification templates; create `{tenant_id}/` folder path in `tenant-assets` storage
 - [ ] `POST /api/v1/auth/login` — proxy to Supabase Auth (or handle on client directly via `@supabase/auth-ui-react`)
-- [ ] `GET /api/v1/me` — return current user's profile and tenant info (auth required)
-- [ ] `PATCH /api/v1/tenant` — update tenant branding settings (admin only): name, logo_url, accent_color, banner_image_url, contact info, show_watermark
+- [x] `GET /api/v1/me` — return current user's profile and tenant info (auth required)
+- [x] `PATCH /api/v1/tenant` — update tenant branding settings (admin only): name, logo_url, accent_color, banner_image_url, contact info, show_watermark
 
 ### 2.2 API — Staff Management
 
-- [ ] `GET /api/v1/staff` — list all staff users for the tenant (admin only)
-- [ ] `POST /api/v1/staff/invite` — send invite email and create user record (admin only)
-- [ ] `DELETE /api/v1/staff/:id` — remove staff member (admin only)
-- [ ] `PATCH /api/v1/staff/:id/role` — change role between `admin` and `staff`
+- [x] `GET /api/v1/staff` — list all staff users for the tenant (admin only)
+- [x] `POST /api/v1/staff/invite` — send invite email and create user record (admin only)
+- [x] `DELETE /api/v1/staff/:id` — remove staff member (admin only)
+- [x] `PATCH /api/v1/staff/:id/role` — change role between `admin` and `staff`
 
 ### 2.3 `platform/` — Auth Pages
 
-- [ ] **Marketing / Landing Page** (`/`) — hero section, feature highlights, CTA to sign up
-- [ ] **Sign Up Page** (`/signup`) — email + password + shop name + slug field; calls `POST /api/v1/auth/register`
+- [x] **Marketing / Landing Page** (`/`) — hero section, feature highlights, CTA to sign up
+- [x] **Sign Up Page** (`/signup`) — email + password + shop name + slug field; calls `POST /api/v1/auth/register`
   - [ ] Slug availability checker (debounced API call)
   - [ ] Cloudflare Turnstile CAPTCHA widget
-- [ ] **Login Page** (`/login`) — email + password via Supabase Auth UI or custom form
-- [ ] **Auth redirect logic** — after login, redirect to `/dashboard` if `tenant_admin` / `tenant_staff`, or `/admin` if `platform_owner`
-- [ ] **Protected route wrapper** — HOC or layout that redirects unauthenticated users to `/login`
+- [x] **Login Page** (`/login`) — email + password via Supabase Auth UI or custom form
+- [/] **Auth redirect logic** — after login, redirect to `/dashboard` if `tenant_admin` / `tenant_staff`, or `/admin` if `platform_owner`
+- [x] **Protected route wrapper** — HOC or layout that redirects unauthenticated users to `/login`
 
 ### 2.4 `platform/` — Onboarding Wizard
 
@@ -260,11 +260,11 @@ arkived/
 
 ### 3.1 API — Equipment Routes
 
-- [ ] `GET /api/v1/equipment` — list all equipment (with filters: category, status, search query); paginated
-- [ ] `GET /api/v1/equipment/:id` — get single equipment item with images and maintenance history
-- [ ] `POST /api/v1/equipment` — create new equipment item (admin/staff)
-- [ ] `PATCH /api/v1/equipment/:id` — update equipment fields (admin/staff)
-- [ ] `DELETE /api/v1/equipment/:id` — soft delete (sets `deleted_at`; admin only)
+- [/] `GET /api/v1/equipment` — list all equipment (with filters: category, status, search query); paginated
+- [/] `GET /api/v1/equipment/:id` — get single equipment item with images and maintenance history
+- [x] `POST /api/v1/equipment` — create new equipment item (admin/staff)
+- [x] `PATCH /api/v1/equipment/:id` — update equipment fields (admin/staff)
+- [x] `DELETE /api/v1/equipment/:id` — soft delete (sets `deleted_at`; admin only)
 - [ ] `POST /api/v1/equipment/:id/images` — upload image to Supabase Storage, insert into `equipment_images`
 - [ ] `DELETE /api/v1/equipment/:id/images/:imageId` — delete image from storage and DB
 - [ ] `PATCH /api/v1/equipment/:id/images/:imageId/primary` — set as primary image
@@ -304,13 +304,13 @@ arkived/
 
 ### 4.2 API — Booking Routes
 
-- [ ] `GET /api/v1/bookings` — list bookings with filters (status, date range, equipment, customer); paginated
+- [/] `GET /api/v1/bookings` — list bookings with filters (status, date range, equipment, customer); paginated
 - [ ] `GET /api/v1/bookings/:id` — get single booking with full details
-- [ ] `POST /api/v1/bookings` — create booking; checks date overlap conflict before inserting
-- [ ] `PATCH /api/v1/bookings/:id/status` — advance booking to next status stage with validation:
+- [x] `POST /api/v1/bookings` — create booking; checks date overlap conflict before inserting
+- [x] `PATCH /api/v1/bookings/:id/status` — advance booking to next status stage with validation:
   - `reserved` → `payment` → `dispatched` → `returned` → `inspected` → `closed`
 - [ ] `PATCH /api/v1/bookings/:id` — update mutable booking fields (dispatch condition, return condition, payment reference)
-- [ ] `GET /api/v1/bookings/calendar` — returns bookings within a date range, formatted for calendar display
+- [x] `GET /api/v1/bookings/calendar` — returns bookings within a date range, formatted for calendar display
 - [ ] Scheduled job (cron via `node-cron`):
   - [ ] Daily: flag bookings where `end_date < today` and `status != closed` as `overdue = true`
   - [ ] Daily: trigger maintenance-due notifications for equipment with `next_service_due = today`
@@ -370,7 +370,7 @@ arkived/
 
 ### 5.1 API — Analytics Routes
 
-- [ ] `GET /api/v1/analytics/overview` — KPIs: active bookings, overdue count, revenue MTD, utilization rate (global)
+- [x] `GET /api/v1/analytics/overview` — KPIs: active bookings, overdue count, revenue MTD, utilization rate (global)
 - [ ] `GET /api/v1/analytics/revenue` — monthly revenue breakdown for the last 12 months
 - [ ] `GET /api/v1/analytics/revenue-by-category` — revenue split by equipment category
 - [ ] `GET /api/v1/analytics/top-equipment` — top 10 items by total revenue

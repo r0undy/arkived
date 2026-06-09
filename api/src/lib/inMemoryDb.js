@@ -19,10 +19,20 @@ const state = {
       created_at: now()
     }
   ],
+  users: [],
   equipment: [],
   bookings: [],
   customers: []
 };
+
+state.users.push({
+  id: 'dev-admin',
+  tenant_id: state.tenants[0].id,
+  role: 'admin',
+  full_name: 'Dev Admin',
+  email: 'dev-admin@arkived.local',
+  created_at: now()
+});
 
 for (let i = 1; i <= 4; i += 1) {
   const id = crypto.randomUUID();
@@ -118,6 +128,40 @@ export const inMemoryDb = {
     };
 
     return state.tenants[index];
+  },
+
+  listUsersByTenant(tenantId) {
+    return state.users.filter((user) => user.tenant_id === tenantId);
+  },
+
+  createUser(payload) {
+    const emailConflict = state.users.find((user) => user.email && user.email.toLowerCase() === payload.email.toLowerCase());
+    if (emailConflict) return null;
+
+    const user = {
+      id: payload.id || crypto.randomUUID(),
+      tenant_id: payload.tenant_id,
+      role: payload.role || 'staff',
+      full_name: payload.full_name || '',
+      email: payload.email,
+      created_at: now()
+    };
+    state.users.push(user);
+    return user;
+  },
+
+  updateUserRole(tenantId, id, role) {
+    const index = state.users.findIndex((user) => user.tenant_id === tenantId && user.id === id);
+    if (index < 0) return null;
+    state.users[index] = { ...state.users[index], role };
+    return state.users[index];
+  },
+
+  deleteUser(tenantId, id) {
+    const index = state.users.findIndex((user) => user.tenant_id === tenantId && user.id === id);
+    if (index < 0) return null;
+    const [removed] = state.users.splice(index, 1);
+    return removed;
   },
 
   listEquipment(tenantId, filters = {}) {

@@ -108,6 +108,98 @@ export const tenantRepository = {
   }
 };
 
+export const staffRepository = {
+  async listByTenant(tenantId) {
+    if (!hasSupabase) {
+      return inMemoryDb.listUsersByTenant(tenantId);
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, role, full_name, created_at')
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: true });
+
+    if (error) {
+      throw new AppError(500, error.message, 'STAFF_LIST_FAILED');
+    }
+
+    return (data ?? []).map((entry) => ({ ...entry, email: null }));
+  },
+
+  async create(payload) {
+    if (!hasSupabase) {
+      const user = inMemoryDb.createUser(payload);
+      if (!user) {
+        throw new AppError(409, 'Email is already in use', 'STAFF_EMAIL_CONFLICT');
+      }
+      return user;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .insert({
+        id: payload.id,
+        tenant_id: payload.tenant_id,
+        role: payload.role,
+        full_name: payload.full_name
+      })
+      .select('id, role, full_name, created_at')
+      .single();
+
+    if (error) {
+      throw new AppError(400, error.message, 'STAFF_CREATE_FAILED');
+    }
+
+    return { ...data, email: payload.email ?? null };
+  },
+
+  async updateRole(tenantId, id, role) {
+    if (!hasSupabase) {
+      const user = inMemoryDb.updateUserRole(tenantId, id, role);
+      if (!user) {
+        throw new AppError(404, 'Staff user not found', 'STAFF_NOT_FOUND');
+      }
+      return user;
+    }
+
+    return safeSingle(
+      supabase
+        .from('users')
+        .update({ role })
+        .eq('tenant_id', tenantId)
+        .eq('id', id)
+        .select('id, role, full_name, created_at')
+        .single(),
+      'Staff user not found'
+    );
+  },
+
+  async deleteById(tenantId, id) {
+    if (!hasSupabase) {
+      const removed = inMemoryDb.deleteUser(tenantId, id);
+      if (!removed) {
+        throw new AppError(404, 'Staff user not found', 'STAFF_NOT_FOUND');
+      }
+      return removed;
+    }
+
+    const { data, error } = await supabase
+      .from('users')
+      .delete()
+      .eq('tenant_id', tenantId)
+      .eq('id', id)
+      .select('id')
+      .single();
+
+    if (error || !data) {
+      throw new AppError(404, 'Staff user not found', 'STAFF_NOT_FOUND');
+    }
+
+    return data;
+  }
+};
+
 export const equipmentRepository = {
   async list(tenantId, filters = {}) {
     if (!hasSupabase) {
