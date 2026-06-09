@@ -5,7 +5,8 @@ const navItems = [
   { to: '/dashboard', label: 'Overview' },
   { to: '/dashboard/equipment', label: 'Equipment' },
   { to: '/dashboard/bookings', label: 'Bookings' },
-  { to: '/dashboard/analytics', label: 'Analytics' }
+  { to: '/dashboard/analytics', label: 'Analytics' },
+  { to: '/dashboard/settings/team', label: 'Team' }
 ];
 
 export default function DashboardLayout() {

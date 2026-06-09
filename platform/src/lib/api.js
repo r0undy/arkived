@@ -42,5 +42,10 @@ export const api = {
 
   overview: () => request('/api/v1/analytics/overview'),
 
+  staff: () => request('/api/v1/staff'),
+  inviteStaff: (body) => request('/api/v1/staff/invite', { method: 'POST', body }),
+  updateStaffRole: (id, role) => request(`/api/v1/staff/${id}/role`, { method: 'PATCH', body: { role } }),
+  removeStaff: (id) => request(`/api/v1/staff/${id}`, { method: 'DELETE' }),
+
   updateBranding: (body) => request('/api/v1/tenant', { method: 'PATCH', body })
 };

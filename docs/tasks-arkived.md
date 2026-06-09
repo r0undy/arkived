@@ -248,11 +248,11 @@ arkived/
 
 ### 2.6 `platform/` — Staff Management Page
 
-- [ ] `/dashboard/settings/team` route
-- [ ] List current team members with role badges
-- [ ] Invite by email form
-- [ ] Change role dropdown
-- [ ] Remove member button with confirmation dialog
+- [x] `/dashboard/settings/team` route
+- [x] List current team members with role badges
+- [x] Invite by email form
+- [x] Change role dropdown
+- [x] Remove member button with confirmation dialog
 
 ---
 
