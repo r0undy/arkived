@@ -33,6 +33,12 @@ export const api = {
   createEquipment: (body) => request('/api/v1/equipment', { method: 'POST', body }),
   updateEquipment: (id, body) => request(`/api/v1/equipment/${id}`, { method: 'PATCH', body }),
   archiveEquipment: (id) => request(`/api/v1/equipment/${id}`, { method: 'DELETE' }),
+  maintenanceLogs: (equipmentId) => request(`/api/v1/equipment/${equipmentId}/maintenance`),
+  createMaintenanceLog: (equipmentId, body) => request(`/api/v1/equipment/${equipmentId}/maintenance`, { method: 'POST', body }),
+  updateMaintenanceLog: (equipmentId, logId, body) =>
+    request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'PATCH', body }),
+  deleteMaintenanceLog: (equipmentId, logId) =>
+    request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'DELETE' }),
 
   bookings: () => request('/api/v1/bookings'),
   updateBookingStatus: (id, status) =>

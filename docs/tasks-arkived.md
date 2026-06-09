@@ -287,7 +287,7 @@ arkived/
   - [ ] All fields editable inline or via edit form (name, description, category, daily rate, deposit, quantity, condition, tags)
   - [ ] Image gallery with drag-to-reorder, set-primary, delete controls
   - [ ] Status badge with manual override dropdown
-  - [ ] Maintenance log section (inline log list + add log form)
+  - [/] Maintenance log section (inline log list + add log form)
   - [ ] Soft-delete (Archive) button with confirmation dialog
 - [ ] **Add Equipment Form** — create new equipment; validates all required fields before submit
 
