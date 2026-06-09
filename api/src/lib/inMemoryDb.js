@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
 const now = () => new Date().toISOString();
+const today = () => new Date().toISOString().slice(0, 10);
 
 const state = {
   tenants: [
@@ -18,10 +19,20 @@ const state = {
       created_at: now()
     }
   ],
+  users: [],
   equipment: [],
   bookings: [],
   customers: []
 };
+
+state.users.push({
+  id: 'dev-admin',
+  tenant_id: state.tenants[0].id,
+  role: 'admin',
+  full_name: 'Dev Admin',
+  email: 'dev-admin@arkived.local',
+  created_at: now()
+});
 
 for (let i = 1; i <= 4; i += 1) {
   const id = crypto.randomUUID();
@@ -43,14 +54,53 @@ for (let i = 1; i <= 4; i += 1) {
   });
 }
 
+state.customers.push({
+  id: crypto.randomUUID(),
+  tenant_id: state.tenants[0].id,
+  full_name: 'Demo Customer',
+  email: 'customer@demo.test',
+  phone: '+63 900 123 4567',
+  notes: '',
+  created_at: now()
+});
+
+state.bookings.push({
+  id: crypto.randomUUID(),
+  tenant_id: state.tenants[0].id,
+  equipment_id: state.equipment[0].id,
+  customer_id: state.customers[0].id,
+  start_date: today(),
+  end_date: today(),
+  status: 'reserved',
+  total_amount: 1300,
+  deposit_paid: false,
+  payment_reference: null,
+  dispatch_condition: null,
+  return_condition: null,
+  overdue: false,
+  created_at: now()
+});
+
+const includesInsensitive = (source, target) =>
+  String(source || '').toLowerCase().includes(String(target || '').toLowerCase());
+
+const ACTIVE_BOOKING_STATUSES = ['reserved', 'payment', 'dispatched'];
+
 export const inMemoryDb = {
   listTenants() {
     return state.tenants;
   },
+
   getTenantBySlug(slug) {
     return state.tenants.find((tenant) => tenant.slug === slug) || null;
   },
+
   createTenant(payload) {
+    const existing = this.getTenantBySlug(payload.slug);
+    if (existing) {
+      return null;
+    }
+
     const tenant = {
       id: crypto.randomUUID(),
       slug: payload.slug,
@@ -67,9 +117,67 @@ export const inMemoryDb = {
     state.tenants.push(tenant);
     return tenant;
   },
-  listEquipment(tenantId) {
-    return state.equipment.filter((item) => item.tenant_id === tenantId && !item.deleted_at);
+
+  updateTenant(tenantId, payload) {
+    const index = state.tenants.findIndex((tenant) => tenant.id === tenantId);
+    if (index < 0) return null;
+
+    state.tenants[index] = {
+      ...state.tenants[index],
+      ...payload
+    };
+
+    return state.tenants[index];
   },
+
+  listUsersByTenant(tenantId) {
+    return state.users.filter((user) => user.tenant_id === tenantId);
+  },
+
+  createUser(payload) {
+    const emailConflict = state.users.find((user) => user.email && user.email.toLowerCase() === payload.email.toLowerCase());
+    if (emailConflict) return null;
+
+    const user = {
+      id: payload.id || crypto.randomUUID(),
+      tenant_id: payload.tenant_id,
+      role: payload.role || 'staff',
+      full_name: payload.full_name || '',
+      email: payload.email,
+      created_at: now()
+    };
+    state.users.push(user);
+    return user;
+  },
+
+  updateUserRole(tenantId, id, role) {
+    const index = state.users.findIndex((user) => user.tenant_id === tenantId && user.id === id);
+    if (index < 0) return null;
+    state.users[index] = { ...state.users[index], role };
+    return state.users[index];
+  },
+
+  deleteUser(tenantId, id) {
+    const index = state.users.findIndex((user) => user.tenant_id === tenantId && user.id === id);
+    if (index < 0) return null;
+    const [removed] = state.users.splice(index, 1);
+    return removed;
+  },
+
+  listEquipment(tenantId, filters = {}) {
+    return state.equipment.filter((item) => {
+      if (item.tenant_id !== tenantId || item.deleted_at) return false;
+      if (filters.category && item.category !== filters.category) return false;
+      if (filters.status && item.status !== filters.status) return false;
+      if (filters.q && !includesInsensitive(item.name, filters.q) && !includesInsensitive(item.description, filters.q)) return false;
+      return true;
+    });
+  },
+
+  getEquipmentById(tenantId, id) {
+    return state.equipment.find((item) => item.tenant_id === tenantId && item.id === id && !item.deleted_at) || null;
+  },
+
   createEquipment(payload) {
     const item = {
       ...payload,
@@ -80,9 +188,57 @@ export const inMemoryDb = {
     state.equipment.push(item);
     return item;
   },
+
+  updateEquipment(tenantId, id, payload) {
+    const index = state.equipment.findIndex((item) => item.tenant_id === tenantId && item.id === id && !item.deleted_at);
+    if (index < 0) return null;
+
+    state.equipment[index] = {
+      ...state.equipment[index],
+      ...payload
+    };
+
+    return state.equipment[index];
+  },
+
+  softDeleteEquipment(tenantId, id) {
+    const item = this.getEquipmentById(tenantId, id);
+    if (!item) return null;
+
+    item.deleted_at = now();
+    item.status = 'archived';
+    return item;
+  },
+
   listBookings(tenantId) {
     return state.bookings.filter((booking) => booking.tenant_id === tenantId);
   },
+
+  getBookingById(tenantId, id) {
+    return state.bookings.find((booking) => booking.tenant_id === tenantId && booking.id === id) || null;
+  },
+
+  listBookingCalendar(tenantId, filters = {}) {
+    return state.bookings.filter((booking) => {
+      if (booking.tenant_id !== tenantId) return false;
+      if (filters.equipmentId && booking.equipment_id !== filters.equipmentId) return false;
+      if (filters.start && booking.end_date < filters.start) return false;
+      if (filters.end && booking.start_date > filters.end) return false;
+      return true;
+    });
+  },
+
+  hasBookingOverlap(tenantId, equipmentId, startDate, endDate, excludeBookingId = null) {
+    return state.bookings.some((booking) => {
+      if (booking.tenant_id !== tenantId) return false;
+      if (booking.equipment_id !== equipmentId) return false;
+      if (excludeBookingId && booking.id === excludeBookingId) return false;
+      if (!ACTIVE_BOOKING_STATUSES.includes(booking.status)) return false;
+
+      return booking.start_date <= endDate && booking.end_date >= startDate;
+    });
+  },
+
   createBooking(payload) {
     const booking = {
       ...payload,
@@ -92,5 +248,17 @@ export const inMemoryDb = {
     };
     state.bookings.push(booking);
     return booking;
+  },
+
+  updateBooking(tenantId, id, payload) {
+    const index = state.bookings.findIndex((booking) => booking.tenant_id === tenantId && booking.id === id);
+    if (index < 0) return null;
+
+    state.bookings[index] = {
+      ...state.bookings[index],
+      ...payload
+    };
+
+    return state.bookings[index];
   }
 };

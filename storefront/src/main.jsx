@@ -16,6 +16,7 @@ import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
+import TenantDebugger from './components/TenantDebugger';
 
 function App() {
   const tenantState = useTenant();
@@ -59,6 +60,9 @@ function App() {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      {import.meta.env.DEV ? (
+        <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
+      ) : null}
     </BrowserRouter>
   );
 }

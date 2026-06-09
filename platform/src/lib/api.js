@@ -23,7 +23,29 @@ const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
 export const api = {
   registerTenant: (body) => request('/api/v1/auth/register', { method: 'POST', body }),
   me: () => request('/api/v1/auth/me'),
-  equipment: () => request('/api/v1/equipment'),
+
+  equipment: (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const suffix = query ? `?${query}` : '';
+    return request(`/api/v1/equipment${suffix}`);
+  },
+  createEquipment: (body) => request('/api/v1/equipment', { method: 'POST', body }),
+  updateEquipment: (id, body) => request(`/api/v1/equipment/${id}`, { method: 'PATCH', body }),
+  archiveEquipment: (id) => request(`/api/v1/equipment/${id}`, { method: 'DELETE' }),
+
   bookings: () => request('/api/v1/bookings'),
-  overview: () => request('/api/v1/analytics/overview')
+  updateBookingStatus: (id, status) =>
+    request(`/api/v1/bookings/${id}/status`, {
+      method: 'PATCH',
+      body: { status }
+    }),
+
+  overview: () => request('/api/v1/analytics/overview'),
+
+  staff: () => request('/api/v1/staff'),
+  inviteStaff: (body) => request('/api/v1/staff/invite', { method: 'POST', body }),
+  updateStaffRole: (id, role) => request(`/api/v1/staff/${id}/role`, { method: 'PATCH', body: { role } }),
+  removeStaff: (id) => request(`/api/v1/staff/${id}`, { method: 'DELETE' }),
+
+  updateBranding: (body) => request('/api/v1/tenant', { method: 'PATCH', body })
 };
