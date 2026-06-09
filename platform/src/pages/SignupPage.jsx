@@ -29,6 +29,7 @@ export default function SignupPage() {
     progress: 0,
     tenantSlug: '',
     tenantUrl: '',
+    accountEmail: '',
     warning: ''
   });
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
@@ -77,7 +78,7 @@ export default function SignupPage() {
     }
   };
 
-  const runProvisioningFlow = async (tenantSlug) => {
+  const runProvisioningFlow = async (tenantSlug, accountEmail) => {
     const tenantUrl = `https://${tenantSlug}.${rootDomain}`;
     setProvisioning({
       active: true,
@@ -85,6 +86,7 @@ export default function SignupPage() {
       progress: 5,
       tenantSlug,
       tenantUrl,
+      accountEmail: accountEmail || '',
       warning: ''
     });
 
@@ -111,10 +113,10 @@ export default function SignupPage() {
     finished = true;
     clearInterval(smoothingTimer);
 
-    setProvisioning((prev) => ({
-      ...prev,
-      active: false,
-      done: true,
+      setProvisioning((prev) => ({
+        ...prev,
+        active: false,
+        done: true,
       progress: 100,
       warning: ready ? '' : 'Workspace is created. DNS propagation may still be in progress.'
     }));
@@ -134,6 +136,7 @@ export default function SignupPage() {
         throw new Error('Please complete the captcha challenge.');
       }
 
+      const accountEmail = form.email;
       const result = await api.registerTenant({
         ...form,
         ...(turnstileToken ? { turnstile_token: turnstileToken } : {})
@@ -141,7 +144,7 @@ export default function SignupPage() {
       setForm(initialState);
       setSlugTouched(false);
       setTurnstileToken('');
-      await runProvisioningFlow(result.tenant.slug);
+      await runProvisioningFlow(result.tenant.slug, accountEmail);
     } catch (error) {
       setStatus({ loading: false, error: error.message, success: '' });
     }
@@ -182,11 +185,22 @@ export default function SignupPage() {
             <button
               className="w-full rounded-md bg-brand-500 px-4 py-3 font-semibold text-white hover:bg-brand-600"
               onClick={() => {
+                const email = encodeURIComponent(provisioning.accountEmail || '');
+                const next = encodeURIComponent('/dashboard/settings/branding');
+                window.location.href = `/login?email=${email}&next=${next}`;
+              }}
+              type="button"
+            >
+              Continue to onboarding
+            </button>
+            <button
+              className="w-full rounded-md border border-neutral-750 px-4 py-3 font-semibold text-neutral-200 hover:bg-neutral-800"
+              onClick={() => {
                 window.location.href = provisioning.tenantUrl;
               }}
               type="button"
             >
-              Go to my storefront
+              Open storefront domain
             </button>
             <a
               className="block text-center text-sm text-neutral-400 underline hover:text-neutral-200"

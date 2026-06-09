@@ -57,7 +57,7 @@ export const useAuth = () => {
     () => ({
       user,
       loading,
-      async signInWithPassword(email, password, turnstileToken = '') {
+      async signInWithPassword(email, password, turnstileToken = '', redirectTo = '') {
         if (!hasSupabaseClient) {
           throw new Error('Supabase is not configured. Use demo sign in for local fallback.');
         }
@@ -78,10 +78,12 @@ export const useAuth = () => {
         localStorage.setItem('arkived_token', data.session.access_token);
         try {
           const me = await api.me();
-          const nextPath = me?.user?.role === 'platform_owner' ? '/admin' : '/dashboard';
+          const normalizedRedirect = String(redirectTo || '');
+          const safeRedirect = normalizedRedirect.startsWith('/') ? normalizedRedirect : '';
+          const nextPath = safeRedirect || (me?.user?.role === 'platform_owner' ? '/admin' : '/dashboard');
           window.location.assign(nextPath);
         } catch (_error) {
-          window.location.assign('/dashboard');
+          window.location.assign(redirectTo && redirectTo.startsWith('/') ? redirectTo : '/dashboard');
         }
       },
       signInAsDemo() {

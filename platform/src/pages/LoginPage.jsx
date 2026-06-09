@@ -1,21 +1,23 @@
-import { useAuth } from '../hooks/useAuth';
 import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
 import { hasSupabaseClient } from '../lib/supabase';
 import TurnstileWidget from '../components/TurnstileWidget';
 
 export default function LoginPage() {
+  const searchParams = new URLSearchParams(window.location.search);
   const auth = useAuth();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(searchParams.get('email') || '');
   const [password, setPassword] = useState('');
   const [turnstileToken, setTurnstileToken] = useState('');
   const [status, setStatus] = useState({ loading: false, error: '' });
   const turnstileSiteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY || '';
+  const nextPath = searchParams.get('next') || '';
 
   const onSubmit = async (event) => {
     event.preventDefault();
     setStatus({ loading: true, error: '' });
     try {
-      await auth.signInWithPassword(email, password, turnstileToken);
+      await auth.signInWithPassword(email, password, turnstileToken, nextPath);
     } catch (error) {
       setStatus({ loading: false, error: error.message });
     }
