@@ -228,23 +228,23 @@ arkived/
 
 ### 2.4 `platform/` — Onboarding Wizard
 
-- [ ] **Onboarding Checklist Component** — shown after first login if setup is incomplete
-  - [ ] Step 1: Upload logo
-  - [ ] Step 2: Set accent color (with live contrast preview and WCAG pass/fail indicator)
-  - [ ] Step 3: Add first equipment item
-  - [ ] Step 4: Invite a team member
-- [ ] Mark steps as complete in `tenants` table via a `onboarding_completed_steps` JSON column
-- [ ] Dismiss wizard once all steps are done
+- [x] **Onboarding Checklist Component** — shown after first login if setup is incomplete
+  - [x] Step 1: Upload logo
+  - [x] Step 2: Set accent color (with live contrast preview and WCAG pass/fail indicator)
+  - [x] Step 3: Add first equipment item
+  - [x] Step 4: Invite a team member
+- [x] Mark steps as complete in `tenants` table via a `onboarding_completed_steps` JSON column
+- [x] Dismiss wizard once all steps are done
 
 ### 2.5 `platform/` — Branding Settings Page
 
-- [ ] `/dashboard/settings/branding` route
-- [ ] Logo upload → Supabase Storage → save URL to `tenants.logo_url`
-- [ ] Accent color picker with live WCAG contrast ratio indicator (against white)
-- [ ] Banner image upload
-- [ ] Shop name, contact info fields
-- [ ] "Powered by Arkived" badge toggle
-- [ ] Live storefront preview panel (iframe or simulated preview)
+- [x] `/dashboard/settings/branding` route
+- [x] Logo upload → Supabase Storage → save URL to `tenants.logo_url`
+- [x] Accent color picker with live WCAG contrast ratio indicator (against white)
+- [x] Banner image upload
+- [x] Shop name, contact info fields
+- [x] "Powered by Arkived" badge toggle
+- [x] Live storefront preview panel (iframe or simulated preview)
 
 ### 2.6 `platform/` — Staff Management Page
 
@@ -265,16 +265,16 @@ arkived/
 - [x] `POST /api/v1/equipment` — create new equipment item (admin/staff)
 - [x] `PATCH /api/v1/equipment/:id` — update equipment fields (admin/staff)
 - [x] `DELETE /api/v1/equipment/:id` — soft delete (sets `deleted_at`; admin only)
-- [ ] `POST /api/v1/equipment/:id/images` — upload image to Supabase Storage, insert into `equipment_images`
-- [ ] `DELETE /api/v1/equipment/:id/images/:imageId` — delete image from storage and DB
-- [ ] `PATCH /api/v1/equipment/:id/images/:imageId/primary` — set as primary image
+- [x] `POST /api/v1/equipment/:id/images` — upload image to Supabase Storage, insert into `equipment_images`
+- [x] `DELETE /api/v1/equipment/:id/images/:imageId` — delete image from storage and DB
+- [x] `PATCH /api/v1/equipment/:id/images/:imageId/primary` — set as primary image
 
 ### 3.2 API — Maintenance Log Routes
 
-- [ ] `GET /api/v1/equipment/:id/maintenance` — list maintenance logs for an item
-- [ ] `POST /api/v1/equipment/:id/maintenance` — create maintenance log entry
-- [ ] `PATCH /api/v1/equipment/:id/maintenance/:logId` — update a log entry
-- [ ] `DELETE /api/v1/equipment/:id/maintenance/:logId` — delete a log entry
+- [x] `GET /api/v1/equipment/:id/maintenance` — list maintenance logs for an item
+- [x] `POST /api/v1/equipment/:id/maintenance` — create maintenance log entry
+- [x] `PATCH /api/v1/equipment/:id/maintenance/:logId` — update a log entry
+- [x] `DELETE /api/v1/equipment/:id/maintenance/:logId` — delete a log entry
 
 ### 3.3 `platform/` — Equipment Catalog Pages
 
@@ -284,11 +284,11 @@ arkived/
   - [ ] Add Equipment button → opens modal or navigates to add form
   - [ ] Pagination or infinite scroll
 - [ ] **Equipment Detail / Edit Page** (`/dashboard/equipment/:id`)
-  - [ ] All fields editable inline or via edit form (name, description, category, daily rate, deposit, quantity, condition, tags)
-  - [ ] Image gallery with drag-to-reorder, set-primary, delete controls
-  - [ ] Status badge with manual override dropdown
-  - [ ] Maintenance log section (inline log list + add log form)
-  - [ ] Soft-delete (Archive) button with confirmation dialog
+  - [x] All fields editable inline or via edit form (name, description, category, daily rate, deposit, quantity, condition, tags)
+  - [x] Image gallery with drag-to-reorder, set-primary, delete controls
+  - [x] Status badge with manual override dropdown
+  - [/] Maintenance log section (inline log list + add log form)
+  - [x] Soft-delete (Archive) button with confirmation dialog
 - [ ] **Add Equipment Form** — create new equipment; validates all required fields before submit
 
 ---

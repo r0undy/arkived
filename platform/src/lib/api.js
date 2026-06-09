@@ -23,15 +23,33 @@ const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
 export const api = {
   registerTenant: (body) => request('/api/v1/auth/register', { method: 'POST', body }),
   me: () => request('/api/v1/auth/me'),
+  tenant: () => request('/api/v1/tenant'),
 
   equipment: (params = {}) => {
     const query = new URLSearchParams(params).toString();
     const suffix = query ? `?${query}` : '';
     return request(`/api/v1/equipment${suffix}`);
   },
+  equipmentById: (id) => request(`/api/v1/equipment/${id}`),
   createEquipment: (body) => request('/api/v1/equipment', { method: 'POST', body }),
   updateEquipment: (id, body) => request(`/api/v1/equipment/${id}`, { method: 'PATCH', body }),
   archiveEquipment: (id) => request(`/api/v1/equipment/${id}`, { method: 'DELETE' }),
+  uploadEquipmentImage: (equipmentId, body) => request(`/api/v1/equipment/${equipmentId}/images`, { method: 'POST', body }),
+  deleteEquipmentImage: (equipmentId, imageId) => request(`/api/v1/equipment/${equipmentId}/images/${imageId}`, { method: 'DELETE' }),
+  setPrimaryEquipmentImage: (equipmentId, imageId) =>
+    request(`/api/v1/equipment/${equipmentId}/images/${imageId}/primary`, { method: 'PATCH' }),
+  reorderEquipmentImages: (equipmentId, imageIds) =>
+    request(`/api/v1/equipment/${equipmentId}/images/reorder`, {
+      method: 'PATCH',
+      body: { image_ids: imageIds }
+    }),
+
+  maintenanceLogs: (equipmentId) => request(`/api/v1/equipment/${equipmentId}/maintenance`),
+  createMaintenanceLog: (equipmentId, body) => request(`/api/v1/equipment/${equipmentId}/maintenance`, { method: 'POST', body }),
+  updateMaintenanceLog: (equipmentId, logId, body) =>
+    request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'PATCH', body }),
+  deleteMaintenanceLog: (equipmentId, logId) =>
+    request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'DELETE' }),
 
   bookings: () => request('/api/v1/bookings'),
   updateBookingStatus: (id, status) =>

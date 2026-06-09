@@ -16,11 +16,13 @@ const state = {
       contact_phone: '+63 900 000 0000',
       contact_address: 'Makati, Metro Manila',
       show_watermark: true,
+      onboarding_completed_steps: [],
       created_at: now()
     }
   ],
   users: [],
   equipment: [],
+  maintenance_logs: [],
   bookings: [],
   customers: []
 };
@@ -95,6 +97,10 @@ export const inMemoryDb = {
     return state.tenants.find((tenant) => tenant.slug === slug) || null;
   },
 
+  getTenantById(id) {
+    return state.tenants.find((tenant) => tenant.id === id) || null;
+  },
+
   createTenant(payload) {
     const existing = this.getTenantBySlug(payload.slug);
     if (existing) {
@@ -112,6 +118,7 @@ export const inMemoryDb = {
       contact_phone: '',
       contact_address: '',
       show_watermark: true,
+      onboarding_completed_steps: [],
       created_at: now()
     };
     state.tenants.push(tenant);
@@ -181,6 +188,7 @@ export const inMemoryDb = {
   createEquipment(payload) {
     const item = {
       ...payload,
+      images: payload.images || [],
       id: crypto.randomUUID(),
       created_at: now(),
       deleted_at: null
@@ -208,6 +216,126 @@ export const inMemoryDb = {
     item.deleted_at = now();
     item.status = 'archived';
     return item;
+  },
+
+  addEquipmentImage(tenantId, equipmentId, payload) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    const images = item.images || [];
+    const image = {
+      id: crypto.randomUUID(),
+      tenant_id: tenantId,
+      equipment_id: equipmentId,
+      storage_url: payload.storage_url,
+      is_primary: Boolean(payload.is_primary),
+      display_order: Number(payload.display_order ?? images.length),
+      created_at: now()
+    };
+
+    if (image.is_primary) {
+      item.images = images.map((entry) => ({ ...entry, is_primary: false }));
+      item.images.push(image);
+    } else {
+      item.images = [...images, image];
+    }
+
+    return image;
+  },
+
+  getEquipmentImage(tenantId, equipmentId, imageId) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+    return (item.images || []).find((entry) => entry.id === imageId) || null;
+  },
+
+  deleteEquipmentImage(tenantId, equipmentId, imageId) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    const index = (item.images || []).findIndex((entry) => entry.id === imageId);
+    if (index < 0) return null;
+
+    const [removed] = item.images.splice(index, 1);
+    return removed;
+  },
+
+  setPrimaryEquipmentImage(tenantId, equipmentId, imageId) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    let found = null;
+    item.images = (item.images || []).map((entry) => {
+      const isPrimary = entry.id === imageId;
+      if (isPrimary) found = { ...entry, is_primary: true };
+      return { ...entry, is_primary: isPrimary };
+    });
+
+    return found;
+  },
+
+  reorderEquipmentImages(tenantId, equipmentId, imageIds) {
+    const item = this.getEquipmentById(tenantId, equipmentId);
+    if (!item) return null;
+
+    const current = item.images || [];
+    if (current.length !== imageIds.length) return null;
+
+    const byId = new Map(current.map((entry) => [entry.id, entry]));
+    if (imageIds.some((id) => !byId.has(id))) return null;
+
+    item.images = imageIds.map((id, index) => ({ ...byId.get(id), display_order: index }));
+    return item.images;
+  },
+
+  listMaintenanceLogs(tenantId, equipmentId) {
+    return state.maintenance_logs
+      .filter((log) => log.tenant_id === tenantId && log.equipment_id === equipmentId)
+      .sort((a, b) => String(b.service_date).localeCompare(String(a.service_date)));
+  },
+
+  createMaintenanceLog(payload) {
+    const log = {
+      id: crypto.randomUUID(),
+      tenant_id: payload.tenant_id,
+      equipment_id: payload.equipment_id,
+      service_date: payload.service_date,
+      service_type: payload.service_type,
+      performed_by: payload.performed_by || null,
+      notes: payload.notes || null,
+      cost: payload.cost ?? null,
+      next_service_due: payload.next_service_due || null,
+      created_at: now()
+    };
+
+    state.maintenance_logs.push(log);
+    return log;
+  },
+
+  updateMaintenanceLog(tenantId, equipmentId, logId, payload) {
+    const index = state.maintenance_logs.findIndex(
+      (log) => log.tenant_id === tenantId && log.equipment_id === equipmentId && log.id === logId
+    );
+
+    if (index < 0) return null;
+
+    state.maintenance_logs[index] = {
+      ...state.maintenance_logs[index],
+      ...payload
+    };
+
+    return state.maintenance_logs[index];
+  },
+
+  deleteMaintenanceLog(tenantId, equipmentId, logId) {
+    const index = state.maintenance_logs.findIndex(
+      (log) => log.tenant_id === tenantId && log.equipment_id === equipmentId && log.id === logId
+    );
+
+    if (index < 0) return null;
+
+    const [removed] = state.maintenance_logs.splice(index, 1);
+    return removed;
   },
 
   listBookings(tenantId) {

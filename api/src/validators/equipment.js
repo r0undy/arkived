@@ -25,3 +25,31 @@ export const equipmentFiltersSchema = z.object({
   status: equipmentStatusSchema.optional(),
   q: z.string().max(120).optional()
 });
+
+export const createEquipmentImageSchema = z.object({
+  file_name: z.string().min(1).max(140),
+  mime_type: z.string().regex(/^image\/[a-z0-9.+-]+$/i, 'mime_type must be an image/* value'),
+  content_base64: z.string().min(16),
+  is_primary: z.boolean().optional().default(false),
+  display_order: z.number().int().min(0).optional()
+});
+
+export const reorderEquipmentImagesSchema = z.object({
+  image_ids: z.array(z.string().uuid()).min(1)
+});
+
+const maintenanceTypeSchema = z.enum(['routine', 'repair', 'inspection', 'cleaning']);
+
+export const createMaintenanceLogSchema = z.object({
+  service_date: z.string().date(),
+  service_type: maintenanceTypeSchema,
+  performed_by: z.string().max(120).optional().nullable(),
+  notes: z.string().max(4000).optional().nullable(),
+  cost: z.number().nonnegative().optional().nullable(),
+  next_service_due: z.string().date().optional().nullable()
+});
+
+export const updateMaintenanceLogSchema = createMaintenanceLogSchema.partial().refine(
+  (value) => Object.keys(value).length > 0,
+  'At least one field is required'
+);

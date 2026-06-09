@@ -19,6 +19,11 @@ tenantRouter.get('/public/tenants', asyncHandler(async (_req, res) => {
   return res.json({ data });
 }));
 
+tenantRouter.get('/', requireAuth, asyncHandler(async (req, res) => {
+  const tenant = await tenantRepository.getById(req.user.tenant_id);
+  res.json({ tenant });
+}));
+
 tenantRouter.get('/:slug/public', asyncHandler(async (req, res) => {
   const tenant = await tenantRepository.getPublicBySlug(req.params.slug);
   res.json({ tenant });

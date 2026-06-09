@@ -15,9 +15,13 @@ create table if not exists public.tenants (
   contact_phone text,
   contact_address text,
   show_watermark boolean not null default true,
+  onboarding_completed_steps text[] not null default '{}',
   plan text not null default 'starter' check (plan in ('starter', 'pro', 'enterprise')),
   created_at timestamptz not null default now()
 );
+
+alter table public.tenants
+  add column if not exists onboarding_completed_steps text[] not null default '{}';
 
 create table if not exists public.users (
   id uuid primary key references auth.users(id) on delete cascade,
