@@ -15,6 +15,7 @@ This Worker routes by hostname:
    - `ROOT_DOMAIN`
    - `PLATFORM_ORIGIN`
    - `STOREFRONT_ORIGIN`
+   - `API_ORIGIN`
 4. Deploy:
    - `wrangler deploy`
 
@@ -32,6 +33,11 @@ Then attach custom domains/routes to the Worker for:
 - `arkived.dev/*`
 - `www.arkived.dev/*`
 - `*.arkived.dev/*`
+
+Dashboard path (2026 UI):
+1. `Workers & Pages` -> select `arkived-host-router`
+2. `Settings` -> `Domains & Routes`
+3. `Add` -> `Route`
 
 ## Quick checks
 

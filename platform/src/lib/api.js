@@ -1,4 +1,12 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const resolveApiUrl = () => {
+  const configured = String(import.meta.env.VITE_API_URL || '').trim();
+  if (configured) return configured.replace(/\/+$/, '');
+  return import.meta.env.DEV
+    ? 'http://localhost:4000'
+    : 'https://arkived-api-a0dzeqhvhghhhsay.southeastasia-01.azurewebsites.net';
+};
+
+const API_URL = resolveApiUrl();
 
 const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
   const token = localStorage.getItem('arkived_token') || '';

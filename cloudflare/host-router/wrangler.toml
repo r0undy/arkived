@@ -1,12 +1,13 @@
 name = "arkived-host-router"
 main = "src/index.js"
-compatibility_date = "2026-06-10"
+compatibility_date = "2026-06-09"
 
 [vars]
 ROOT_DOMAIN = "arkived.dev"
 # Do not include protocol. Example: lively-hill-022b70100.6.azurestaticapps.net
-PLATFORM_ORIGIN = "icy-hill-06e592f00.6.azurestaticapps.net"
-STOREFRONT_ORIGIN = "lively-hill-022b70100.6.azurestaticapps.net"
+PLATFORM_ORIGIN = "icy-hill-06e592f00.7.azurestaticapps.net"
+STOREFRONT_ORIGIN = "lively-hill-022b70100.7.azurestaticapps.net"
+API_ORIGIN = "arkived-api-a0dzeqhvhghhhsay.southeastasia-01.azurewebsites.net"
 
 [observability.logs]
 enabled = true

@@ -5,6 +5,8 @@ export default {
     const rootDomain = (env.ROOT_DOMAIN || "arkived.dev").toLowerCase();
     const platformOrigin = env.PLATFORM_ORIGIN;
     const storefrontOrigin = env.STOREFRONT_ORIGIN;
+    const apiOrigin = env.API_ORIGIN || "";
+    const apiHost = `api.${rootDomain}`;
 
     if (!platformOrigin || !storefrontOrigin) {
       return new Response("Missing PLATFORM_ORIGIN or STOREFRONT_ORIGIN", {
@@ -29,8 +31,15 @@ export default {
     }
 
     const isApex = host === rootDomain || host === `www.${rootDomain}`;
+    const isApiHost = host === apiHost;
     const isTenantSubdomain = host.endsWith(`.${rootDomain}`) && !isApex;
-    const targetOrigin = isApex ? platformOrigin : isTenantSubdomain ? storefrontOrigin : platformOrigin;
+    const targetOrigin = isApiHost && apiOrigin
+      ? apiOrigin
+      : isApex
+        ? platformOrigin
+        : isTenantSubdomain
+          ? storefrontOrigin
+          : platformOrigin;
 
     const upstreamUrl = new URL(request.url);
     upstreamUrl.protocol = "https:";

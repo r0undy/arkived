@@ -26,6 +26,8 @@
 - [Supabase Setup Guide](setup-supabase.md) — Step-by-step database, RLS, storage, and env setup.
 - [Security Hardening Runbook](setup-security.md) — RLS verification SQL + Cloudflare WAF/rate-limit setup.
 - [Resend Setup Guide](setup-resend.md) — Free-tier email setup, domain verification, env vars, and Arkived notification wiring.
+- [Azure + Cloudflare Deployment Guide](deploy-azure-frontdoor-cloudflare.md) — Front Door + SWA + App Service setup for `arkived.dev` and `*.arkived.dev`.
+- [Cloudflare Worker Routing Guide](deploy-cloudflare-worker-routing.md) — Separate platform/storefront deployments with wildcard host routing at Cloudflare edge.
 
 ---
 
