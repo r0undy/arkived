@@ -238,13 +238,13 @@ arkived/
 
 ### 2.5 `platform/` — Branding Settings Page
 
-- [ ] `/dashboard/settings/branding` route
-- [ ] Logo upload → Supabase Storage → save URL to `tenants.logo_url`
-- [ ] Accent color picker with live WCAG contrast ratio indicator (against white)
-- [ ] Banner image upload
-- [ ] Shop name, contact info fields
-- [ ] "Powered by Arkived" badge toggle
-- [ ] Live storefront preview panel (iframe or simulated preview)
+- [x] `/dashboard/settings/branding` route
+- [x] Logo upload → Supabase Storage → save URL to `tenants.logo_url`
+- [x] Accent color picker with live WCAG contrast ratio indicator (against white)
+- [x] Banner image upload
+- [x] Shop name, contact info fields
+- [x] "Powered by Arkived" badge toggle
+- [x] Live storefront preview panel (iframe or simulated preview)
 
 ### 2.6 `platform/` — Staff Management Page
 

@@ -20,6 +20,7 @@ import EquipmentPage from './pages/EquipmentPage';
 import BookingsPage from './pages/BookingsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import TeamPage from './pages/TeamPage';
+import BrandingPage from './pages/BrandingPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const ProtectedShell = () => (
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
           { path: '/dashboard/equipment', element: <EquipmentPage /> },
           { path: '/dashboard/bookings', element: <BookingsPage /> },
           { path: '/dashboard/analytics', element: <AnalyticsPage /> },
+          { path: '/dashboard/settings/branding', element: <BrandingPage /> },
           { path: '/dashboard/settings/team', element: <TeamPage /> },
           { path: '/admin', element: <Navigate to="/dashboard" replace /> }
         ]

@@ -23,6 +23,7 @@ const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
 export const api = {
   registerTenant: (body) => request('/api/v1/auth/register', { method: 'POST', body }),
   me: () => request('/api/v1/auth/me'),
+  tenant: () => request('/api/v1/tenant'),
 
   equipment: (params = {}) => {
     const query = new URLSearchParams(params).toString();

@@ -61,6 +61,25 @@ export const tenantRepository = {
     );
   },
 
+  async getById(id) {
+    if (!hasSupabase) {
+      const tenant = inMemoryDb.getTenantById(id);
+      if (!tenant) {
+        throw new AppError(404, 'Tenant not found', 'TENANT_NOT_FOUND');
+      }
+      return tenant;
+    }
+
+    return safeSingle(
+      supabase
+        .from('tenants')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark')
+        .eq('id', id)
+        .single(),
+      'Tenant not found'
+    );
+  },
+
   async registerTenant(payload) {
     if (!hasSupabase) {
       const tenant = inMemoryDb.createTenant(payload);

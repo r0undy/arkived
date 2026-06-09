@@ -95,6 +95,10 @@ export const inMemoryDb = {
     return state.tenants.find((tenant) => tenant.slug === slug) || null;
   },
 
+  getTenantById(id) {
+    return state.tenants.find((tenant) => tenant.id === id) || null;
+  },
+
   createTenant(payload) {
     const existing = this.getTenantBySlug(payload.slug);
     if (existing) {
