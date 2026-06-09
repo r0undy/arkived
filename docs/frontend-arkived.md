@@ -33,7 +33,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 - [Phase F4 — Supabase Storage for Images](#phase-f4--supabase-storage-for-images)
 - [Phase F5 — The Captivating Storefront](#phase-f5--the-captivating-storefront)
 - [Phase F6 — Dashboard & Platform Polish](#phase-f6--dashboard--platform-polish)
-- [Phase F7 — Motion, Accessibility & Performance](#phase-f7--motion-accessibility--performance)
+- [Phase F7 — Motion, Accessibility, Performance & Responsiveness](#phase-f7--motion-accessibility-performance--responsiveness)
 - [Phase F8 — Storefront ↔ Platform Connectivity](#phase-f8--storefront--platform-connectivity)
 - [Acceptance & Definition of Done](#acceptance--definition-of-done)
 
@@ -49,6 +49,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 | **In-your-face guidance** | The next best action is always the loudest thing on screen. Onboarding is a persistent, unavoidable companion until activation is complete. |
 | **Interactive by default** | Every customization shows a **live preview**. No "save and pray" — the user sees the result as they type, drag, or pick. |
 | **Conversion-first storefront** | The storefront exists to *sell rentals*. Every section earns its place by building trust, showing value, or removing friction from the inquiry. |
+| **Responsive by default** | Every view is designed mobile-first and verified across phone, tablet, and desktop. Layouts reflow gracefully — no horizontal scroll, no clipped controls, touch targets ≥ 44px. Most rental browsing happens on phones. |
 | **Consistency** | App 1 uses the fixed Arkived dark theme ([dsd §2](./dsd-arkived.md#2-color-system)). App 2 is fully tenant-themed via CSS variables ([dsd §8](./dsd-arkived.md#8-app-2-theming-system)). Never mix the two token systems. |
 
 **Reference stack (do not regress):** React 19 native metadata, Tailwind v4 `@theme` (no JS config), Lucide icons, `prefers-reduced-motion` guards. See [AGENTS.md](../AGENTS.md) §3.
@@ -312,7 +313,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ---
 
-## Phase F7 — Motion, Accessibility & Performance
+## Phase F7 — Motion, Accessibility, Performance & Responsiveness
 
 > Polish that makes everything feel intentional and inclusive. Non-negotiable, per [dsd §7](./dsd-arkived.md#7-motion--animation) and [tasks §7.3](./tasks-arkived.md).
 
@@ -338,6 +339,23 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [ ] `loading="lazy"` on all storefront imagery; client-side image compression on upload ([F4.1](#f41-reusable-imageuploader-component))
 - [ ] Preload the tenant theme/branding before first storefront paint to avoid a flash of default colors
 - [ ] Keep bundles lean — no second icon library, no heavyweight animation deps where CSS suffices
+
+### F7.4 Responsiveness (mobile-first, all breakpoints)
+
+> Responsiveness is a cross-cutting requirement for **every** view in both apps, not a final pass. Design mobile-first, then enhance for larger screens.
+
+- [ ] Adopt a consistent breakpoint ladder (Tailwind `sm` 640 / `md` 768 / `lg` 1024 / `xl` 1280) and design each layout mobile-first (base styles target the smallest screen)
+- [ ] **Platform shell:** sidebar collapses to a drawer / bottom tab bar on mobile ([F0.2](#f02-layout-polish)); top bar condenses (search → icon, user menu → avatar)
+- [ ] **Data tables** reflow to stacked cards or horizontally scroll within a contained region on small screens — never overflow the page
+- [ ] **Branding studio** ([F2.1](#f21-split-screen-live-preview)) stacks controls above the preview on mobile; the device toggle still previews Desktop/Mobile frames
+- [ ] **Onboarding wizard** is fully usable on a phone (single-column steps, thumb-reachable primary action)
+- [ ] **Storefront** is mobile-first end to end ([F5.4](#f54-storefront-fundamentals)): hero, category/equipment grids, and footer reflow; sticky mobile inquiry CTA ([F5.6](#f56-extra-storefront-touches-high-impact-optional))
+- [ ] **Modals / drawers / date pickers** convert to full-screen or bottom-sheet patterns on mobile; no off-screen content
+- [ ] **Touch targets** are ≥ 44×44px; adequate spacing prevents mis-taps; hover-only affordances have a tap/focus equivalent
+- [ ] Respect safe areas (notches) and dynamic viewport units (`dvh`) so fixed bars don't get hidden by mobile browser chrome
+- [ ] **Fluid type & spacing:** headings/sections scale down sensibly (use the [dsd §3.1](./dsd-arkived.md#31-type-scale) scale responsively); no fixed pixel widths that cause overflow
+- [ ] Images/media are fluid (`max-width: 100%`); use responsive `srcset`/sizes where it matters
+- [ ] **Verification:** test each view at 360 / 768 / 1024 / 1440px (and landscape) — zero horizontal scroll, no clipped or overlapping controls
 
 ---
 
@@ -385,6 +403,7 @@ A frontend item is **Done** when:
 - [ ] It composes from the F0 shared primitives (no one-off buttons/inputs/cards)
 - [ ] It honors the correct token system — App 1 = Arkived dark theme; App 2 = tenant CSS variables
 - [ ] It has loading, empty, and error states (skeletons, not raw spinners)
+- [ ] It is **fully responsive** — mobile-first and verified at 360 / 768 / 1024 / 1440px with no horizontal scroll, clipped controls, or touch targets < 44px ([F7.4](#f74-responsiveness-mobile-first-all-breakpoints))
 - [ ] It passes WCAG AA: focus rings, labels, alt text, non-color-only status, AA contrast
 - [ ] All animations respect `prefers-reduced-motion`
 - [ ] Copy matches the [dsd §9](./dsd-arkived.md#9-voice--tone) voice (clear, direct, encouraging)
