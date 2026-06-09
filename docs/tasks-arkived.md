@@ -487,9 +487,9 @@ arkived/
 
 ### 7.5 Environment & Deployment
 
-- [ ] `platform/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- [ ] `storefront/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
-- [ ] `api/.env.example` — `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ORIGIN`, `RESEND_API_KEY`, `TWILIO_*`
+- [x] `platform/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- [x] `storefront/.env.example` — `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+- [x] `api/.env.example` — `PORT`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ORIGIN`, `RESEND_API_KEY`, `TWILIO_*`
 - [ ] Deploy `api/` to Azure App Service; set environment variables
 - [ ] Deploy `platform/` to static host (Vercel / Cloudflare Pages); set `VITE_*` env vars
 - [ ] Deploy `storefront/` to static host; configure wildcard domain `*.arkived.dev`
