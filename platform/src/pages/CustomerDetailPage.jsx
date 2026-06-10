@@ -1,6 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../lib/api';
+import Badge from '../components/ui/Badge';
+
+const STATUS_VARIANT = {
+  reserved: 'info',
+  payment: 'warning',
+  dispatched: 'info',
+  returned: 'warning',
+  inspected: 'info',
+  closed: 'success'
+};
 
 export default function CustomerDetailPage() {
   const { id } = useParams();
@@ -52,7 +62,9 @@ export default function CustomerDetailPage() {
             <article key={entry.id} className="rounded-md border border-neutral-750 bg-neutral-900 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400">
                 <span>{new Date(entry.created_at).toLocaleString()}</span>
-                <span className="rounded-md bg-neutral-800 px-2 py-1 capitalize">{entry.status}</span>
+                <Badge variant={STATUS_VARIANT[entry.status] || 'neutral'} icon={false} className="capitalize">
+                  {entry.status}
+                </Badge>
               </div>
               <p className="mt-2 text-sm text-neutral-200">
                 {entry.start_date} to {entry.end_date} • PHP {Number(entry.total_amount || 0).toLocaleString()}

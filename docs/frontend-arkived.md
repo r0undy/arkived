@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.8.0
+> **Version:** 1.9.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -30,7 +30,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
-| F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading. |
+| F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading, calendar polish, consistent Team/Customers tables + detail. Admin primitive adoption pending. |
 | F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes/images, theme preload, mobile-first, global reduced-motion guard, focus rings, alt text, label/aria-describedby associations. Responsive verification sweep continuing. |
 | F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity, customer status-tracking page. |
 
@@ -324,7 +324,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading
 - [x] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges, new-inquiry highlight, and calendar polish (today highlight, out-of-month dimming, weekday header, "+N more" overflow, animated detail drawer) shipped
 - [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
-- [/] **Team / Customers:** consistent table + detail patterns from the F0 kit — empty states adopted; full detail-pattern pass pending
+- [x] **Team / Customers:** consistent table + detail patterns from the F0 kit — shared table styling, avatar initials, status/role/count Badges, skeleton loading, and Badge-based detail timeline shipped
 - [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)
 - [ ] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency
 
