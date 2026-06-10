@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, CalendarCheck, Truck, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch, Star, ThumbsUp, Headset, Phone, MessageCircle, Mail } from 'lucide-react';
+import { Search, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch, Star, Phone, MessageCircle, Mail } from 'lucide-react';
 import Meta from '../components/Meta';
 import EquipmentCard from '../components/EquipmentCard';
+import WelcomeModal, { shouldShowWelcome, markWelcomeSeen } from '../components/WelcomeModal';
 import { LocalBusinessJsonLd } from '../components/StructuredData';
 import { getOpenState, hasBusinessHours } from '../lib/businessHours';
+import { HOW_IT_WORKS, REASONS } from '../lib/homeHighlights';
 
 /** Subtle scroll parallax for the hero background, disabled under reduced-motion. */
 function useParallax() {
@@ -40,18 +42,6 @@ function useParallax() {
   return { ref, offset };
 }
 
-const HOW_IT_WORKS = [
-  { icon: Search, title: 'Browse', body: 'Explore the catalog and find the gear you need.' },
-  { icon: CalendarCheck, title: 'Request', body: 'Pick your dates and send a quick booking inquiry.' },
-  { icon: Truck, title: 'Pick up', body: 'We confirm availability and get you ready to go.' }
-];
-
-const REASONS = [
-  { icon: ShieldCheck, title: 'Quality you can trust', body: 'Every item is inspected and maintained between rentals.' },
-  { icon: Headset, title: 'Real, responsive support', body: 'Questions before you book? We reply fast and clearly.' },
-  { icon: ThumbsUp, title: 'Simple, fair pricing', body: 'Transparent daily rates and deposits — no surprises.' }
-];
-
 const digitsOf = (phone) => String(phone || '').replace(/[^\d]/g, '');
 
 export default function HomePage({ tenant, equipment = [], catalogError = '' }) {
@@ -82,10 +72,24 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
     { icon: MapPin, label: tenant.contact_address ? 'Local pickup' : 'Flexible pickup' }
   ];
 
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  useEffect(() => {
+    if (shouldShowWelcome(tenant.slug)) {
+      setWelcomeOpen(true);
+    }
+  }, [tenant.slug]);
+
+  const closeWelcome = () => {
+    markWelcomeSeen(tenant.slug);
+    setWelcomeOpen(false);
+  };
+
   return (
     <>
       <Meta tenant={tenant} title={title} description={description} path="/" />
       <LocalBusinessJsonLd tenant={tenant} />
+
+      {welcomeOpen ? <WelcomeModal tenant={tenant} onClose={closeWelcome} /> : null}
 
       <div className="space-y-16 sm:space-y-20">
         {catalogError ? (
@@ -250,52 +254,70 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
           </section>
         ) : null}
 
-        {/* How it works — open inline strip */}
+        {/* How it works — numbered steps with connector */}
         <section>
-          <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900">How it works</h2>
-          <div className="mt-8 grid gap-8 sm:grid-cols-3">
+          <div className="text-center">
+            <p className="text-sm font-bold uppercase tracking-[0.18em]" style={{ color: 'var(--color-primary)' }}>
+              Renting made simple
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">How it works</h2>
+            <p className="mx-auto mt-3 max-w-xl text-base text-slate-600">
+              Three quick steps from browsing to picking up your gear — no account required.
+            </p>
+          </div>
+          <div className="relative mt-10 grid gap-8 sm:grid-cols-3">
+            {/* connector line behind the step badges (desktop) */}
+            <span aria-hidden="true" className="absolute left-[16.66%] right-[16.66%] top-7 hidden h-px bg-slate-200 sm:block" />
             {HOW_IT_WORKS.map((step, index) => {
               const Icon = step.icon;
               return (
                 <div key={step.title} className="relative text-center">
-                  {index > 0 ? (
-                    <span
-                      aria-hidden="true"
-                      className="absolute -left-4 top-5 hidden h-px w-8 bg-slate-300 sm:block"
-                    />
-                  ) : null}
-                  <p
-                    className="text-sm font-bold uppercase tracking-[0.18em]"
-                    style={{ color: 'var(--color-primary)' }}
+                  <span
+                    className="relative z-10 mx-auto flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-sm"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
                   >
-                    Step {index + 1}
-                  </p>
-                  <h3 className="mt-2 inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
-                    <Icon className="h-5 w-5 text-slate-400" aria-hidden="true" /> {step.title}
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-600">{step.body}</p>
+                    <Icon className="h-6 w-6" aria-hidden="true" />
+                  </span>
+                  <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Step {index + 1}</p>
+                  <h3 className="mt-1 text-lg font-semibold text-slate-900">{step.title}</h3>
+                  <p className="mx-auto mt-1.5 max-w-xs text-sm text-slate-600">{step.body}</p>
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* Why rent with us — editorial, no cards */}
+        {/* Why rent with us — feature cards */}
         <section className="border-t border-slate-200/70 pt-14">
-          <div className="flex items-center justify-center gap-1 text-amber-400" aria-hidden="true">
-            {[0, 1, 2, 3, 4].map((i) => (
-              <Star key={i} className="h-4 w-4 fill-current" />
-            ))}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-1 text-amber-400" aria-hidden="true">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <Star key={i} className="h-4 w-4 fill-current" />
+              ))}
+            </div>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+              Why customers choose {tenant.name}
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-base text-slate-600">
+              A rental experience built around quality, clarity, and getting you back to work fast.
+            </p>
           </div>
-          <h2 className="mt-3 text-center text-2xl font-bold tracking-tight text-slate-900">Why customers choose {tenant.name}</h2>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-x-10 gap-y-8 sm:grid-cols-3">
+          <div className="mx-auto mt-10 grid max-w-4xl gap-5 sm:grid-cols-3">
             {REASONS.map((reason) => {
               const Icon = reason.icon;
               return (
-                <div key={reason.title} className="text-center sm:text-left">
-                  <Icon className="mx-auto h-6 w-6 sm:mx-0" style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
-                  <h3 className="mt-3 text-base font-semibold text-slate-900">{reason.title}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{reason.body}</p>
+                <div
+                  key={reason.title}
+                  className="rounded-2xl border border-slate-200 bg-white p-6 text-center transition hover:-translate-y-0.5 hover:shadow-md sm:text-left"
+                >
+                  <span
+                    className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl sm:mx-0"
+                    style={{ backgroundColor: 'color-mix(in srgb, var(--color-primary) 12%, white)' }}
+                  >
+                    <Icon className="h-5 w-5" style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-4 text-base font-semibold text-slate-900">{reason.title}</h3>
+                  <p className="mt-1.5 text-sm text-slate-600">{reason.body}</p>
                 </div>
               );
             })}
