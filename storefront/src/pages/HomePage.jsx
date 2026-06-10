@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, CalendarCheck, Truck, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch, Star, ThumbsUp, Headset } from 'lucide-react';
+import { Search, CalendarCheck, Truck, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch, Star, ThumbsUp, Headset, Phone, MessageCircle, Mail } from 'lucide-react';
 import Meta from '../components/Meta';
 import EquipmentCard from '../components/EquipmentCard';
 import { LocalBusinessJsonLd } from '../components/StructuredData';
+import { getOpenState, hasBusinessHours } from '../lib/businessHours';
 
 /** Subtle scroll parallax for the hero background, disabled under reduced-motion. */
 function useParallax() {
@@ -51,6 +52,8 @@ const REASONS = [
   { icon: ThumbsUp, title: 'Simple, fair pricing', body: 'Transparent daily rates and deposits — no surprises.' }
 ];
 
+const digitsOf = (phone) => String(phone || '').replace(/[^\d]/g, '');
+
 export default function HomePage({ tenant, equipment = [], catalogError = '' }) {
   const title = `${tenant.name} | Equipment Rentals`;
   const description =
@@ -62,6 +65,15 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
   const featured = available.slice(0, 6);
   const heroImage = tenant.banner_image_url;
   const parallax = useParallax();
+
+  const showHours = hasBusinessHours(tenant.business_hours);
+  const openState = showHours ? getOpenState(tenant.business_hours) : null;
+  const phoneDigits = digitsOf(tenant.contact_phone);
+  const contactActions = [
+    tenant.contact_phone ? { key: 'call', icon: Phone, label: 'Call', href: `tel:${tenant.contact_phone}` } : null,
+    phoneDigits ? { key: 'whatsapp', icon: MessageCircle, label: 'WhatsApp', href: `https://wa.me/${phoneDigits}`, external: true } : null,
+    tenant.contact_email ? { key: 'email', icon: Mail, label: 'Email', href: `mailto:${tenant.contact_email}` } : null
+  ].filter(Boolean);
 
   return (
     <>
@@ -92,14 +104,42 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
             style={
               heroImage
                 ? { background: 'linear-gradient(to top, rgba(15,23,42,0.85), rgba(15,23,42,0.35))' }
-                : { background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))' }
+                : {
+                    backgroundImage: 'linear-gradient(120deg, var(--color-primary), var(--color-primary-hover), var(--color-primary))',
+                    backgroundSize: '220% 220%'
+                  }
             }
           >
-            <div className="max-w-2xl">
+            {!heroImage ? (
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 motion-safe:animate-[auroraShift_12s_ease-in-out_infinite]"
+                style={{
+                  backgroundImage: 'linear-gradient(120deg, var(--color-primary), var(--color-primary-hover), var(--color-primary))',
+                  backgroundSize: '220% 220%',
+                  opacity: 0.9
+                }}
+              />
+            ) : null}
+            <div className="relative max-w-2xl">
               {tenant.logo_url ? (
                 <img src={tenant.logo_url} alt={`${tenant.name} logo`} className="mb-5 h-14 w-14 rounded-xl bg-white/90 object-contain p-1.5" />
               ) : null}
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Equipment rentals</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Equipment rentals</p>
+                {openState ? (
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold backdrop-blur ${
+                      openState.isOpen ? 'bg-emerald-500/90 text-white' : 'bg-white/20 text-white'
+                    }`}
+                    title={`${openState.todayLabel}: ${openState.todayRange}`}
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${openState.isOpen ? 'bg-white motion-safe:animate-pulse' : 'bg-white/70'}`} aria-hidden="true" />
+                    {openState.isOpen ? 'Open now' : 'Closed'}
+                    <span className="hidden font-normal text-white/85 sm:inline">· {openState.todayRange}</span>
+                  </span>
+                ) : null}
+              </div>
               <h1 className="mt-3 text-[clamp(1.875rem,6vw,3.25rem)] font-extrabold leading-tight tracking-tight text-white drop-shadow-sm">{tenant.name}</h1>
               <p className="mt-4 max-w-xl text-lg text-white/90">
                 {tenant.tagline || 'Browse available gear, compare rates, and submit a booking inquiry in minutes.'}
@@ -119,6 +159,23 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
                   <Search className="h-4 w-4" aria-hidden="true" /> Find equipment
                 </Link>
               </div>
+              {contactActions.length > 0 ? (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  {contactActions.map((action) => {
+                    const Icon = action.icon;
+                    return (
+                      <a
+                        key={action.key}
+                        href={action.href}
+                        {...(action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur transition hover:bg-white/20"
+                      >
+                        <Icon className="h-4 w-4" aria-hidden="true" /> {action.label}
+                      </a>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           </div>
         </section>

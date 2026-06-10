@@ -35,12 +35,18 @@ export const tenantRepository = {
     if (!hasSupabase) {
       return inMemoryDb
         .listTenants()
-        .map((tenant) => ({ id: tenant.id, slug: tenant.slug, name: tenant.name, accent_color: tenant.accent_color }));
+        .map((tenant) => ({
+          id: tenant.id,
+          slug: tenant.slug,
+          name: tenant.name,
+          logo_url: tenant.logo_url || '',
+          accent_color: tenant.accent_color
+        }));
     }
 
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, slug, name, accent_color')
+      .select('id, slug, name, logo_url, accent_color')
       .order('created_at', { ascending: true });
 
     if (error) {

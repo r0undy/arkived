@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.14.0
+> **Version:** 1.18.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -267,7 +267,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] Redesign the [storefront HomePage](../storefront/src/pages/HomePage.jsx) hero: full-bleed banner with a soft gradient scrim for legibility, logo lockup, shop name, a value-prop tagline, and a high-contrast primary CTA ("Browse the catalog")
 - [x] Secondary CTA for inquiries ("Request a quote") and a quick-search field
-- [x] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in + scroll parallax on the hero banner shipped (rAF-throttled, disabled under `prefers-reduced-motion`)
+- [x] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in + scroll parallax on the hero banner shipped (rAF-throttled, disabled under `prefers-reduced-motion`); the no-banner hero now uses an animated accent aurora gradient, plus a live "Open now" hero badge and quick contact actions (call/WhatsApp/email) driven by the tenant's settings
 - [x] Trust strip directly under the hero: # items available, response time, location, years in business (whatever the tenant provides)
 
 ### F5.2 Conversion-focused sections
@@ -325,7 +325,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges, new-inquiry highlight, and calendar polish (today highlight, out-of-month dimming, weekday header, "+N more" overflow, animated detail drawer) shipped
 - [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
 - [x] **Team / Customers:** consistent table + detail patterns from the F0 kit — shared table styling, avatar initials, status/role/count Badges, skeleton loading, and Badge-based detail timeline shipped
-- [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)
+- [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup) — full SaaS landing page shipped: gradient/grid hero with an `aspect-4/5` hero-image placeholder (ready for a model/product shot), a **dynamic** partner/tenant marquee (fetched from `GET /api/v1/tenant/public/partners` — real tenant name + logo with an accent-monogram fallback; each item links out to that tenant's `{slug}.{STOREFRONT_DOMAIN}` storefront), a bento feature layout (featured storefront card + supporting cards), a lazy-loaded YouTube demo (`youtube-nocookie` facade), a numbered "why we built it" timeline, a **manually-controlled** team slider (left/right controls, snap scroll, portrait cards with image-or-initials, gradient scrim, hover-lift with vertical track padding so the lift/shadow is never clipped), and a full-bleed "wow" final CTA (animated aurora wash + grid mask + floating glow orbs, gradient headline, **no contained card**). Shared `Marquee` primitive (renders children twice, `-50%` translate loop, pause-on-hover, reduced-motion safe) powers the partner strip
 - [x] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency — KPI cards wrapped in `Card` with icons, tenant status as `Badge`, `EmptyState` for the no-tenants case, and skeleton loading shipped
 
 ---

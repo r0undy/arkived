@@ -38,6 +38,7 @@ export const api = {
   registerTenant: (body) => request('/api/v1/auth/register', { method: 'POST', body }),
   me: () => request('/api/v1/auth/me'),
   tenant: () => request('/api/v1/tenant'),
+  publicPartners: () => request('/api/v1/tenant/public/partners'),
 
   equipment: (params = {}) => {
     const query = new URLSearchParams(params).toString();
