@@ -2,7 +2,14 @@ import { z } from 'zod';
 import { slugSchema } from './common.js';
 
 const hexColorSchema = z.string().regex(/^#[0-9A-F]{6}$/i, 'Color must be a valid 6-digit hex value');
-const onboardingStepSchema = z.enum(['upload_logo', 'set_accent_color', 'add_first_equipment', 'invite_team_member']);
+const onboardingStepSchema = z.enum([
+  'upload_logo',
+  'set_accent_color',
+  'add_first_equipment',
+  'set_contact_details',
+  'invite_team_member',
+  'share_storefront'
+]);
 
 export const registerTenantSchema = z.object({
   name: z.string().min(2).max(120),

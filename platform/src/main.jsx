@@ -18,6 +18,7 @@ import { ToastProvider } from './components/ui';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const DashboardHomePage = lazy(() => import('./pages/DashboardHomePage'));
 const EquipmentPage = lazy(() => import('./pages/EquipmentPage'));
 const EquipmentDetailPage = lazy(() => import('./pages/EquipmentDetailPage'));
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
   {
     element: <ProtectedShell />,
     children: [
+      { path: '/welcome', element: routeElement(WelcomePage) },
       {
         element: <DashboardLayout />,
         children: [
