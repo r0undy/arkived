@@ -49,7 +49,6 @@ export default function EquipmentPage() {
   const [status, setStatus] = useState({ loading: false, error: '' });
   const [filters, setFilters] = useState({ q: '', category: '', status: '' });
   const [page, setPage] = useState(1);
-  const [imageById, setImageById] = useState({});
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState('card');
 
@@ -78,42 +77,17 @@ export default function EquipmentPage() {
   const start = (page - 1) * PAGE_SIZE;
   const pageItems = useMemo(() => items.slice(start, start + PAGE_SIZE), [items, start]);
 
-  useEffect(() => {
-    let mounted = true;
-
-    const loadImages = async () => {
-      const pairs = await Promise.all(
-        pageItems.map(async (item) => {
-          try {
-            const detail = await api.equipmentById(item.id);
-            const images = detail.data?.images || [];
-            const primary = images.find((entry) => entry.is_primary) || images[0] || null;
-            return [item.id, primary?.storage_url || ''];
-          } catch (_error) {
-            return [item.id, ''];
-          }
-        })
-      );
-
-      if (!mounted) return;
-
-      setImageById((prev) => {
-        const next = { ...prev };
-        for (const [id, url] of pairs) {
-          next[id] = url;
-        }
-        return next;
-      });
-    };
-
-    if (pageItems.length > 0) {
-      loadImages();
+  // The list endpoint now returns each item's images, so resolve the cover
+  // photo directly instead of an extra request per card.
+  const imageById = useMemo(() => {
+    const map = {};
+    for (const item of items) {
+      const images = item.images || [];
+      const primary = images.find((entry) => entry.is_primary) || images[0] || null;
+      map[item.id] = primary?.storage_url || '';
     }
-
-    return () => {
-      mounted = false;
-    };
-  }, [pageItems]);
+    return map;
+  }, [items]);
 
   const updateForm = (key) => (event) => {
     const value = ['daily_rate', 'deposit', 'quantity'].includes(key)
@@ -136,24 +110,31 @@ export default function EquipmentPage() {
       const created = await api.createEquipment(form);
       const newId = created?.data?.id;
 
+      let imageError = '';
       if (newId && newImages.length > 0) {
-        for (let index = 0; index < newImages.length; index += 1) {
-          const file = newImages[index];
-          const content_base64 = await fileToBase64(file);
-          await api.uploadEquipmentImage(newId, {
-            file_name: file.name,
-            mime_type: file.type || 'image/png',
-            content_base64,
-            is_primary: index === 0,
-            display_order: index
-          });
+        try {
+          for (let index = 0; index < newImages.length; index += 1) {
+            const file = newImages[index];
+            const content_base64 = await fileToBase64(file);
+            await api.uploadEquipmentImage(newId, {
+              file_name: file.name,
+              mime_type: file.type || 'image/png',
+              content_base64,
+              is_primary: index === 0,
+              display_order: index
+            });
+          }
+        } catch (uploadError) {
+          // The item itself was created — don't lose it just because a photo
+          // upload failed. Surface a soft warning and still refresh the list.
+          imageError = uploadError.message || 'Item created, but a photo failed to upload.';
         }
       }
 
       setForm(initialForm);
       setNewImages([]);
-      setStatus({ loading: false, error: '' });
-      setFormOpen(false);
+      setStatus({ loading: false, error: imageError });
+      setFormOpen(!imageError ? false : true);
       await loadItems();
     } catch (error) {
       setStatus({ loading: false, error: error.message });

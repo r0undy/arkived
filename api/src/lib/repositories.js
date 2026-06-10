@@ -373,7 +373,32 @@ export const equipmentRepository = {
       throw new AppError(500, error.message, 'EQUIPMENT_LIST_FAILED');
     }
 
-    return data ?? [];
+    const items = data ?? [];
+    if (items.length === 0) {
+      return items;
+    }
+
+    // Attach images in a single query so storefront cards / dashboard tiles can
+    // render a cover photo without an N+1 round-trip per item.
+    const { data: images, error: imageError } = await supabase
+      .from('equipment_images')
+      .select('id, equipment_id, storage_url, is_primary, display_order, created_at')
+      .eq('tenant_id', tenantId)
+      .in('equipment_id', items.map((item) => item.id))
+      .order('display_order', { ascending: true });
+
+    if (imageError) {
+      throw new AppError(500, imageError.message, 'EQUIPMENT_LIST_IMAGES_FAILED');
+    }
+
+    const imagesByEquipment = new Map();
+    for (const image of images ?? []) {
+      const bucket = imagesByEquipment.get(image.equipment_id) || [];
+      bucket.push(image);
+      imagesByEquipment.set(image.equipment_id, bucket);
+    }
+
+    return items.map((item) => ({ ...item, images: imagesByEquipment.get(item.id) ?? [] }));
   },
 
   async getById(tenantId, id) {
