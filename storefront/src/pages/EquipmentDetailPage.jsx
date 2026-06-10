@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle2, Link2, Check, X, Plus } from 'lucide-react';
 import { storefrontApi } from '../lib/api';
 import Meta from '../components/Meta';
+import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import { ProductJsonLd } from '../components/StructuredData';
 import { recordRecentlyViewed, getRecentlyViewed } from '../lib/recentlyViewed';
 import { useQuoteCart } from '../hooks/useQuoteCart';
@@ -255,14 +256,13 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
             {/* Availability */}
             <section className="border-t border-slate-200/70 pt-6">
               <h2 className="text-lg font-semibold tracking-tight text-slate-900">Availability</h2>
-              <div className="mt-3 grid gap-2">
-                {availabilityError ? <p className="text-sm text-red-700">{availabilityError}</p> : null}
-                {unavailableRanges.map((entry) => (
-                  <p key={entry.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                    Unavailable: {entry.start_date} to {entry.end_date} ({entry.status})
-                  </p>
-                ))}
-                {unavailableRanges.length === 0 && !availabilityError ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
+              <p className="mt-1 text-sm text-slate-500">Booked dates over the next 3 months are shaded. Everything else is open.</p>
+              <div className="mt-4">
+                {availabilityError ? (
+                  <p className="rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{availabilityError}</p>
+                ) : (
+                  <AvailabilityCalendar ranges={unavailableRanges} months={3} />
+                )}
               </div>
             </section>
 
