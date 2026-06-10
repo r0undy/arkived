@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, CalendarDays, X } from 'lucide-react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
+import Button from '../components/ui/Button';
 
 const VIEW_OPTIONS = ['month', 'week', 'day'];
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -28,10 +31,17 @@ const shiftDate = (date, view, direction) => {
 };
 
 const colorClassByType = {
-  reserved: 'bg-warning-500/20 text-warning-200 border-warning-500/40',
-  rented: 'bg-danger-500/20 text-danger-200 border-danger-500/40',
-  available: 'bg-success-500/20 text-success-200 border-success-500/40',
-  maintenance: 'bg-blue-500/20 text-blue-200 border-blue-500/40'
+  reserved: 'border-warning-500/30 bg-warning-500/10 text-warning-200',
+  rented: 'border-danger-500/30 bg-danger-500/10 text-danger-200',
+  available: 'border-success-500/30 bg-success-500/10 text-success-200',
+  maintenance: 'border-blue-500/30 bg-blue-500/10 text-blue-200'
+};
+
+const dotByType = {
+  reserved: 'bg-warning-500',
+  rented: 'bg-danger-500',
+  available: 'bg-success-500',
+  maintenance: 'bg-blue-500'
 };
 
 const eventTypeFromStatus = (status) => {
@@ -181,61 +191,99 @@ export default function CalendarPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-      <p className="mt-2 text-sm text-neutral-400">Month / week / day booking and maintenance visibility.</p>
+      <PageHeader title="Calendar" subtitle="Month / week / day booking and maintenance visibility." />
 
-      <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
-        <div className="flex flex-wrap items-end gap-2">
-          <FilterSelect
-            label="Equipment"
-            value={filters.equipment_id}
-            onChange={(event) => setFilters((prev) => ({ ...prev, equipment_id: event.target.value }))}
-          >
-            <option value="">All</option>
-            {equipment.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
-          </FilterSelect>
-          <FilterSelect
-            label="Category"
-            value={filters.category}
-            onChange={(event) => setFilters((prev) => ({ ...prev, category: event.target.value, equipment_id: '' }))}
-          >
-            <option value="">All</option>
-            {categories.map((entry) => <option key={entry} value={entry}>{entry}</option>)}
-          </FilterSelect>
+      <div className="rounded-xl border border-neutral-750 bg-neutral-800/60 p-3 shadow-sm">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-0.5 rounded-lg border border-neutral-750 bg-neutral-900 p-1">
+              <button
+                aria-label="Previous period"
+                className="rounded-md p-1.5 text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+                onClick={prev}
+                type="button"
+              >
+                <ChevronLeft aria-hidden="true" className="h-4 w-4" />
+              </button>
+              <button
+                className="rounded-md px-2.5 py-1 text-sm font-medium text-neutral-200 transition hover:bg-neutral-800 hover:text-white"
+                onClick={today}
+                type="button"
+              >
+                Today
+              </button>
+              <button
+                aria-label="Next period"
+                className="rounded-md p-1.5 text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+                onClick={next}
+                type="button"
+              >
+                <ChevronRight aria-hidden="true" className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-neutral-100">{title}</p>
+              <p className="text-xs capitalize text-neutral-500">{view} view</p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex items-center rounded-lg border border-neutral-750 bg-neutral-900 p-1">
+              {VIEW_OPTIONS.map((entry) => (
+                <button
+                  key={entry}
+                  aria-pressed={view === entry}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium capitalize transition ${
+                    view === entry
+                      ? 'bg-brand-500 text-white shadow-sm'
+                      : 'text-neutral-400 hover:text-neutral-100'
+                  }`}
+                  onClick={() => setView(entry)}
+                  type="button"
+                >
+                  {entry}
+                </button>
+              ))}
+            </div>
+
+            <FilterSelect
+              label="Equipment"
+              value={filters.equipment_id}
+              onChange={(event) => setFilters((prev) => ({ ...prev, equipment_id: event.target.value }))}
+            >
+              <option value="">All equipment</option>
+              {equipment.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+            </FilterSelect>
+            <FilterSelect
+              label="Category"
+              value={filters.category}
+              onChange={(event) => setFilters((prev) => ({ ...prev, category: event.target.value, equipment_id: '' }))}
+            >
+              <option value="">All categories</option>
+              {categories.map((entry) => <option key={entry} value={entry}>{entry}</option>)}
+            </FilterSelect>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button className="rounded-md border border-neutral-700 px-3 py-2 text-sm" onClick={prev} type="button">Prev</button>
-          <button className="rounded-md border border-neutral-700 px-3 py-2 text-sm" onClick={today} type="button">Today</button>
-          <button className="rounded-md border border-neutral-700 px-3 py-2 text-sm" onClick={next} type="button">Next</button>
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-neutral-750/60 pt-3 text-xs text-neutral-400">
+          <span className="font-medium uppercase tracking-wide text-neutral-500">Legend</span>
+          <LegendItem dot={dotByType.available} label="Available" />
+          <LegendItem dot={dotByType.rented} label="Rented" />
+          <LegendItem dot={dotByType.reserved} label="Reserved" />
+          <LegendItem dot={dotByType.maintenance} label="In maintenance" />
         </div>
-      </div>
-
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        {VIEW_OPTIONS.map((entry) => (
-          <button
-            key={entry}
-            className={`rounded-md px-3 py-1 text-sm capitalize ${view === entry ? 'bg-brand-500 text-white' : 'border border-neutral-700 text-neutral-300'}`}
-            onClick={() => setView(entry)}
-            type="button"
-          >
-            {entry}
-          </button>
-        ))}
-        <span className="ml-2 text-sm text-neutral-300">{title}</span>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <LegendItem className={colorClassByType.available} label="Available" />
-        <LegendItem className={colorClassByType.rented} label="Rented" />
-        <LegendItem className={colorClassByType.reserved} label="Reserved" />
-        <LegendItem className={colorClassByType.maintenance} label="In Maintenance" />
       </div>
 
       {view === 'day' ? (
-        <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
-          <h2 className="text-sm font-semibold text-neutral-200">{formatLong(toYmd(range.start))}</h2>
-          <div className="mt-3 grid gap-2">
+        <section className="mt-4 rounded-xl border border-neutral-750 bg-neutral-800 p-5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <CalendarDays aria-hidden="true" className="h-4 w-4 text-brand-400" />
+            <h2 className="text-sm font-semibold text-neutral-100">{formatLong(toYmd(range.start))}</h2>
+            <span className="ml-auto text-xs text-neutral-500">
+              {(eventsByDate.get(toYmd(range.start)) || []).length} events
+            </span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
             {(eventsByDate.get(toYmd(range.start)) || []).map((event) => (
               <EventButton
                 key={event.id}
@@ -245,92 +293,136 @@ export default function CalendarPage() {
               />
             ))}
             {(eventsByDate.get(toYmd(range.start)) || []).length === 0 ? (
-              <p className="text-sm text-neutral-400">No events for this day.</p>
+              <div className="col-span-full flex flex-col items-center justify-center rounded-lg border border-dashed border-neutral-750 py-12 text-center">
+                <CalendarDays aria-hidden="true" className="h-6 w-6 text-neutral-600" />
+                <p className="mt-2 text-sm text-neutral-400">No events scheduled for this day.</p>
+              </div>
             ) : null}
           </div>
         </section>
       ) : (
-        <section className="mt-6 overflow-x-auto rounded-lg border border-neutral-750 bg-neutral-800">
-          {view === 'month' ? (
-            <div className="grid min-w-225 grid-cols-7 border-b border-neutral-750">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
-                <div key={label} className="px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide text-neutral-400">
-                  {label}
-                </div>
-              ))}
+        <section className="mt-4 overflow-hidden rounded-xl border border-neutral-750 bg-neutral-800 shadow-sm">
+          <div className="overflow-x-auto">
+            {view === 'month' ? (
+              <div className="grid min-w-225 grid-cols-7 border-b border-neutral-750 bg-neutral-900/50">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
+                  <div key={label} className="px-2 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
+                    {label}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            <div className="grid min-w-225 grid-cols-7">
+              {weekDays.map((day) => {
+                const ymd = toYmd(day);
+                const dayEvents = eventsByDate.get(ymd) || [];
+                const isToday = ymd === todayYmd;
+                const outsideMonth = view === 'month' && day.getUTCMonth() !== anchorDate.getUTCMonth();
+                const weekdayShort = day.toLocaleDateString(undefined, { weekday: 'short', timeZone: 'UTC' });
+                return (
+                  <div
+                    key={ymd}
+                    className={`min-h-32 border-r border-b border-neutral-750 p-1.5 transition-colors last:border-r-0 ${
+                      outsideMonth ? 'bg-neutral-900/40' : 'hover:bg-neutral-750/30'
+                    } ${isToday ? 'bg-brand-500/6' : ''}`}
+                  >
+                    <div className="mb-1 flex items-center justify-between px-0.5">
+                      <div className="flex items-baseline gap-1.5">
+                        {view !== 'month' ? (
+                          <span className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">{weekdayShort}</span>
+                        ) : null}
+                        <span
+                          className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-1 text-xs font-semibold ${
+                            isToday
+                              ? 'bg-brand-500 text-white'
+                              : outsideMonth
+                                ? 'text-neutral-600'
+                                : 'text-neutral-300'
+                          }`}
+                        >
+                          {day.getUTCDate()}
+                        </span>
+                      </div>
+                      {dayEvents.length > 0 ? (
+                        <span className="text-[10px] font-medium text-neutral-500">{dayEvents.length}</span>
+                      ) : null}
+                    </div>
+                    <div className="grid gap-1">
+                      {dayEvents.slice(0, 4).map((event) => (
+                        <EventButton
+                          key={`${event.id}-${ymd}`}
+                          compact
+                          event={event}
+                          equipment={equipmentById[event.equipment_id]}
+                          onClick={() => setSelected(event)}
+                        />
+                      ))}
+                      {dayEvents.length > 4 ? (
+                        <button
+                          className="rounded px-1 py-0.5 text-left text-[10px] font-medium text-neutral-400 transition hover:text-neutral-100"
+                          onClick={() => { setView('day'); setAnchorDate(startOfDay(day)); }}
+                          type="button"
+                        >
+                          +{dayEvents.length - 4} more
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          ) : null}
-          <div className="grid min-w-225 grid-cols-7">
-            {weekDays.map((day) => {
-              const ymd = toYmd(day);
-              const dayEvents = eventsByDate.get(ymd) || [];
-              const isToday = ymd === todayYmd;
-              const outsideMonth = view === 'month' && day.getUTCMonth() !== anchorDate.getUTCMonth();
-              return (
-                <div
-                  key={ymd}
-                  className={`min-h-35 border-r border-b border-neutral-750 p-2 last:border-r-0 ${
-                    outsideMonth ? 'bg-neutral-900/40' : ''
-                  } ${isToday ? 'bg-brand-500/5' : ''}`}
-                >
-                  <div className="flex items-center justify-between">
-                    <p className={`text-xs ${outsideMonth ? 'text-neutral-600' : 'text-neutral-400'}`}>
-                      {day.toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short', timeZone: 'UTC' })}
-                    </p>
-                    {isToday ? (
-                      <span className="inline-flex items-center rounded-full bg-brand-500 px-1.5 text-[10px] font-semibold text-white">
-                        Today
-                      </span>
-                    ) : null}
-                  </div>
-                  <div className="mt-2 grid gap-1">
-                    {dayEvents.slice(0, 4).map((event) => (
-                      <EventButton
-                        key={`${event.id}-${ymd}`}
-                        compact
-                        event={event}
-                        equipment={equipmentById[event.equipment_id]}
-                        onClick={() => setSelected(event)}
-                      />
-                    ))}
-                    {dayEvents.length > 4 ? (
-                      <span className="px-1 text-[10px] font-medium text-neutral-400">+{dayEvents.length - 4} more</span>
-                    ) : null}
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </section>
       )}
 
       {selected ? (
         <div className="fixed inset-0 z-40" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSelected(null)} />
-          <aside className="absolute right-0 top-0 h-full w-full max-w-md animate-[modalIn_0.2s_ease-out] border-l border-neutral-750 bg-neutral-900 p-5 shadow-2xl">
-            <div className="flex items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold tracking-tight">Event Detail</h3>
-              <button className="rounded-md border border-neutral-700 px-2 py-1 text-xs" onClick={() => setSelected(null)} type="button">
-                Close
+          <div className="absolute inset-0 bg-black/50 animate-[fadeIn_0.15s_ease-out]" onClick={() => setSelected(null)} />
+          <aside className="absolute right-0 top-0 h-full w-full max-w-md animate-[modalIn_0.2s_ease-out] border-l border-neutral-750 bg-neutral-900 shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b border-neutral-800 p-5">
+              <div className="flex items-center gap-3">
+                <span className={`mt-0.5 h-9 w-1 shrink-0 rounded-full ${dotByType[selected.type] || dotByType.reserved}`} />
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight text-neutral-50">
+                    {equipmentById[selected.equipment_id]?.name || selected.equipment_id}
+                  </h3>
+                  <span className={`mt-1 inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium capitalize ${colorClassByType[selected.type] || colorClassByType.reserved}`}>
+                    <span className={`h-1.5 w-1.5 rounded-full ${dotByType[selected.type] || dotByType.reserved}`} />
+                    {selected.type}
+                  </span>
+                </div>
+              </div>
+              <button
+                aria-label="Close"
+                className="rounded-md p-1.5 text-neutral-400 transition hover:bg-neutral-800 hover:text-neutral-100"
+                onClick={() => setSelected(null)}
+                type="button"
+              >
+                <X aria-hidden="true" className="h-4 w-4" />
               </button>
             </div>
 
-            <div className="mt-4 space-y-2 text-sm">
-              <Row label="Type" value={selected.type} />
+            <div className="space-y-2 p-5 text-sm">
               <Row label="Status" value={selected.status} />
-              <Row label="Equipment" value={equipmentById[selected.equipment_id]?.name || selected.equipment_id} />
-              <Row label="Start" value={selected.start_date} />
-              <Row label="End" value={selected.end_date} />
-            </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Row label="Start" value={selected.start_date} />
+                <Row label="End" value={selected.end_date} />
+              </div>
 
-            {selected.booking_id ? (
-              <Link
-                className="mt-5 inline-block rounded-md bg-brand-500 px-3 py-2 text-sm font-semibold hover:bg-brand-600"
-                to={`/dashboard/bookings/${selected.booking_id}`}
-              >
-                Open booking detail
-              </Link>
-            ) : null}
+              {selected.booking_id ? (
+                <Button
+                  as={Link}
+                  className="mt-3 w-full"
+                  to={`/dashboard/bookings/${selected.booking_id}`}
+                >
+                  Open booking detail
+                </Button>
+              ) : (
+                <p className="mt-3 rounded-lg border border-dashed border-neutral-750 px-3 py-2 text-center text-xs text-neutral-500">
+                  Maintenance event — no booking attached.
+                </p>
+              )}
+            </div>
           </aside>
         </div>
       ) : null}
@@ -340,24 +432,33 @@ export default function CalendarPage() {
 
 function FilterSelect({ label, children, ...props }) {
   return (
-    <label className="block text-sm text-neutral-200">
-      <span>{label}</span>
-      <select className="mt-1 rounded-md border border-neutral-750 bg-neutral-950 px-3 py-2" {...props}>
+    <label className="inline-flex items-center gap-2 text-xs text-neutral-400">
+      <span className="hidden sm:inline">{label}</span>
+      <select
+        aria-label={label}
+        className="h-9 rounded-lg border border-neutral-750 bg-neutral-900 px-3 text-sm text-neutral-200 transition hover:border-neutral-700 focus:border-brand-500"
+        {...props}
+      >
         {children}
       </select>
     </label>
   );
 }
 
-function LegendItem({ className, label }) {
-  return <span className={`rounded border px-2 py-1 ${className}`}>{label}</span>;
+function LegendItem({ dot, label }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`h-2 w-2 rounded-full ${dot}`} />
+      {label}
+    </span>
+  );
 }
 
 function Row({ label, value }) {
   return (
-    <div className="rounded-md border border-neutral-750 bg-neutral-800 p-3">
-      <p className="text-xs uppercase tracking-wide text-neutral-400">{label}</p>
-      <p className="mt-1 text-neutral-100">{value || '--'}</p>
+    <div className="rounded-lg border border-neutral-750 bg-neutral-800 p-3">
+      <p className="text-xs uppercase tracking-wide text-neutral-500">{label}</p>
+      <p className="mt-1 capitalize text-neutral-100">{value || '--'}</p>
     </div>
   );
 }
@@ -365,16 +466,17 @@ function Row({ label, value }) {
 function EventButton({ event, equipment, compact = false, onClick }) {
   return (
     <button
-      className={`w-full rounded border px-2 py-1 text-left ${colorClassByType[event.type] || colorClassByType.reserved}`}
+      className={`flex w-full items-center gap-1.5 rounded-md border px-1.5 py-1 text-left transition hover:brightness-125 ${colorClassByType[event.type] || colorClassByType.reserved}`}
       onClick={onClick}
       type="button"
     >
-      <p className={compact ? 'text-[11px] font-medium' : 'text-xs font-semibold'}>
-        {equipment?.name || event.equipment_id}
-      </p>
-      <p className={compact ? 'text-[10px] opacity-90' : 'text-xs opacity-90'}>
-        {event.title}
-      </p>
+      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${dotByType[event.type] || dotByType.reserved}`} />
+      <span className="min-w-0 flex-1">
+        <span className={`block truncate font-medium ${compact ? 'text-[11px]' : 'text-xs'}`}>
+          {equipment?.name || event.equipment_id}
+        </span>
+        {!compact ? <span className="block truncate text-xs capitalize opacity-80">{event.title}</span> : null}
+      </span>
     </button>
   );
 }

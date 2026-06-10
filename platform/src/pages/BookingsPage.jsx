@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
+import { Table, TableContainer, THead, Th, TBody, Tr, Td } from '../components/ui/Table';
 import { CalendarCheck } from 'lucide-react';
 import { useNewInquiries } from '../hooks/useNewInquiries';
 
@@ -295,8 +297,7 @@ export default function BookingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
-      <p className="mt-2 text-sm text-neutral-400">Track reservation-to-return pipeline.</p>
+      <PageHeader title="Bookings" subtitle="Track reservation-to-return pipeline." />
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div className="grid flex-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">
@@ -417,48 +418,51 @@ export default function BookingsPage() {
         </section>
       ) : null}
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-750 bg-neutral-800">
-        <table className="min-w-full divide-y divide-neutral-750 text-sm">
-          <thead className="bg-neutral-900 text-neutral-300">
-            <tr>
-              <th className="px-3 py-2 text-left">Customer</th>
-              <th className="px-3 py-2 text-left">Equipment</th>
-              <th className="px-3 py-2 text-left">Start</th>
-              <th className="px-3 py-2 text-left">End</th>
-              <th className="px-3 py-2 text-left">Status</th>
-              <th className="px-3 py-2 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-750">
+      <TableContainer className="mt-6">
+        <Table>
+          <THead>
+            <Th>Customer</Th>
+            <Th>Equipment</Th>
+            <Th>Start</Th>
+            <Th>End</Th>
+            <Th>Status</Th>
+            <Th align="right">Actions</Th>
+          </THead>
+          <TBody>
             {bookings.map((booking) => {
               const isNew = newInquiryIds.has(booking.id);
               return (
-                <tr key={booking.id} className={isNew ? 'bg-info-500/10' : undefined}>
-                  <td className="px-3 py-2">
+                <Tr key={booking.id} highlight={isNew}>
+                  <Td>
                     <span className="flex items-center gap-2">
                       {isNew ? <Badge variant="info">New</Badge> : null}
-                      {customerMap[booking.customer_id]?.full_name || booking.customer_id}
+                      <span className="font-medium text-neutral-100">
+                        {customerMap[booking.customer_id]?.full_name || booking.customer_id}
+                      </span>
                     </span>
-                  </td>
-                  <td className="px-3 py-2">{equipmentMap[booking.equipment_id]?.name || booking.equipment_id}</td>
-                  <td className="px-3 py-2">{booking.start_date}</td>
-                  <td className="px-3 py-2">{booking.end_date}</td>
-                  <td className="px-3 py-2">
+                  </Td>
+                  <Td className="text-neutral-300">{equipmentMap[booking.equipment_id]?.name || booking.equipment_id}</Td>
+                  <Td className="tabular-nums text-neutral-300">{booking.start_date}</Td>
+                  <Td className="tabular-nums text-neutral-300">{booking.end_date}</Td>
+                  <Td>
                     <span className="flex items-center gap-1.5">
                       <Badge variant={STATUS_VARIANT[booking.status] || 'neutral'} icon={false} className="capitalize">
                         {booking.status}
                       </Badge>
                       {booking.overdue ? <Badge variant="danger">Overdue</Badge> : null}
                     </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex flex-wrap gap-2">
-                      <Link className="rounded-md border border-neutral-700 px-2 py-1 hover:bg-neutral-900" to={`/dashboard/bookings/${booking.id}`}>
+                  </Td>
+                  <Td align="right">
+                    <div className="flex flex-wrap justify-end gap-2">
+                      <Link
+                        className="inline-flex items-center rounded-md border border-neutral-750 px-2.5 py-1 text-xs font-medium text-neutral-200 transition hover:bg-neutral-700 hover:text-white"
+                        to={`/dashboard/bookings/${booking.id}`}
+                      >
                         View
                       </Link>
                       {NEXT_STATUS[booking.status] ? (
                         <button
-                          className="rounded-md bg-brand-500 px-2 py-1 text-xs font-semibold hover:bg-brand-600"
+                          className="rounded-md bg-brand-500 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-brand-600"
                           onClick={() => moveForward(booking)}
                           type="button"
                         >
@@ -466,12 +470,12 @@ export default function BookingsPage() {
                         </button>
                       ) : null}
                     </div>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               );
             })}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
         {bookings.length === 0 ? (
           <EmptyState
             className="border-0"
@@ -489,7 +493,7 @@ export default function BookingsPage() {
             }
           />
         ) : null}
-      </div>
+      </TableContainer>
 
       <div className="mt-4 flex items-center justify-between text-sm text-neutral-300">
         <p>Total: {meta.total}</p>

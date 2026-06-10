@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, LayoutGrid, List } from 'lucide-react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import { SkeletonCard } from '../components/ui/Skeleton';
+import { Table, TableContainer, THead, Th, TBody, Tr, Td } from '../components/ui/Table';
 
 const PAGE_SIZE = 6;
 
@@ -129,8 +131,7 @@ export default function EquipmentPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Equipment</h1>
-      <p className="mt-2 text-sm text-neutral-400">Browse and manage your rental inventory.</p>
+      <PageHeader title="Equipment" subtitle="Browse and manage your rental inventory." />
 
       <div className="mt-6 grid gap-3 rounded-lg border border-neutral-750 bg-neutral-800 p-4 md:grid-cols-4">
         <Field label="Search" value={filters.q} onChange={updateFilter('q')} placeholder="Name or keyword" />
@@ -288,23 +289,21 @@ export default function EquipmentPage() {
           ))}
         </div>
       ) : (
-        <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-750">
-          <table className="w-full min-w-150 text-left text-sm">
-            <thead className="bg-neutral-800 text-xs uppercase tracking-wide text-neutral-400">
-              <tr>
-                <th className="px-4 py-3 font-medium">Item</th>
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Daily rate</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-800">
+        <TableContainer className="mt-4">
+          <Table className="min-w-150">
+            <THead>
+              <Th>Item</Th>
+              <Th>Category</Th>
+              <Th align="right">Daily rate</Th>
+              <Th>Status</Th>
+              <Th align="right">Action</Th>
+            </THead>
+            <TBody>
               {pageItems.map((item) => (
-                <tr key={item.id} className="bg-neutral-900 hover:bg-neutral-800/60">
-                  <td className="px-4 py-3">
+                <Tr key={item.id}>
+                  <Td>
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-neutral-800">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-md bg-neutral-900">
                         {imageById[item.id] ? (
                           <img alt={item.name} className="h-full w-full object-cover" src={imageById[item.id]} />
                         ) : (
@@ -315,27 +314,27 @@ export default function EquipmentPage() {
                       </div>
                       <span className="font-medium text-neutral-100">{item.name}</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-neutral-400">{item.category}</td>
-                  <td className="px-4 py-3">PHP {Number(item.daily_rate).toLocaleString()}</td>
-                  <td className="px-4 py-3">
+                  </Td>
+                  <Td className="text-neutral-400">{item.category}</Td>
+                  <Td align="right" className="tabular-nums text-neutral-200">PHP {Number(item.daily_rate).toLocaleString()}</Td>
+                  <Td>
                     <Badge variant={STATUS_VARIANT[item.status] || 'neutral'} icon={false} className="capitalize">
                       {item.status}
                     </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-right">
+                  </Td>
+                  <Td align="right">
                     <Link
-                      className="rounded border border-neutral-750 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
+                      className="inline-flex items-center rounded-md border border-neutral-750 px-3 py-1 text-xs font-medium text-neutral-200 transition hover:bg-neutral-700 hover:text-white"
                       to={`/dashboard/equipment/${item.id}`}
                     >
                       Open detail
                     </Link>
-                  </td>
-                </tr>
+                  </Td>
+                </Tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TBody>
+          </Table>
+        </TableContainer>
       )}
 
       {!loading && items.length > 0 ? (

@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import { useAuth } from '../hooks/useAuth';
 import Badge from '../components/ui/Badge';
+import { Table, TableContainer, THead, Th, TBody, Tr, Td } from '../components/ui/Table';
 
 const initialInvite = {
   email: '',
@@ -90,8 +92,7 @@ export default function TeamPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-      <p className="mt-2 text-sm text-neutral-400">Manage tenant staff members and admin roles.</p>
+      <PageHeader title="Team" subtitle="Manage tenant staff members and admin roles." />
 
       <form className="mt-6 grid gap-3 rounded-lg border border-neutral-750 bg-neutral-800 p-4 md:grid-cols-3" onSubmit={submitInvite}>
         <Field label="Email" type="email" value={invite.email} onChange={updateInvite('email')} required />
@@ -122,21 +123,19 @@ export default function TeamPage() {
         </div>
       </form>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-750">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-neutral-800 text-xs uppercase tracking-wide text-neutral-400">
-            <tr>
-              <th className="px-4 py-3 font-medium">Member</th>
-              <th className="px-4 py-3 font-medium">Role</th>
-              <th className="px-4 py-3 font-medium">Created</th>
-              <th className="px-4 py-3 text-right font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-750">
+      <TableContainer className="mt-6">
+        <Table>
+          <THead>
+            <Th>Member</Th>
+            <Th>Role</Th>
+            <Th>Created</Th>
+            <Th align="right">Action</Th>
+          </THead>
+          <TBody>
             {loading
               ? Array.from({ length: 3 }).map((_, index) => (
-                  <tr key={index} className="bg-neutral-900">
-                    <td className="px-4 py-3">
+                  <Tr key={index}>
+                    <Td>
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 animate-pulse rounded-full bg-neutral-700" />
                         <div className="space-y-1.5">
@@ -144,17 +143,17 @@ export default function TeamPage() {
                           <div className="h-3 w-40 animate-pulse rounded bg-neutral-750" />
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-3"><div className="h-7 w-24 animate-pulse rounded bg-neutral-700" /></td>
-                    <td className="px-4 py-3"><div className="h-3.5 w-20 animate-pulse rounded bg-neutral-700" /></td>
-                    <td className="px-4 py-3"><div className="ml-auto h-6 w-16 animate-pulse rounded bg-neutral-700" /></td>
-                  </tr>
+                    </Td>
+                    <Td><div className="h-7 w-24 animate-pulse rounded bg-neutral-700" /></Td>
+                    <Td><div className="h-3.5 w-20 animate-pulse rounded bg-neutral-700" /></Td>
+                    <Td align="right"><div className="ml-auto h-6 w-16 animate-pulse rounded bg-neutral-700" /></Td>
+                  </Tr>
                 ))
               : null}
 
             {!loading && error ? (
               <tr>
-                <td className="px-4 py-6 text-danger-500" colSpan="4">{error}</td>
+                <Td className="text-danger-500" colSpan="4">{error}</Td>
               </tr>
             ) : null}
 
@@ -162,8 +161,8 @@ export default function TeamPage() {
               ? team.map((member) => {
                   const isSelf = currentUserId && currentUserId === member.id;
                   return (
-                    <tr key={member.id} className="bg-neutral-900 transition hover:bg-neutral-800/60">
-                      <td className="px-4 py-3">
+                    <Tr key={member.id}>
+                      <Td>
                         <div className="flex items-center gap-3">
                           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-xs font-semibold text-brand-200">
                             {teamInitials(member.full_name, (member.email || '?')[0]?.toUpperCase())}
@@ -176,8 +175,8 @@ export default function TeamPage() {
                             <p className="truncate text-xs text-neutral-400">{member.email || member.id}</p>
                           </div>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
+                      </Td>
+                      <Td>
                         <select
                           className="rounded-md border border-neutral-750 bg-neutral-950 px-2 py-1 capitalize"
                           value={member.role}
@@ -187,34 +186,34 @@ export default function TeamPage() {
                           <option value="staff">staff</option>
                           <option value="admin">admin</option>
                         </select>
-                      </td>
-                      <td className="px-4 py-3 text-neutral-300">{new Date(member.created_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3 text-right">
+                      </Td>
+                      <Td className="tabular-nums text-neutral-300">{new Date(member.created_at).toLocaleDateString()}</Td>
+                      <Td align="right">
                         <button
-                          className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800 disabled:opacity-50"
+                          className="rounded-md border border-neutral-750 px-2.5 py-1 text-xs font-medium text-neutral-200 transition hover:bg-neutral-700 hover:text-white disabled:opacity-50"
                           disabled={Boolean(isSelf)}
                           onClick={() => removeMember(member.id)}
                           type="button"
                         >
                           Remove
                         </button>
-                      </td>
-                    </tr>
+                      </Td>
+                    </Tr>
                   );
                 })
               : null}
 
             {!loading && !error && team.length === 0 ? (
               <tr>
-                <td className="px-4 py-8 text-center text-neutral-400" colSpan="4">
+                <Td className="text-center" colSpan="4">
                   <p className="font-medium text-neutral-200">It's just you so far</p>
-                  <p className="mt-1 text-sm">Invite a teammate above to help manage bookings, equipment, and customers.</p>
-                </td>
+                  <p className="mt-1 text-sm text-neutral-400">Invite a teammate above to help manage bookings, equipment, and customers.</p>
+                </Td>
               </tr>
             ) : null}
-          </tbody>
-        </table>
-      </div>
+          </TBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 }

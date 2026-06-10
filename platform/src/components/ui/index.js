@@ -5,6 +5,8 @@ export { default as Badge } from './Badge';
 export { default as Modal } from './Modal';
 export { Skeleton, SkeletonText, SkeletonCard } from './Skeleton';
 export { default as EmptyState } from './EmptyState';
+export { default as PageHeader } from './PageHeader';
+export { Table, TableContainer, THead, Th, TBody, Tr, Td } from './Table';
 export { default as ProgressRing } from './ProgressRing';
 export { default as Switch } from './Switch';
 export { default as Tooltip } from './Tooltip';

@@ -75,18 +75,25 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
     tenant.contact_email ? { key: 'email', icon: Mail, label: 'Email', href: `mailto:${tenant.contact_email}` } : null
   ].filter(Boolean);
 
+  const heroFacts = [
+    { icon: PackageSearch, label: `${available.length} items available` },
+    { icon: Clock, label: 'Fast replies' },
+    { icon: ShieldCheck, label: 'Quality maintained' },
+    { icon: MapPin, label: tenant.contact_address ? 'Local pickup' : 'Flexible pickup' }
+  ];
+
   return (
     <>
       <Meta tenant={tenant} title={title} description={description} path="/" />
       <LocalBusinessJsonLd tenant={tenant} />
 
-      <div className="space-y-12">
+      <div className="space-y-16 sm:space-y-20">
         {catalogError ? (
           <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{catalogError}</div>
         ) : null}
 
         {/* Hero */}
-        <section ref={parallax.ref} className="relative overflow-hidden rounded-3xl">
+        <section ref={parallax.ref} className="relative overflow-hidden rounded-2xl">
           {heroImage ? (
             <div
               aria-hidden="true"
@@ -176,104 +183,118 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
                   })}
                 </div>
               ) : null}
+
+              {/* Inline trust facts — replaces the standalone card strip */}
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-white/80">
+                {heroFacts.map((fact, index) => {
+                  const Icon = fact.icon;
+                  return (
+                    <span key={fact.label} className="inline-flex items-center">
+                      {index > 0 ? (
+                        <span className="mr-4 hidden h-1 w-1 rounded-full bg-white/40 sm:inline-block" aria-hidden="true" />
+                      ) : null}
+                      <Icon className="mr-1.5 h-4 w-4 text-white/70" aria-hidden="true" />
+                      {fact.label}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Trust strip */}
-        <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <TrustItem icon={PackageSearch} label={`${available.length} items`} sub="available to rent" />
-          <TrustItem icon={Clock} label="Fast replies" sub="we respond quickly" />
-          <TrustItem icon={ShieldCheck} label="Trusted gear" sub="quality maintained" />
-          <TrustItem icon={MapPin} label="Local pickup" sub={tenant.contact_address ? 'see footer' : 'flexible options'} />
-        </section>
-
-        {/* Categories */}
-        {categories.length > 0 ? (
-          <section>
-            <div className="flex items-end justify-between">
-              <h2 className="text-2xl font-bold tracking-tight text-slate-900">Browse by category</h2>
-              <Link className="text-sm font-semibold text-slate-500 hover:text-slate-800" to="/catalog">View all</Link>
-            </div>
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-              {categories.map((category) => (
-                <Link
-                  key={category}
-                  to={`/catalog?category=${encodeURIComponent(category)}`}
-                  className="group flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white p-5 text-center transition hover:-translate-y-1 hover:border-slate-300 hover:shadow-md"
-                >
-                  <span
-                    className="mb-3 flex h-12 w-12 items-center justify-center rounded-full text-white transition group-hover:scale-110"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
-                  >
-                    <PackageSearch className="h-5 w-5" aria-hidden="true" />
-                  </span>
-                  <span className="text-sm font-semibold capitalize text-slate-800">{category}</span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
-
-        {/* Featured */}
+        {/* Featured equipment — products lead */}
         <section>
           <div className="flex items-end justify-between">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Featured equipment</h2>
             <Link className="text-sm font-semibold text-slate-500 hover:text-slate-800" to="/catalog">See the full catalog</Link>
           </div>
           {featured.length > 0 ? (
-            <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((item) => (
                 <EquipmentCard key={item.id} item={item} slug={tenant?.slug} />
               ))}
             </div>
           ) : (
-            <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+            <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
               No equipment listed yet. Check back soon.
             </div>
           )}
         </section>
 
-        {/* How it works */}
-        <section className="rounded-3xl bg-slate-900 px-6 py-12 sm:px-10">
-          <h2 className="text-center text-2xl font-bold tracking-tight text-white">How it works</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-3">
+        {/* Categories — quiet pill row */}
+        {categories.length > 0 ? (
+          <section>
+            <div className="flex items-end justify-between">
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900">Shop by category</h2>
+              <Link className="text-sm font-semibold text-slate-500 hover:text-slate-800" to="/catalog">View all</Link>
+            </div>
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {categories.map((category) => (
+                <Link
+                  key={category}
+                  to={`/catalog?category=${encodeURIComponent(category)}`}
+                  className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm font-medium capitalize text-slate-700 transition hover:border-primary hover:text-slate-900"
+                >
+                  <span
+                    aria-hidden="true"
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-[11px] font-bold uppercase text-white"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  >
+                    {category.charAt(0)}
+                  </span>
+                  {category}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {/* How it works — open inline strip */}
+        <section>
+          <h2 className="text-center text-2xl font-bold tracking-tight text-slate-900">How it works</h2>
+          <div className="mt-8 grid gap-8 sm:grid-cols-3">
             {HOW_IT_WORKS.map((step, index) => {
               const Icon = step.icon;
               return (
-                <div key={step.title} className="text-center">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/10 text-white">
-                    <Icon className="h-6 w-6" aria-hidden="true" />
-                  </div>
-                  <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-white/50">Step {index + 1}</p>
-                  <h3 className="mt-1 text-lg font-semibold text-white">{step.title}</h3>
-                  <p className="mt-1 text-sm text-white/70">{step.body}</p>
+                <div key={step.title} className="relative text-center">
+                  {index > 0 ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute -left-4 top-5 hidden h-px w-8 bg-slate-300 sm:block"
+                    />
+                  ) : null}
+                  <p
+                    className="text-sm font-bold uppercase tracking-[0.18em]"
+                    style={{ color: 'var(--color-primary)' }}
+                  >
+                    Step {index + 1}
+                  </p>
+                  <h3 className="mt-2 inline-flex items-center gap-2 text-lg font-semibold text-slate-900">
+                    <Icon className="h-5 w-5 text-slate-400" aria-hidden="true" /> {step.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">{step.body}</p>
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* Why rent with us (social proof — graceful value-prop when no testimonials) */}
-        <section>
+        {/* Why rent with us — editorial, no cards */}
+        <section className="border-t border-slate-200/70 pt-14">
           <div className="flex items-center justify-center gap-1 text-amber-400" aria-hidden="true">
             {[0, 1, 2, 3, 4].map((i) => (
-              <Star key={i} className="h-5 w-5 fill-current" />
+              <Star key={i} className="h-4 w-4 fill-current" />
             ))}
           </div>
           <h2 className="mt-3 text-center text-2xl font-bold tracking-tight text-slate-900">Why customers choose {tenant.name}</h2>
-          <div className="mt-8 grid gap-5 sm:grid-cols-3">
+          <div className="mx-auto mt-10 grid max-w-4xl gap-x-10 gap-y-8 sm:grid-cols-3">
             {REASONS.map((reason) => {
               const Icon = reason.icon;
               return (
-                <div key={reason.title} className="rounded-2xl border border-slate-200 bg-white p-6 text-center">
-                  <div
-                    className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white"
-                    style={{ backgroundColor: 'var(--color-primary)' }}
-                  >
-                    <Icon className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{reason.title}</h3>
+                <div key={reason.title} className="text-center sm:text-left">
+                  <Icon className="mx-auto h-6 w-6 sm:mx-0" style={{ color: 'var(--color-primary)' }} aria-hidden="true" />
+                  <h3 className="mt-3 text-base font-semibold text-slate-900">{reason.title}</h3>
                   <p className="mt-1 text-sm text-slate-600">{reason.body}</p>
                 </div>
               );
@@ -281,19 +302,17 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section
-          className="overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-10"
-          style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))' }}
-        >
-          <h2 className="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-tight" style={{ color: 'var(--color-primary-foreground)' }}>
+        {/* Final CTA — minimal band, no slab */}
+        <section className="border-t border-slate-200/70 pt-14 text-center">
+          <h2 className="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-tight text-slate-900">
             Ready to rent?
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-base" style={{ color: 'var(--color-primary-foreground)', opacity: 0.9 }}>
+          <p className="mx-auto mt-3 max-w-xl text-base text-slate-600">
             Find the right equipment for your next project and send a booking request in minutes.
           </p>
           <Link
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-base font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5"
+            className="mt-7 inline-flex items-center gap-2 rounded-xl px-6 py-3 text-base font-semibold shadow-lg transition hover:-translate-y-0.5"
+            style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
             to="/catalog"
           >
             Browse the catalog <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -304,16 +323,3 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
   );
 }
 
-function TrustItem({ icon: Icon, label, sub }) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
-        <Icon className="h-5 w-5" aria-hidden="true" />
-      </span>
-      <div>
-        <p className="text-sm font-semibold text-slate-900">{label}</p>
-        <p className="text-xs text-slate-500">{sub}</p>
-      </div>
-    </div>
-  );
-}

@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Search, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import EmptyState from '../components/ui/EmptyState';
 import Badge from '../components/ui/Badge';
+import { Table, TableContainer, THead, Th, TBody, Tr, Td } from '../components/ui/Table';
 
 const initials = (name = '') =>
   name
@@ -65,8 +67,7 @@ export default function CustomersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
-      <p className="mt-2 text-sm text-neutral-400">Searchable customer directory with booking activity.</p>
+      <PageHeader title="Customers" subtitle="Searchable customer directory with booking activity." />
 
       <div className="mt-6">
         <label className="block text-sm text-neutral-200">
@@ -83,22 +84,20 @@ export default function CustomersPage() {
         </label>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-neutral-750 bg-neutral-800">
-        <table className="min-w-full divide-y divide-neutral-750 text-sm">
-          <thead className="bg-neutral-900 text-xs uppercase tracking-wide text-neutral-400">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium">Customer</th>
-              <th className="px-4 py-3 text-left font-medium">Phone</th>
-              <th className="px-4 py-3 text-left font-medium">Bookings</th>
-              <th className="px-4 py-3 text-left font-medium">Last activity</th>
-              <th className="px-4 py-3 text-right font-medium">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-750">
+      <TableContainer className="mt-6">
+        <Table>
+          <THead>
+            <Th>Customer</Th>
+            <Th>Phone</Th>
+            <Th>Bookings</Th>
+            <Th>Last activity</Th>
+            <Th align="right">Action</Th>
+          </THead>
+          <TBody>
             {loading
               ? Array.from({ length: 5 }).map((_, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-3">
+                  <Tr key={index}>
+                    <Td>
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 animate-pulse rounded-full bg-neutral-700" />
                         <div className="space-y-1.5">
@@ -106,16 +105,16 @@ export default function CustomersPage() {
                           <div className="h-3 w-40 animate-pulse rounded bg-neutral-750" />
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-3"><div className="h-3.5 w-24 animate-pulse rounded bg-neutral-700" /></td>
-                    <td className="px-4 py-3"><div className="h-5 w-10 animate-pulse rounded bg-neutral-700" /></td>
-                    <td className="px-4 py-3"><div className="h-3.5 w-28 animate-pulse rounded bg-neutral-700" /></td>
-                    <td className="px-4 py-3"><div className="ml-auto h-6 w-16 animate-pulse rounded bg-neutral-700" /></td>
-                  </tr>
+                    </Td>
+                    <Td><div className="h-3.5 w-24 animate-pulse rounded bg-neutral-700" /></Td>
+                    <Td><div className="h-5 w-10 animate-pulse rounded bg-neutral-700" /></Td>
+                    <Td><div className="h-3.5 w-28 animate-pulse rounded bg-neutral-700" /></Td>
+                    <Td align="right"><div className="ml-auto h-6 w-16 animate-pulse rounded bg-neutral-700" /></Td>
+                  </Tr>
                 ))
               : rows.map((customer) => (
-                  <tr key={customer.id} className="transition hover:bg-neutral-800/60">
-                    <td className="px-4 py-3">
+                  <Tr key={customer.id}>
+                    <Td>
                       <div className="flex items-center gap-3">
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-xs font-semibold text-brand-200">
                           {initials(customer.full_name)}
@@ -125,26 +124,26 @@ export default function CustomersPage() {
                           <p className="truncate text-xs text-neutral-400">{customer.email || 'No email'}</p>
                         </div>
                       </div>
-                    </td>
-                    <td className="px-4 py-3 text-neutral-300">{customer.phone || '--'}</td>
-                    <td className="px-4 py-3">
+                    </Td>
+                    <Td className="text-neutral-300">{customer.phone || '--'}</Td>
+                    <Td>
                       <Badge variant={customer.bookingCount > 0 ? 'info' : 'neutral'} icon={false}>
                         {customer.bookingCount}
                       </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-neutral-300">{new Date(customer.lastActivity).toLocaleDateString()}</td>
-                    <td className="px-4 py-3 text-right">
+                    </Td>
+                    <Td className="tabular-nums text-neutral-300">{new Date(customer.lastActivity).toLocaleDateString()}</Td>
+                    <Td align="right">
                       <Link
-                        className="inline-flex items-center gap-1 rounded-md border border-neutral-750 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
+                        className="inline-flex items-center gap-1 rounded-md border border-neutral-750 px-3 py-1 text-xs font-medium text-neutral-200 transition hover:bg-neutral-700 hover:text-white"
                         to={`/dashboard/customers/${customer.id}`}
                       >
                         View <ArrowRight className="h-3 w-3" aria-hidden="true" />
                       </Link>
-                    </td>
-                  </tr>
+                    </Td>
+                  </Tr>
                 ))}
-          </tbody>
-        </table>
+          </TBody>
+        </Table>
         {!loading && rows.length === 0 ? (
           <EmptyState
             className="border-0"
@@ -157,7 +156,7 @@ export default function CustomersPage() {
             }
           />
         ) : null}
-      </div>
+      </TableContainer>
     </div>
   );
 }

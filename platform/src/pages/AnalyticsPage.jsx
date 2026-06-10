@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const toYmd = (value) => new Date(value).toISOString().slice(0, 10);
@@ -100,8 +101,7 @@ export default function AnalyticsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-      <p className="mt-2 text-sm text-neutral-400">Revenue, demand, and utilization performance.</p>
+      <PageHeader title="Analytics" subtitle="Revenue, demand, and utilization performance." />
 
       <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
         <h2 className="text-lg font-semibold tracking-tight">Date Range</h2>
