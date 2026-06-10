@@ -3,7 +3,8 @@ import { createRoot } from 'react-dom/client';
 import {
   createBrowserRouter,
   Outlet,
-  RouterProvider
+  RouterProvider,
+  useRouteError
 } from 'react-router-dom';
 
 import './index.css';
@@ -15,29 +16,83 @@ import PlatformOwnerRoute from './components/PlatformOwnerRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import { ToastProvider } from './components/ui';
 
-const HomePage = lazy(() => import('./pages/HomePage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const SignupPage = lazy(() => import('./pages/SignupPage'));
-const WelcomePage = lazy(() => import('./pages/WelcomePage'));
-const DashboardHomePage = lazy(() => import('./pages/DashboardHomePage'));
-const EquipmentPage = lazy(() => import('./pages/EquipmentPage'));
-const EquipmentDetailPage = lazy(() => import('./pages/EquipmentDetailPage'));
-const BookingsPage = lazy(() => import('./pages/BookingsPage'));
-const BookingDetailPage = lazy(() => import('./pages/BookingDetailPage'));
-const CalendarPage = lazy(() => import('./pages/CalendarPage'));
-const CustomersPage = lazy(() => import('./pages/CustomersPage'));
-const CustomerDetailPage = lazy(() => import('./pages/CustomerDetailPage'));
-const AnalyticsPage = lazy(() => import('./pages/AnalyticsPage'));
-const TeamPage = lazy(() => import('./pages/TeamPage'));
-const BrandingPage = lazy(() => import('./pages/BrandingPage'));
-const AdminPage = lazy(() => import('./pages/AdminPage'));
-const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+/**
+ * Wrap a dynamic import so a failed chunk load — which happens when a new
+ * deploy replaces hashed filenames while a stale index.html is still in the
+ * browser/CDN cache — recovers by reloading the page once to fetch the fresh
+ * asset manifest. A short time window guards against reload loops when a chunk
+ * is genuinely unavailable.
+ */
+const CHUNK_RELOAD_KEY = 'arkived:last-chunk-reload';
+
+const isChunkLoadError = (error) =>
+  error instanceof Error &&
+  /dynamically imported module|Importing a module script failed|Failed to fetch/i.test(error.message);
+
+const lazyWithReload = (factory) =>
+  lazy(() =>
+    factory().catch((error) => {
+      if (isChunkLoadError(error)) {
+        const last = Number(sessionStorage.getItem(CHUNK_RELOAD_KEY) || 0);
+        if (Date.now() - last > 10_000) {
+          sessionStorage.setItem(CHUNK_RELOAD_KEY, String(Date.now()));
+          window.location.reload();
+          // Never resolve so nothing renders before the reload takes over.
+          return new Promise(() => {});
+        }
+      }
+      throw error;
+    })
+  );
+
+const HomePage = lazyWithReload(() => import('./pages/HomePage'));
+const LoginPage = lazyWithReload(() => import('./pages/LoginPage'));
+const SignupPage = lazyWithReload(() => import('./pages/SignupPage'));
+const WelcomePage = lazyWithReload(() => import('./pages/WelcomePage'));
+const DashboardHomePage = lazyWithReload(() => import('./pages/DashboardHomePage'));
+const EquipmentPage = lazyWithReload(() => import('./pages/EquipmentPage'));
+const EquipmentDetailPage = lazyWithReload(() => import('./pages/EquipmentDetailPage'));
+const BookingsPage = lazyWithReload(() => import('./pages/BookingsPage'));
+const BookingDetailPage = lazyWithReload(() => import('./pages/BookingDetailPage'));
+const CalendarPage = lazyWithReload(() => import('./pages/CalendarPage'));
+const CustomersPage = lazyWithReload(() => import('./pages/CustomersPage'));
+const CustomerDetailPage = lazyWithReload(() => import('./pages/CustomerDetailPage'));
+const AnalyticsPage = lazyWithReload(() => import('./pages/AnalyticsPage'));
+const TeamPage = lazyWithReload(() => import('./pages/TeamPage'));
+const BrandingPage = lazyWithReload(() => import('./pages/BrandingPage'));
+const AdminPage = lazyWithReload(() => import('./pages/AdminPage'));
+const NotFoundPage = lazyWithReload(() => import('./pages/NotFoundPage'));
 
 const routeElement = (Component) => (
   <Suspense fallback={<div className="p-6 text-sm text-neutral-300">Loading page...</div>}>
     <Component />
   </Suspense>
 );
+
+function RouteError() {
+  const error = useRouteError();
+  const looksLikeStaleChunk = isChunkLoadError(error);
+
+  return (
+    <div className="mx-auto mt-16 max-w-lg rounded-lg border border-danger-500/40 bg-danger-500/10 p-6 text-center">
+      <h1 className="text-xl font-semibold text-danger-300">
+        {looksLikeStaleChunk ? 'A new version is available' : 'Something went wrong'}
+      </h1>
+      <p className="mt-2 text-sm text-neutral-200">
+        {looksLikeStaleChunk
+          ? 'This page was updated since you last loaded the app. Reload to get the latest version.'
+          : 'We hit an unexpected error loading this page. Reloading usually fixes it.'}
+      </p>
+      <button
+        className="mt-4 rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
+        onClick={() => window.location.reload()}
+        type="button"
+      >
+        Reload
+      </button>
+    </div>
+  );
+}
 
 const ProtectedShell = () => (
   <ProtectedRoute>
@@ -54,6 +109,7 @@ const AdminProtectedShell = () => (
 const router = createBrowserRouter([
   {
     element: <MarketingLayout />,
+    errorElement: <RouteError />,
     children: [
       { path: '/', element: routeElement(HomePage) },
       { path: '/login', element: routeElement(LoginPage) },
@@ -62,6 +118,7 @@ const router = createBrowserRouter([
   },
   {
     element: <ProtectedShell />,
+    errorElement: <RouteError />,
     children: [
       { path: '/welcome', element: routeElement(WelcomePage) },
       {
@@ -88,7 +145,7 @@ const router = createBrowserRouter([
       }
     ]
   },
-  { path: '*', element: routeElement(NotFoundPage) }
+  { path: '*', element: routeElement(NotFoundPage), errorElement: <RouteError /> }
 ]);
 
 createRoot(document.getElementById('root')).render(

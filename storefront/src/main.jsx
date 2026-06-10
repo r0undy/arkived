@@ -12,6 +12,7 @@ import './index.css';
 import { useTenant } from './hooks/useTenant';
 import { storefrontApi } from './lib/api';
 import StorefrontLayout from './layouts/StorefrontLayout';
+import StorefrontErrorBoundary from './components/StorefrontErrorBoundary';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
@@ -153,6 +154,8 @@ function CatalogDetailRoute({ equipment, equipmentList, slug, tenant, loadingCat
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
+    <StorefrontErrorBoundary>
+      <App />
+    </StorefrontErrorBoundary>
   </React.StrictMode>
 );
