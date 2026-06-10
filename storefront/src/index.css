@@ -24,9 +24,9 @@ body {
   [role="button"],
   [tabindex]:not([tabindex="-1"])
 ):focus-visible {
-  outline: 2px solid #4f46e5;
+  outline: 2px solid var(--color-primary, #4f46e5);
   outline-offset: 2px;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #4f46e5) 30%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -294,7 +294,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
                 </div>
               ) : null}
 
-              {status.error ? <p className="text-sm text-rose-600 md:col-span-2">{status.error}</p> : null}
+              {status.error ? <p role="alert" className="text-sm text-rose-600 md:col-span-2">{status.error}</p> : null}
 
               <button
                 className="inline-flex w-fit items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:opacity-60"

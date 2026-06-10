@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.7.0
+> **Version:** 1.8.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -31,7 +31,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
 | F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading. |
-| F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes, lazy images, theme preload, mobile-first. Continuous. |
+| F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes/images, theme preload, mobile-first, global reduced-motion guard, focus rings, alt text, label/aria-describedby associations. Responsive verification sweep continuing. |
 | F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity, customer status-tracking page. |
 
 > Builds: `platform` and `storefront` both compile clean with no Vite warnings under Node v25.8.2.
@@ -338,17 +338,17 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [ ] Apply the [dsd §7.1](./dsd-arkived.md#71-duration--easing) duration/easing scale consistently (enter faster, exit faster)
 - [x] Skeletons over spinners wherever content shape is known
-- [ ] Wrap all animations in a `prefers-reduced-motion` guard ([dsd §7.2](./dsd-arkived.md#72-motion-principles))
+- [x] Wrap all animations in a `prefers-reduced-motion` guard ([dsd §7.2](./dsd-arkived.md#72-motion-principles)) — global CSS guard in both apps + explicit JS guards in confetti and hero parallax
 - [x] Tasteful confetti only at genuine milestones (onboarding complete) — and reduced-motion safe
 
 ### F7.2 Accessibility (WCAG 2.1 AA)
 
-- [ ] Visible brand focus rings on every interactive element ([dsd §5](./dsd-arkived.md#5-elevation--depth))
-- [ ] All images have meaningful `alt`; decorative images marked empty `alt`
-- [ ] Every input has an associated `<label>`; errors announced via `aria-live`
-- [ ] Status never communicated by color alone (badges carry text/icon)
-- [ ] Storefront accent contrast enforced at save time ([F2.2](#f22-accent-color-made-delightful))
-- [ ] Full keyboard path through onboarding, branding studio, and inquiry form
+- [x] Visible brand focus rings on every interactive element ([dsd §5](./dsd-arkived.md#5-elevation--depth)) — global `:focus-visible` ring in both apps (storefront ring is tenant-themed via `--color-primary`)
+- [x] All images have meaningful `alt`; decorative images marked empty `alt` — audited across both apps; decorative icons use `aria-hidden`
+- [x] Every input has an associated `<label>`; errors announced via `aria-live` — platform `Field` kit links labels + `aria-describedby`/`role=alert`; storefront forms use wrapped labels + `role=alert` errors
+- [x] Status never communicated by color alone (badges carry text/icon)
+- [x] Storefront accent contrast enforced at save time ([F2.2](#f22-accent-color-made-delightful))
+- [/] Full keyboard path through onboarding, branding studio, and inquiry form — primitives (Tabs/Modal/Switch) are keyboard-operable; full end-to-end keyboard sweep pending
 
 ### F7.3 Performance
 
