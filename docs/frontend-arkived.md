@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.10.0
+> **Version:** 1.11.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -336,7 +336,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F7.1 Motion
 
-- [ ] Apply the [dsd §7.1](./dsd-arkived.md#71-duration--easing) duration/easing scale consistently (enter faster, exit faster)
+- [x] Apply the [dsd §7.1](./dsd-arkived.md#71-duration--easing) duration/easing scale consistently (enter faster, exit faster) — modals/page drawers `300ms ease-out`, toasts/backdrops `200ms`, hover/focus on the `150ms` base; mobile nav drawer slides in (`drawerInLeft 300ms`) with a `200ms` backdrop fade
 - [x] Skeletons over spinners wherever content shape is known
 - [x] Wrap all animations in a `prefers-reduced-motion` guard ([dsd §7.2](./dsd-arkived.md#72-motion-principles)) — global CSS guard in both apps + explicit JS guards in confetti and hero parallax
 - [x] Tasteful confetti only at genuine milestones (onboarding complete) — and reduced-motion safe
@@ -362,12 +362,12 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 > Responsiveness is a cross-cutting requirement for **every** view in both apps, not a final pass. Design mobile-first, then enhance for larger screens.
 
 - [ ] Adopt a consistent breakpoint ladder (Tailwind `sm` 640 / `md` 768 / `lg` 1024 / `xl` 1280) and design each layout mobile-first (base styles target the smallest screen)
-- [ ] **Platform shell:** sidebar collapses to a drawer / bottom tab bar on mobile ([F0.2](#f02-layout-polish)); top bar condenses (search → icon, user menu → avatar)
-- [ ] **Data tables** reflow to stacked cards or horizontally scroll within a contained region on small screens — never overflow the page
+- [x] **Platform shell:** sidebar collapses to a drawer / bottom tab bar on mobile ([F0.2](#f02-layout-polish)); top bar condenses (search → icon, user menu → avatar) — animated slide-in drawer + condensing sticky header shipped
+- [x] **Data tables** reflow to stacked cards or horizontally scroll within a contained region on small screens — never overflow the page — every platform table sits in an `overflow-x-auto` container
 - [ ] **Branding studio** ([F2.1](#f21-split-screen-live-preview)) stacks controls above the preview on mobile; the device toggle still previews Desktop/Mobile frames
 - [ ] **Onboarding wizard** is fully usable on a phone (single-column steps, thumb-reachable primary action)
 - [ ] **Storefront** is mobile-first end to end ([F5.4](#f54-storefront-fundamentals)): hero, category/equipment grids, and footer reflow; sticky mobile inquiry CTA ([F5.6](#f56-extra-storefront-touches-high-impact-optional))
-- [ ] **Modals / drawers / date pickers** convert to full-screen or bottom-sheet patterns on mobile; no off-screen content
+- [x] **Modals / drawers / date pickers** convert to full-screen or bottom-sheet patterns on mobile; no off-screen content — shared `Modal` is a bottom-sheet on mobile (`rounded-t-lg` → `sm:rounded-lg`)
 - [ ] **Touch targets** are ≥ 44×44px; adequate spacing prevents mis-taps; hover-only affordances have a tap/focus equivalent
 - [ ] Respect safe areas (notches) and dynamic viewport units (`dvh`) so fixed bars don't get hidden by mobile browser chrome
 - [ ] **Fluid type & spacing:** headings/sections scale down sensibly (use the [dsd §3.1](./dsd-arkived.md#31-type-scale) scale responsively); no fixed pixel widths that cause overflow

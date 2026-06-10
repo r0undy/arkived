@@ -141,8 +141,8 @@ export default function DashboardLayout() {
       {/* Mobile drawer */}
       {mobileOpen ? (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 flex w-64 flex-col border-r border-neutral-750 bg-neutral-950 p-3">
+          <div className="absolute inset-0 animate-[fadeIn_200ms_ease-out] bg-black/60" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 flex w-64 animate-[drawerInLeft_300ms_ease-out] flex-col border-r border-neutral-750 bg-neutral-950 p-3">
             <div className="mb-6 flex items-center justify-between px-1">
               <Link className="flex items-center gap-2" to="/dashboard" onClick={() => setMobileOpen(false)}>
                 <ArkivedMark className="h-7 w-7" />
