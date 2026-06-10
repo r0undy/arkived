@@ -13,10 +13,12 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlatformOwnerRoute from './components/PlatformOwnerRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import { ToastProvider } from './components/ui';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const SignupPage = lazy(() => import('./pages/SignupPage'));
+const WelcomePage = lazy(() => import('./pages/WelcomePage'));
 const DashboardHomePage = lazy(() => import('./pages/DashboardHomePage'));
 const EquipmentPage = lazy(() => import('./pages/EquipmentPage'));
 const EquipmentDetailPage = lazy(() => import('./pages/EquipmentDetailPage'));
@@ -61,6 +63,7 @@ const router = createBrowserRouter([
   {
     element: <ProtectedShell />,
     children: [
+      { path: '/welcome', element: routeElement(WelcomePage) },
       {
         element: <DashboardLayout />,
         children: [
@@ -91,7 +94,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AppErrorBoundary>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </AppErrorBoundary>
   </React.StrictMode>
 );

@@ -118,6 +118,10 @@ export const inMemoryDb = {
       contact_phone: '',
       contact_address: '',
       show_watermark: true,
+      tagline: '',
+      meta_description: '',
+      favicon_url: '',
+      og_image_url: '',
       onboarding_completed_steps: [],
       created_at: now()
     };

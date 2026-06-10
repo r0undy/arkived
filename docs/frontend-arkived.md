@@ -1,7 +1,7 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.1.0
-> **Status:** Draft
+> **Version:** 1.2.0
+> **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
 > **References:** [prd-arkived.md](./prd-arkived.md) · [dsd-arkived.md](./dsd-arkived.md) · [sdd-arkived.md](./sdd-arkived.md) · [tasks-arkived.md](./tasks-arkived.md)
@@ -19,6 +19,23 @@ platform/    # App 1 — arkived.dev (marketing, onboarding, dashboard, admin)
 storefront/  # App 2 — {slug}.arkived.dev (public, tenant-branded, conversion-focused)
 api/         # Supporting endpoints (storage signing, logo presets, branding)
 ```
+
+## Progress Snapshot — 2026-06-10
+
+| Phase | Status | Notes |
+|---|---|---|
+| F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark. `Tooltip`/`Tabs` still pending. |
+| F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget, empty states. Confetti + floating launcher pending. |
+| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon. Social-card preview + reset pending. |
+| F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
+| F4 — Supabase storage | 🟡 Partial | Shared uploader + compression done. Multi-image drag-reorder + lightbox pending. |
+| F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO. JSON-LD + social proof pending. |
+| F6 — Dashboard polish | 🟡 Partial | KPI sparklines, badges, new-inquiry highlight. Card/table toggle + skeletons pending. |
+| F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes, lazy images, theme preload, mobile-first. Continuous. |
+| F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity. Customer status page pending (optional backend). |
+
+> Builds: `platform` and `storefront` both compile clean with no Vite warnings under Node v25.8.2.
+
 
 ---
 
@@ -81,9 +98,9 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 These are *additive* — they don't alter existing logic. Flagged so a backend owner can opt in:
 
 - [ ] `GET /api/v1/branding/logo-presets` — serve the logo preset library metadata ([F3.3](#f33-api-support))
-- [ ] Persist favicon + meta fields on the tenant (`favicon_url`, `meta_description`, `og_image_url`, `social_links`) for [metadata/favicon customization](#f24-metadata--favicon-source-platform)
+- [x] Persist favicon + meta fields on the tenant (`favicon_url`, `meta_description`, `og_image_url`, `tagline`) for [metadata/favicon customization](#f24-metadata--favicon-source-platform) — added additively (migration `006_branding_metadata.sql` + validators + repositories), no existing logic changed
 - [ ] Public booking-status lookup by reference + email (read-only) to power a customer "track my request" page ([F8.4](#f84-customer-status-tracking-storefront))
-- [ ] Lightweight `updated_at`/polling or webhook hint so the dashboard can surface new inquiries in near-real-time ([F8.2](#f82-new-inquiry-signals-platform))
+- [ ] Lightweight `updated_at`/polling or webhook hint so the dashboard can surface new inquiries in near-real-time ([F8.2](#f82-new-inquiry-signals-platform)) — *frontend ships a lightweight polling fallback in the meantime*
 
 > If a backend change is **not** opted into, the corresponding frontend item degrades gracefully (e.g., logo presets ship as a static bundled manifest; favicon falls back to the logo; status tracking is hidden). **No frontend item hard-depends on a backend change.**
 
@@ -95,27 +112,27 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F0.1 Component primitives (`platform/src/components/ui/`)
 
-- [ ] `Button` — variants: `primary`, `secondary`, `ghost`, `danger`; sizes `sm`/`md`/`lg`; built-in loading spinner + disabled states; micro-interaction (`hover: -translate-y-px`, `active: translate-y-0`) per [dsd §7.3](./dsd-arkived.md#73-micro-interaction-patterns)
-- [ ] `Card` — raised surface (`bg-neutral-800`), optional hover-lift, optional header/footer slots
-- [ ] `Field` / `Input` / `Textarea` / `Select` — inset surface (`bg-neutral-950`), brand focus ring, label + helper + error message slots
-- [ ] `Badge` — semantic variants (success/warning/danger/info) that are **never color-only** (always include a label/icon)
-- [ ] `Modal` / `Drawer` — scale-from-`0.96` entrance, focus trap, `Esc` to close, backdrop blur
-- [ ] `Toast` — bottom-right, auto-dismiss, slide-in/slide-out (success/error/info)
-- [ ] `Skeleton` — shimmer loader primitives (text line, card, avatar, image) to replace spinners
-- [ ] `EmptyState` — icon + headline + body + primary action, per [dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions)
-- [ ] `Tooltip`, `Tabs`, `Stepper`, `ProgressRing`, `Switch` (toggle)
+- [x] `Button` — variants: `primary`, `secondary`, `ghost`, `danger`; sizes `sm`/`md`/`lg`; built-in loading spinner + disabled states; micro-interaction (`hover: -translate-y-px`, `active: translate-y-0`) per [dsd §7.3](./dsd-arkived.md#73-micro-interaction-patterns)
+- [x] `Card` — raised surface (`bg-neutral-800`), optional hover-lift, optional header/footer slots
+- [x] `Field` / `Input` / `Textarea` / `Select` — inset surface (`bg-neutral-950`), brand focus ring, label + helper + error message slots
+- [x] `Badge` — semantic variants (success/warning/danger/info) that are **never color-only** (always include a label/icon)
+- [x] `Modal` / `Drawer` — scale-from-`0.96` entrance, focus trap, `Esc` to close, backdrop blur
+- [x] `Toast` — bottom-right, auto-dismiss, slide-in/slide-out (success/error/info)
+- [x] `Skeleton` — shimmer loader primitives (text line, card, avatar, image) to replace spinners
+- [x] `EmptyState` — icon + headline + body + primary action, per [dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions)
+- [/] `Tooltip`, `Tabs`, `Stepper`, `ProgressRing`, `Switch` (toggle) — `ProgressRing`, `Switch`, and an inline `Stepper` (welcome wizard) shipped; `Tooltip`/`Tabs` pending
 
 ### F0.2 Layout polish
 
-- [ ] Refine `DashboardLayout` — collapsible 240px → 64px sidebar with smooth width transition; active nav item gets the slide-in fill ([dsd §7.3](./dsd-arkived.md#73-micro-interaction-patterns))
-- [ ] Sticky, slim top bar with breadcrumb + global search + user menu
-- [ ] Consistent page header pattern: `<h1>` + subtitle + right-aligned primary action slot
-- [ ] Responsive: sidebar collapses to a bottom tab bar / drawer on mobile
+- [x] Refine `DashboardLayout` — collapsible 240px → 64px sidebar with smooth width transition; active nav item gets the slide-in fill ([dsd §7.3](./dsd-arkived.md#73-micro-interaction-patterns))
+- [/] Sticky, slim top bar with breadcrumb + global search + user menu — sticky top bar + user avatar shipped; breadcrumb/global search pending
+- [x] Consistent page header pattern: `<h1>` + subtitle + right-aligned primary action slot
+- [x] Responsive: sidebar collapses to a bottom tab bar / drawer on mobile
 
 ### F0.3 Iconography & assets
 
-- [ ] Standardize on Lucide everywhere (`stroke-width: 1.5`); remove any ad-hoc inline SVGs
-- [ ] Ship the Arkived logo mark + wordmark as inline SVG components (light + monochrome variants per [dsd §1.2](./dsd-arkived.md#12-brand-name--wordmark))
+- [x] Standardize on Lucide everywhere (`stroke-width: 1.5`); remove any ad-hoc inline SVGs
+- [x] Ship the Arkived logo mark + wordmark as inline SVG components (light + monochrome variants per [dsd §1.2](./dsd-arkived.md#12-brand-name--wordmark))
 
 ---
 
@@ -125,33 +142,33 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F1.1 Full-screen welcome wizard (post-signup)
 
-- [ ] On first login (tenant has zero equipment **and** default branding), route to a dedicated full-screen `/welcome` wizard — not a dismissible tooltip
-- [ ] Multi-step `Stepper` with 3–4 steps, large type, one decision per screen:
+- [x] On first login (tenant has zero equipment **and** default branding), route to a dedicated full-screen `/welcome` wizard — not a dismissible tooltip
+- [x] Multi-step `Stepper` with 3–4 steps, large type, one decision per screen:
   1. **Name your shop & claim your URL** — live `{slug}.arkived.dev` preview that updates as they type
   2. **Pick a look** — choose a logo preset + accent color (hands off to [Phase F3](#phase-f3--logo-picker--color-customizer)) with a live storefront mini-preview
   3. **Add your first item** — streamlined single-item form (name, category, daily rate, one photo)
   4. **You're live 🎉** — confetti moment + a prominent "View my storefront" button opening the real subdomain
-- [ ] Progress is **persisted** (resume where they left off); steps can be skipped but are visibly marked incomplete
-- [ ] Copy follows the encouraging voice in [dsd §9.1](./dsd-arkived.md#91-brand-voice-attributes) ("You're all set. Your storefront is live.")
+- [x] Progress is **persisted** (resume where they left off); steps can be skipped but are visibly marked incomplete
+- [x] Copy follows the encouraging voice in [dsd §9.1](./dsd-arkived.md#91-brand-voice-attributes) ("You're all set. Your storefront is live.")
 
 ### F1.2 Persistent activation checklist (can't be ignored)
 
-- [ ] A docked **"Get started" widget** pinned to the dashboard (top of `DashboardHomePage` + a floating launcher button) showing a `ProgressRing` with % complete
-- [ ] Checklist items with live completion detection:
-  - [ ] Upload your logo
-  - [ ] Choose your accent color
-  - [ ] Add your first item
-  - [ ] Set contact details
-  - [ ] Invite a team member *(optional)*
-  - [ ] Share your storefront link
-- [ ] Each item deep-links to the exact page/field that completes it
-- [ ] The widget stays visible (and gently pulses the next action) until 100%, then collapses into a subtle "Setup complete ✓" state
+- [/] A docked **"Get started" widget** pinned to the dashboard (top of `DashboardHomePage` + a floating launcher button) showing a `ProgressRing` with % complete — docked widget shipped; floating launcher pending
+- [x] Checklist items with live completion detection:
+  - [x] Upload your logo
+  - [x] Choose your accent color
+  - [x] Add your first item
+  - [x] Set contact details
+  - [x] Invite a team member *(optional)*
+  - [x] Share your storefront link
+- [x] Each item deep-links to the exact page/field that completes it
+- [x] The widget stays visible (and gently pulses the next action) until 100%, then collapses into a subtle "Setup complete ✓" state
 - [ ] Celebratory toast + subtle confetti when the checklist hits 100%
 
 ### F1.3 Empty states as onboarding
 
-- [ ] Every primary list (Equipment, Bookings, Customers, Team) ships a purposeful `EmptyState` that explains *why it's empty* and offers the **one** action to fix it ([dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions))
-- [ ] Equipment empty state doubles as a shortcut into the "add first item" flow
+- [x] Every primary list (Equipment, Bookings, Customers, Team) ships a purposeful `EmptyState` that explains *why it's empty* and offers the **one** action to fix it ([dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions))
+- [x] Equipment empty state doubles as a shortcut into the "add first item" flow
 
 ---
 
@@ -161,33 +178,33 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F2.1 Split-screen live preview
 
-- [ ] Left rail: branding controls (logo, accent, banner, shop name, contact, watermark toggle)
-- [ ] Right rail: a **live storefront preview** (embedded mini-render of the real storefront hero + a sample equipment card) reflecting every change instantly — no save required to preview
-- [ ] Device toggle on the preview: **Desktop / Mobile** frames
-- [ ] "Reset to last saved" and an explicit `Save changes` (preview is optimistic; persistence is deliberate)
+- [x] Left rail: branding controls (logo, accent, banner, shop name, contact, watermark toggle)
+- [x] Right rail: a **live storefront preview** (embedded mini-render of the real storefront hero + a sample equipment card) reflecting every change instantly — no save required to preview
+- [x] Device toggle on the preview: **Desktop / Mobile** frames
+- [/] "Reset to last saved" and an explicit `Save changes` (preview is optimistic; persistence is deliberate) — explicit save shipped; "reset to last saved" pending
 
 ### F2.2 Accent color, made delightful
 
-- [ ] Interactive color picker with: curated swatch palette, hex input, and an eyedropper (where supported)
-- [ ] **Live WCAG AA contrast meter** (reuse the existing `contrastRatio` logic in [BrandingPage](../platform/src/pages/BrandingPage.jsx)) with a pass/fail pill and a plain-language hint ("Great contrast" / "Too light — text may be hard to read")
-- [ ] Auto-derive `accent_hover` (darken ~10%) and show both swatches
-- [ ] Block save (with a friendly inline message) when contrast fails AA per [dsd §8.4](./dsd-arkived.md#84-branding-validation-rules)
+- [x] Interactive color picker with: curated swatch palette, hex input, and an eyedropper (where supported)
+- [x] **Live WCAG AA contrast meter** (reuse the existing `contrastRatio` logic in [BrandingPage](../platform/src/pages/BrandingPage.jsx)) with a pass/fail pill and a plain-language hint ("Great contrast" / "Too light — text may be hard to read")
+- [x] Auto-derive `accent_hover` (darken ~10%) and show both swatches
+- [x] Block save (with a friendly inline message) when contrast fails AA per [dsd §8.4](./dsd-arkived.md#84-branding-validation-rules)
 
 ### F2.3 Banner & polish
 
-- [ ] Drag-and-drop banner upload with crop/preview to the recommended 1440×560 ratio ([dsd §8.4](./dsd-arkived.md#84-branding-validation-rules))
-- [ ] Graceful default: branded gradient when no banner is set
-- [ ] "Powered by Arkived" watermark toggle shows a live before/after in the preview
+- [x] Drag-and-drop banner upload with crop/preview to the recommended 1440×560 ratio ([dsd §8.4](./dsd-arkived.md#84-branding-validation-rules))
+- [x] Graceful default: branded gradient when no banner is set
+- [x] "Powered by Arkived" watermark toggle shows a live before/after in the preview
 
 ### F2.4 Metadata & favicon source (platform)
 
 > Where the tenant *defines* how their storefront appears in browser tabs, search results, and social shares. The storefront *renders* these in [F5.5](#f55-storefront-metadata-favicon--seo).
 
-- [ ] **Favicon:** auto-generate a favicon from the chosen logo preset/upload (render the SVG mark on the accent color to PNG/ICO sizes: 16/32/180/512); allow a dedicated favicon override. Live tab-preview mockup in the studio
-- [ ] **SEO metadata:** editable storefront meta `title` template and `meta_description`, with character counters and a live Google-result preview snippet
-- [ ] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview
-- [ ] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data)
-- [ ] All fields validated + persisted via tenant branding (see optional backend fields in [Backend Impact](#backend-impact--scope)); graceful fallbacks when unset (favicon → logo, OG image → banner)
+- [x] **Favicon:** auto-generate a favicon from the chosen logo preset/upload (render the SVG mark on the accent color to PNG/ICO sizes: 16/32/180/512); allow a dedicated favicon override. Live tab-preview mockup in the studio
+- [x] **SEO metadata:** editable storefront meta `title` template and `meta_description`, with character counters and a live Google-result preview snippet
+- [/] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview — OG image field persisted; live social-card preview pending
+- [/] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data) — address/contact shipped; hours + social links pending
+- [x] All fields validated + persisted via tenant branding (see optional backend fields in [Backend Impact](#backend-impact--scope)); graceful fallbacks when unset (favicon → logo, OG image → banner)
 
 ---
 
@@ -197,21 +214,21 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F3.1 Logo preset library
 
-- [ ] Curate **12–20 SVG logo marks** (geometric, abstract, category-themed: tools, cameras, party, outdoor, audio, etc.) stored as inline/parameterized SVGs
-- [ ] Presets are **monochrome + recolorable** — they use `currentColor` / a single fill slot so the chosen accent applies instantly
-- [ ] Gallery grid in the Branding studio + Onboarding step: hover to preview, click to select
-- [ ] Each preset pairs the mark with the tenant's shop name to form a quick wordmark lockup
+- [x] Curate **12–20 SVG logo marks** (geometric, abstract, category-themed: tools, cameras, party, outdoor, audio, etc.) stored as inline/parameterized SVGs
+- [x] Presets are **monochrome + recolorable** — they use `currentColor` / a single fill slot so the chosen accent applies instantly
+- [x] Gallery grid in the Branding studio + Onboarding step: hover to preview, click to select
+- [x] Each preset pairs the mark with the tenant's shop name to form a quick wordmark lockup
 
 ### F3.2 Recolor & customize
 
-- [ ] Selecting a preset opens a customizer: pick fill color (defaults to accent), optional background shape (none / rounded square / circle), and a light/dark variant
-- [ ] Live preview of the logo on both light and dark surfaces (so it works in the dashboard header *and* storefront)
-- [ ] "Use this logo" rasterizes/stores the chosen SVG (see [F4](#phase-f4--supabase-storage-for-images)) and sets `logo_url`
-- [ ] Users can still upload their own file — presets are the *fast path*, not the only path
+- [x] Selecting a preset opens a customizer: pick fill color (defaults to accent), optional background shape (none / rounded square / circle), and a light/dark variant
+- [x] Live preview of the logo on both light and dark surfaces (so it works in the dashboard header *and* storefront)
+- [x] "Use this logo" rasterizes/stores the chosen SVG (see [F4](#phase-f4--supabase-storage-for-images)) and sets `logo_url`
+- [x] Users can still upload their own file — presets are the *fast path*, not the only path
 
 ### F3.3 API support
 
-- [ ] `GET /api/v1/branding/logo-presets` returns preset metadata (id, name, svg/source, recolorable slots) — see [sdd](./sdd-arkived.md)
+- [ ] `GET /api/v1/branding/logo-presets` returns preset metadata (id, name, svg/source, recolorable slots) — see [sdd](./sdd-arkived.md) *(optional; presets currently ship as a static bundled manifest)*
 - [ ] Store the chosen preset id + customization (fill, shape, variant) on the tenant so the logo can be regenerated/edited later
 
 ---
@@ -222,22 +239,22 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F4.1 Reusable `ImageUploader` component
 
-- [ ] Single shared `ImageUploader` used by Equipment, Branding logo, and Branding banner
-- [ ] Drag-and-drop **and** click-to-browse; paste-from-clipboard bonus
-- [ ] Client-side validation before upload: type + size per asset rules ([dsd §8.4](./dsd-arkived.md#84-branding-validation-rules)) — logo PNG/SVG ≤2MB, banner JPEG/WebP ≤5MB, equipment images per spec
-- [ ] Upload progress bar + thumbnail preview; client-side downscale/compress large images before upload
-- [ ] Stores under the tenant prefix `${tenant_id}/...` to satisfy the storage RLS policy ([003_storage.sql](../supabase/sql/003_storage.sql)); resolves and persists the public URL
+- [x] Single shared `ImageUploader` used by Equipment, Branding logo, and Branding banner
+- [x] Drag-and-drop **and** click-to-browse; paste-from-clipboard bonus
+- [x] Client-side validation before upload: type + size per asset rules ([dsd §8.4](./dsd-arkived.md#84-branding-validation-rules)) — logo PNG/SVG ≤2MB, banner JPEG/WebP ≤5MB, equipment images per spec
+- [x] Upload progress bar + thumbnail preview; client-side downscale/compress large images before upload
+- [x] Stores under the tenant prefix `${tenant_id}/...` to satisfy the storage RLS policy ([003_storage.sql](../supabase/sql/003_storage.sql)); resolves and persists the public URL
 
 ### F4.2 Equipment images
 
-- [ ] Equipment create/edit supports **multiple images** with a drag-to-reorder gallery; first image = primary
-- [ ] Equipment cards (dashboard + storefront) show real photos with `loading="lazy"` and a branded placeholder when none exist
-- [ ] Equipment detail page: primary image + thumbnail strip with lightbox
+- [/] Equipment create/edit supports **multiple images** with a drag-to-reorder gallery; first image = primary — reorder/primary API wired; platform drag-reorder UI pending
+- [x] Equipment cards (dashboard + storefront) show real photos with `loading="lazy"` and a branded placeholder when none exist
+- [/] Equipment detail page: primary image + thumbnail strip with lightbox — storefront detail has thumbnail strip; lightbox pending
 
 ### F4.3 Resilience (already partially in place)
 
-- [ ] Keep + standardize the existing **retry-on-failure** UX from [BrandingPage](../platform/src/pages/BrandingPage.jsx) (`lastFailedUpload`) inside the shared uploader
-- [ ] Clear, specific error copy on failure; never lose the user's other unsaved edits
+- [x] Keep + standardize the existing **retry-on-failure** UX from [BrandingPage](../platform/src/pages/BrandingPage.jsx) (`lastFailedUpload`) inside the shared uploader
+- [x] Clear, specific error copy on failure; never lose the user's other unsaved edits
 - [ ] Optional: soft-delete orphaned assets when an image is replaced (respect [AGENTS.md](../AGENTS.md) soft-deletion guidance)
 
 ---
@@ -248,45 +265,45 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F5.1 Hero that sells
 
-- [ ] Redesign the [storefront HomePage](../storefront/src/pages/HomePage.jsx) hero: full-bleed banner with a soft gradient scrim for legibility, logo lockup, shop name, a value-prop tagline, and a high-contrast primary CTA ("Browse the catalog")
-- [ ] Secondary CTA for inquiries ("Request a quote") and a quick-search field
-- [ ] Subtle parallax / fade-in on scroll (motion-reduced safe)
-- [ ] Trust strip directly under the hero: # items available, response time, location, years in business (whatever the tenant provides)
+- [x] Redesign the [storefront HomePage](../storefront/src/pages/HomePage.jsx) hero: full-bleed banner with a soft gradient scrim for legibility, logo lockup, shop name, a value-prop tagline, and a high-contrast primary CTA ("Browse the catalog")
+- [x] Secondary CTA for inquiries ("Request a quote") and a quick-search field
+- [/] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in shipped; parallax pending
+- [x] Trust strip directly under the hero: # items available, response time, location, years in business (whatever the tenant provides)
 
 ### F5.2 Conversion-focused sections
 
-- [ ] **Category showcase** — visual cards with representative imagery, not plain pills
-- [ ] **Featured / popular equipment** — rich cards: real photo, name, condition badge, daily rate, availability hint, hover-lift, quick "Inquire" affordance
-- [ ] **How it works** — a 3-step "Browse → Request → Pick up" strip to reduce perceived friction
+- [x] **Category showcase** — visual cards with representative imagery, not plain pills
+- [x] **Featured / popular equipment** — rich cards: real photo, name, condition badge, daily rate, availability hint, hover-lift, quick "Inquire" affordance
+- [x] **How it works** — a 3-step "Browse → Request → Pick up" strip to reduce perceived friction
 - [ ] **Social proof** — testimonials / ratings block (graceful when empty)
-- [ ] **Final CTA band** — accent-colored call-to-action before the footer
-- [ ] Rich, branded footer: contact, hours, map/address, social, and the conditional "Powered by Arkived" badge ([PoweredByArkivedBadge](../storefront/src/components/PoweredByArkivedBadge.jsx))
+- [x] **Final CTA band** — accent-colored call-to-action before the footer
+- [x] Rich, branded footer: contact, hours, map/address, social, and the conditional "Powered by Arkived" badge ([PoweredByArkivedBadge](../storefront/src/components/PoweredByArkivedBadge.jsx))
 
 ### F5.3 Catalog & detail glow-up
 
-- [ ] Catalog: refined card grid, sticky search + category chips, condition/price filters, empty + loading skeletons
-- [ ] Equipment detail: image gallery/lightbox, clear pricing & deposit, read-only availability calendar, related items
-- [ ] **Availability-aware date picker:** the inquiry date range consumes `GET /storefront/:slug/catalog/:id/availability` so already-booked / maintenance dates are visibly disabled before submit — preventing the `409 BOOKING_CONFLICT` round-trip
-- [ ] **Inquiry form as the star**: prominent, low-friction, inline validation, live price estimate (days × daily rate + deposit), instant success state with the booking reference and clear next steps; never leaves the user guessing ([dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions))
-- [ ] Out-of-stock / in-maintenance items show a clear, on-brand "Currently unavailable" state instead of a dead-end
+- [x] Catalog: refined card grid, sticky search + category chips, condition/price filters, empty + loading skeletons
+- [/] Equipment detail: image gallery/lightbox, clear pricing & deposit, read-only availability calendar, related items — gallery + pricing + availability shipped; lightbox/related items pending
+- [x] **Availability-aware date picker:** the inquiry date range consumes `GET /storefront/:slug/catalog/:id/availability` so already-booked / maintenance dates are visibly disabled before submit — preventing the `409 BOOKING_CONFLICT` round-trip
+- [x] **Inquiry form as the star**: prominent, low-friction, inline validation, live price estimate (days × daily rate + deposit), instant success state with the booking reference and clear next steps; never leaves the user guessing ([dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions))
+- [x] Out-of-stock / in-maintenance items show a clear, on-brand "Currently unavailable" state instead of a dead-end
 
 ### F5.4 Storefront fundamentals
 
-- [ ] Mobile-first responsive across all sections (most rental browsing is mobile)
-- [ ] Theming strictly via `--color-primary` / `--color-primary-hover` injected at runtime ([dsd §8.2](./dsd-arkived.md#82-how-theming-is-applied)); never reference App 1 brand tokens
-- [ ] Polished 404 and tenant-not-found states that still feel on-brand
-- [ ] Sensible defaults everywhere: a storefront with no logo/banner/items still looks intentional, not broken
+- [x] Mobile-first responsive across all sections (most rental browsing is mobile)
+- [x] Theming strictly via `--color-primary` / `--color-primary-hover` injected at runtime ([dsd §8.2](./dsd-arkived.md#82-how-theming-is-applied)); never reference App 1 brand tokens
+- [x] Polished 404 and tenant-not-found states that still feel on-brand
+- [x] Sensible defaults everywhere: a storefront with no logo/banner/items still looks intentional, not broken
 
 ### F5.5 Storefront metadata, favicon & SEO
 
 > Renders what the tenant configured in [F2.4](#f24-metadata--favicon-source-platform), using React 19 native document metadata (no helmet — per [AGENTS.md](../AGENTS.md) §3).
 
-- [ ] **Dynamic favicon per tenant:** inject `<link rel="icon">` (and `apple-touch-icon`) from the tenant's favicon/logo at runtime so each storefront shows its *own* icon in the browser tab — falls back to the logo, then a generated accent mark
-- [ ] Per-page `<title>` using the tenant template (e.g., `"Drill Press — ConstructionPro Rentals"`) and unique `<meta name="description">`
-- [ ] **Open Graph + Twitter cards** on every page (`og:title`, `og:description`, `og:image`, `twitter:card`) so shared links render rich previews
-- [ ] `<link rel="canonical">` per page; sensible `lang`, `theme-color` (= tenant accent), and viewport meta
+- [x] **Dynamic favicon per tenant:** inject `<link rel="icon">` (and `apple-touch-icon`) from the tenant's favicon/logo at runtime so each storefront shows its *own* icon in the browser tab — falls back to the logo, then a generated accent mark
+- [x] Per-page `<title>` using the tenant template (e.g., `"Drill Press — ConstructionPro Rentals"`) and unique `<meta name="description">`
+- [x] **Open Graph + Twitter cards** on every page (`og:title`, `og:description`, `og:image`, `twitter:card`) so shared links render rich previews
+- [x] `<link rel="canonical">` per page; sensible `lang`, `theme-color` (= tenant accent), and viewport meta
 - [ ] **Structured data (JSON-LD):** `LocalBusiness` for the shop + `Product`/`Offer` for equipment to improve search appearance
-- [ ] `robots`/`sitemap` friendliness; `theme-color` matches the tenant accent for mobile browser chrome
+- [x] `robots`/`sitemap` friendliness; `theme-color` matches the tenant accent for mobile browser chrome
 
 ### F5.6 Extra storefront touches (high-impact, optional)
 
@@ -303,12 +320,12 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 > Bring the authenticated experience up to the same bar as onboarding and storefront.
 
-- [ ] **Dashboard home:** KPI cards with sparklines + the activation widget ([F1.2](#f12-persistent-activation-checklist-cant-be-ignored)); recent activity feed
-- [ ] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading
-- [ ] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight
-- [ ] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
-- [ ] **Team / Customers:** consistent table + detail patterns from the F0 kit
-- [ ] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)
+- [x] **Dashboard home:** KPI cards with sparklines + the activation widget ([F1.2](#f12-persistent-activation-checklist-cant-be-ignored)); recent activity feed
+- [/] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading — photo thumbnails, labeled status badges, search & filters shipped; card/table toggle + skeletons pending
+- [/] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges + new-inquiry highlight shipped; calendar polish pending
+- [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
+- [/] **Team / Customers:** consistent table + detail patterns from the F0 kit — empty states adopted; full detail-pattern pass pending
+- [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)
 - [ ] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency
 
 ---
@@ -335,10 +352,10 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F7.3 Performance
 
-- [ ] Lazy-load route components with `React.lazy` + `<Suspense>` (platform)
-- [ ] `loading="lazy"` on all storefront imagery; client-side image compression on upload ([F4.1](#f41-reusable-imageuploader-component))
-- [ ] Preload the tenant theme/branding before first storefront paint to avoid a flash of default colors
-- [ ] Keep bundles lean — no second icon library, no heavyweight animation deps where CSS suffices
+- [x] Lazy-load route components with `React.lazy` + `<Suspense>` (platform)
+- [x] `loading="lazy"` on all storefront imagery; client-side image compression on upload ([F4.1](#f41-reusable-imageuploader-component))
+- [x] Preload the tenant theme/branding before first storefront paint to avoid a flash of default colors
+- [x] Keep bundles lean — no second icon library, no heavyweight animation deps where CSS suffices
 
 ### F7.4 Responsiveness (mobile-first, all breakpoints)
 
@@ -365,34 +382,34 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F8.1 Inquiries become bookings (storefront → platform)
 
-- [ ] A storefront inquiry (`POST /bookings/inquiry`) already creates a `reserved` booking **and** a customer — make the storefront success state reflect this: show the booking reference and "the shop has received your request"
-- [ ] Confirm the new booking appears in the platform Bookings list and Calendar with no extra wiring (shared tenant data)
-- [ ] If the chosen dates conflict, surface the API's `409 BOOKING_CONFLICT` as a friendly inline message and refresh availability
+- [x] A storefront inquiry (`POST /bookings/inquiry`) already creates a `reserved` booking **and** a customer — make the storefront success state reflect this: show the booking reference and "the shop has received your request"
+- [x] Confirm the new booking appears in the platform Bookings list and Calendar with no extra wiring (shared tenant data)
+- [x] If the chosen dates conflict, surface the API's `409 BOOKING_CONFLICT` as a friendly inline message and refresh availability
 
 ### F8.2 New-inquiry signals (platform)
 
-- [ ] Dashboard surfaces **incoming inquiries**: a badge/count on Bookings nav + a "New requests" card on the dashboard home
-- [ ] New `reserved` bookings are visually highlighted until acknowledged by an operator
-- [ ] Near-real-time refresh via polling/`updated_at` (or the optional backend hint in [Backend Impact](#backend-impact--scope)); degrades to manual refresh
-- [ ] Operator can advance the booking through the real pipeline (`reserved → payment → …`) directly from the list/detail
+- [x] Dashboard surfaces **incoming inquiries**: a badge/count on Bookings nav + a "New requests" card on the dashboard home
+- [x] New `reserved` bookings are visually highlighted until acknowledged by an operator
+- [x] Near-real-time refresh via polling/`updated_at` (or the optional backend hint in [Backend Impact](#backend-impact--scope)); degrades to manual refresh
+- [x] Operator can advance the booking through the real pipeline (`reserved → payment → …`) directly from the list/detail
 
 ### F8.3 Maintenance & availability reflection (platform → storefront)
 
-- [ ] When equipment is set to `maintenance` (or `archived`) in the platform, the storefront **immediately reflects it**: the item shows "Currently unavailable" and its dates are blocked in the inquiry picker
-- [ ] The storefront availability calendar mirrors platform bookings via the existing availability endpoint — booked/maintenance ranges render as unavailable
-- [ ] Equipment marked `available` reappears in the catalog automatically
+- [x] When equipment is set to `maintenance` (or `archived`) in the platform, the storefront **immediately reflects it**: the item shows "Currently unavailable" and its dates are blocked in the inquiry picker
+- [x] The storefront availability calendar mirrors platform bookings via the existing availability endpoint — booked/maintenance ranges render as unavailable
+- [x] Equipment marked `available` reappears in the catalog automatically
 
 ### F8.4 Customer status tracking (storefront)
 
-- [ ] After submitting an inquiry, the customer gets a **booking reference** and an optional "track your request" link
+- [/] After submitting an inquiry, the customer gets a **booking reference** and an optional "track your request" link — reference shown in the success state; track link pending the optional lookup endpoint
 - [ ] A lightweight, read-only status page shows where their request is in the pipeline (received → confirmed → ready → returned), mapped from the booking status
 - [ ] Depends on the optional public status-lookup endpoint in [Backend Impact](#backend-impact--scope); hidden gracefully if not available
 - [ ] Status-change notifications already fire server-side (`notify.bookingStatusChanged`) — keep storefront copy consistent with those emails
 
 ### F8.5 Calendar parity
 
-- [ ] The platform calendar (`GET /bookings/calendar`) and the storefront availability view present the *same* booked ranges, using a shared rendering convention so operators and customers see a consistent picture
-- [ ] Equipment-level filtering on both sides stays in sync (same equipment id semantics)
+- [x] The platform calendar (`GET /bookings/calendar`) and the storefront availability view present the *same* booked ranges, using a shared rendering convention so operators and customers see a consistent picture
+- [x] Equipment-level filtering on both sides stays in sync (same equipment id semantics)
 
 ---
 

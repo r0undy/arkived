@@ -173,7 +173,10 @@ export default function TeamPage() {
 
             {!loading && !error && team.length === 0 ? (
               <tr>
-                <td className="px-4 py-6 text-neutral-400" colSpan="4">No team members found.</td>
+                <td className="px-4 py-8 text-center text-neutral-400" colSpan="4">
+                  <p className="font-medium text-neutral-200">It's just you so far</p>
+                  <p className="mt-1 text-sm">Invite a teammate above to help manage bookings, equipment, and customers.</p>
+                </td>
               </tr>
             ) : null}
           </tbody>

@@ -1,33 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Inbox, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
-
-const linearize = (channel) => {
-  const normalized = channel / 255;
-  return normalized <= 0.03928
-    ? normalized / 12.92
-    : ((normalized + 0.055) / 1.055) ** 2.4;
-};
-
-const contrastRatio = (hexA, hexB) => {
-  const normalize = (hex) => {
-    const match = /^#([0-9a-f]{6})$/i.exec(hex || '');
-    if (!match) return null;
-    const value = match[1];
-    const r = Number.parseInt(value.slice(0, 2), 16);
-    const g = Number.parseInt(value.slice(2, 4), 16);
-    const b = Number.parseInt(value.slice(4, 6), 16);
-    return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
-  };
-
-  const a = normalize(hexA);
-  const b = normalize(hexB);
-  if (a === null || b === null) return 0;
-
-  const lighter = Math.max(a, b);
-  const darker = Math.min(a, b);
-  return (lighter + 0.05) / (darker + 0.05);
-};
+import ActivationWidget from '../components/ActivationWidget';
+import Badge from '../components/ui/Badge';
+import Sparkline from '../components/ui/Sparkline';
+import { useNewInquiries } from '../hooks/useNewInquiries';
+import { computeCompletedSteps, shouldRouteToWelcome } from '../lib/onboarding';
 
 export default function DashboardHomePage() {
   const [overview, setOverview] = useState(null);
@@ -39,6 +18,11 @@ export default function DashboardHomePage() {
   const [customerLookup, setCustomerLookup] = useState({});
   const [underperformingAssets, setUnderperformingAssets] = useState([]);
   const [syncingChecklist, setSyncingChecklist] = useState(false);
+  const [volumeTrend, setVolumeTrend] = useState([]);
+  const [revenueTrend, setRevenueTrend] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+  const navigate = useNavigate();
+  const { newInquiries, count: inquiryCount } = useNewInquiries();
 
   useEffect(() => {
     Promise.all([
@@ -84,20 +68,30 @@ export default function DashboardHomePage() {
         setEquipmentLookup({});
         setCustomerLookup({});
         setUnderperformingAssets([]);
-      });
+      })
+      .finally(() => setLoaded(true));
   }, []);
 
-  const completedSteps = useMemo(() => {
-    if (!tenant) return [];
+  useEffect(() => {
+    if (loaded && shouldRouteToWelcome(tenant, { equipmentCount })) {
+      navigate('/welcome', { replace: true });
+    }
+  }, [loaded, tenant, equipmentCount, navigate]);
 
-    const steps = [];
-    if (tenant.logo_url) steps.push('upload_logo');
-    if (contrastRatio(tenant.accent_color, '#ffffff') >= 4.5) steps.push('set_accent_color');
-    if (equipmentCount > 0) steps.push('add_first_equipment');
-    if (staffCount > 1) steps.push('invite_team_member');
+  useEffect(() => {
+    Promise.all([
+      api.analyticsBookingVolume().catch(() => ({ data: [] })),
+      api.analyticsRevenue().catch(() => ({ data: [] }))
+    ]).then(([volumeResult, revenueResult]) => {
+      setVolumeTrend((volumeResult.data || []).map((entry) => entry.count));
+      setRevenueTrend((revenueResult.data || []).map((entry) => entry.revenue));
+    });
+  }, []);
 
-    return steps;
-  }, [tenant, equipmentCount, staffCount]);
+  const completedSteps = useMemo(
+    () => computeCompletedSteps(tenant, { equipmentCount, staffCount }),
+    [tenant, equipmentCount, staffCount]
+  );
 
   useEffect(() => {
     if (!tenant) return;
@@ -117,73 +111,70 @@ export default function DashboardHomePage() {
 
   const cards = [
     { label: 'Utilization Rate', value: `${overview?.utilizationRate ?? '--'}%` },
-    { label: 'Active Bookings', value: overview?.activeBookings ?? '--' },
+    { label: 'Active Bookings', value: overview?.activeBookings ?? '--', trend: volumeTrend },
     {
       label: 'Overdue Rentals',
       value: overview?.overdueCount ?? '--',
       alert: Number(overview?.overdueCount || 0) > 0
     },
-    { label: 'Revenue (MTD)', value: overview ? `PHP ${Number(overview.revenueMTD).toLocaleString()}` : '--' }
-  ];
-
-  const checklist = [
     {
-      id: 'upload_logo',
-      label: 'Upload logo',
-      href: '/dashboard/settings/branding'
-    },
-    {
-      id: 'set_accent_color',
-      label: 'Set accent color (AA contrast)',
-      href: '/dashboard/settings/branding'
-    },
-    {
-      id: 'add_first_equipment',
-      label: 'Add first equipment item',
-      href: '/dashboard/equipment'
-    },
-    {
-      id: 'invite_team_member',
-      label: 'Invite a team member',
-      href: '/dashboard/settings/team'
+      label: 'Revenue (MTD)',
+      value: overview ? `PHP ${Number(overview.revenueMTD).toLocaleString()}` : '--',
+      trend: revenueTrend
     }
   ];
-
-  const completedLookup = new Set(completedSteps);
-  const allDone = checklist.every((item) => completedLookup.has(item.id));
 
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
       <p className="mt-2 text-sm text-neutral-400">Live KPI snapshot for your rental operations.</p>
 
-      {!allDone ? (
-        <section className="mt-6 rounded-lg border border-neutral-750 bg-neutral-800 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-sm font-semibold text-neutral-100">Onboarding Checklist</p>
-              <p className="text-xs text-neutral-400">Complete these steps to activate your storefront setup.</p>
+      <ActivationWidget
+        tenant={tenant}
+        equipmentCount={equipmentCount}
+        staffCount={staffCount}
+        syncing={syncingChecklist}
+      />
+
+      {inquiryCount > 0 ? (
+        <section className="mt-6 rounded-xl border border-info-500/40 bg-info-500/10 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-info-500/20 text-info-500">
+                <Inbox aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-neutral-100">
+                  {inquiryCount} new {inquiryCount === 1 ? 'request' : 'requests'} from your storefront
+                </p>
+                <p className="text-xs text-neutral-400">
+                  Customers reserved equipment online. Review and move them through the pipeline.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-neutral-400">
-              {completedSteps.length}/{checklist.length} complete {syncingChecklist ? '• syncing' : ''}
-            </p>
+            <Link
+              to="/dashboard/bookings"
+              className="inline-flex items-center gap-1.5 rounded-md bg-info-500 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-px hover:brightness-110 sm:ml-auto"
+            >
+              Review requests <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
           </div>
 
-          <div className="mt-4 grid gap-2">
-            {checklist.map((item) => {
-              const done = completedLookup.has(item.id);
-              return (
+          <ul className="mt-3 grid gap-2">
+            {newInquiries.slice(0, 3).map((booking) => (
+              <li key={booking.id}>
                 <Link
-                  key={item.id}
-                  className="flex items-center justify-between rounded-md border border-neutral-750 bg-neutral-900 px-3 py-2 text-sm"
-                  to={item.href}
+                  to={`/dashboard/bookings/${booking.id}`}
+                  className="flex items-center justify-between rounded-lg border border-info-500/20 bg-neutral-900 px-3 py-2 text-sm transition hover:border-info-500/40"
                 >
-                  <span className={done ? 'text-neutral-300 line-through' : 'text-neutral-100'}>{item.label}</span>
-                  <span className={done ? 'text-success-500' : 'text-warning-500'}>{done ? 'Done' : 'Pending'}</span>
+                  <span className="truncate text-neutral-200">
+                    {equipmentLookup[booking.equipment_id]?.name || 'Equipment'} · {booking.start_date} → {booking.end_date}
+                  </span>
+                  <Badge variant="info">New</Badge>
                 </Link>
-              );
-            })}
-          </div>
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 
@@ -198,7 +189,12 @@ export default function DashboardHomePage() {
             }`}
           >
             <p className="text-sm text-neutral-400">{card.label}</p>
-            <p className="mt-2 text-2xl font-semibold">{card.value}</p>
+            <div className="mt-2 flex items-end justify-between gap-2">
+              <p className="text-2xl font-semibold tabular-nums">{card.value}</p>
+              {card.trend && card.trend.length > 1 ? (
+                <Sparkline data={card.trend} strokeClass={card.alert ? 'text-warning-400' : 'text-brand-400'} />
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

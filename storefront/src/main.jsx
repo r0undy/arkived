@@ -19,11 +19,16 @@ import NotFoundPage from './pages/NotFoundPage';
 import TenantDebugger from './components/TenantDebugger';
 import TenantLoadingScreen from './components/TenantLoadingScreen';
 
+const shouldShowTenantDebugger = () => (
+  import.meta.env.DEV && import.meta.env.VITE_ENABLE_TENANT_DEBUGGER === 'true'
+);
+
 function App() {
   const tenantState = useTenant();
   const [equipment, setEquipment] = useState([]);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [catalogError, setCatalogError] = useState('');
+  const showTenantDebugger = shouldShowTenantDebugger();
 
   useEffect(() => {
     if (!tenantState.tenant) return;
@@ -40,11 +45,25 @@ function App() {
   }, [tenantState.tenant]);
 
   if (tenantState.loading) {
-    return <TenantLoadingScreen />;
+    return (
+      <>
+        <TenantLoadingScreen />
+        {showTenantDebugger ? (
+          <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
+        ) : null}
+      </>
+    );
   }
 
   if (tenantState.error || !tenantState.tenant) {
-    return <NotFoundPage title="Tenant not found" message="This storefront slug does not exist." />;
+    return (
+      <>
+        <NotFoundPage title="Tenant not found" message="This storefront slug does not exist." />
+        {showTenantDebugger ? (
+          <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
+        ) : null}
+      </>
+    );
   }
 
   return (
@@ -69,7 +88,7 @@ function App() {
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      {import.meta.env.DEV ? (
+      {showTenantDebugger ? (
         <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
       ) : null}
     </BrowserRouter>

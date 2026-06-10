@@ -1,6 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
+import { CalendarCheck } from 'lucide-react';
+import { useNewInquiries } from '../hooks/useNewInquiries';
 
 const NEXT_STATUS = {
   reserved: 'payment',
@@ -10,6 +14,14 @@ const NEXT_STATUS = {
   inspected: 'closed'
 };
 const BLOCKING_STATUSES = new Set(['reserved', 'payment', 'dispatched', 'returned', 'inspected']);
+const STATUS_VARIANT = {
+  reserved: 'info',
+  payment: 'warning',
+  dispatched: 'info',
+  returned: 'warning',
+  inspected: 'info',
+  closed: 'success'
+};
 const DAY_MS = 24 * 60 * 60 * 1000;
 const toYmd = (value) => new Date(value).toISOString().slice(0, 10);
 const addDays = (value, days) => {
@@ -53,6 +65,8 @@ export default function BookingsPage() {
   });
   const [availability, setAvailability] = useState(null);
   const [blockedRanges, setBlockedRanges] = useState([]);
+  const { newInquiries, acknowledge } = useNewInquiries({ poll: false });
+  const newInquiryIds = useMemo(() => new Set(newInquiries.map((entry) => entry.id)), [newInquiries]);
 
   const loadBookings = async () => {
     try {
@@ -85,6 +99,12 @@ export default function BookingsPage() {
   useEffect(() => {
     loadLookups();
   }, []);
+
+  // Acknowledge storefront inquiries when the operator leaves this view so the
+  // dashboard/nav "new requests" signal clears once they've been seen (F8.2).
+  const acknowledgeRef = useRef(acknowledge);
+  acknowledgeRef.current = acknowledge;
+  useEffect(() => () => acknowledgeRef.current(), []);
 
   useEffect(() => {
     loadBookings();
@@ -410,38 +430,65 @@ export default function BookingsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-neutral-750">
-            {bookings.map((booking) => (
-              <tr key={booking.id}>
-                <td className="px-3 py-2">{customerMap[booking.customer_id]?.full_name || booking.customer_id}</td>
-                <td className="px-3 py-2">{equipmentMap[booking.equipment_id]?.name || booking.equipment_id}</td>
-                <td className="px-3 py-2">{booking.start_date}</td>
-                <td className="px-3 py-2">{booking.end_date}</td>
-                <td className="px-3 py-2">
-                  <span className="rounded-md bg-neutral-900 px-2 py-1 capitalize">
-                    {booking.status}{booking.overdue ? ' • overdue' : ''}
-                  </span>
-                </td>
-                <td className="px-3 py-2">
-                  <div className="flex flex-wrap gap-2">
-                    <Link className="rounded-md border border-neutral-700 px-2 py-1 hover:bg-neutral-900" to={`/dashboard/bookings/${booking.id}`}>
-                      View
-                    </Link>
-                    {NEXT_STATUS[booking.status] ? (
-                      <button
-                        className="rounded-md bg-brand-500 px-2 py-1 text-xs font-semibold hover:bg-brand-600"
-                        onClick={() => moveForward(booking)}
-                        type="button"
-                      >
-                        Move to {NEXT_STATUS[booking.status]}
-                      </button>
-                    ) : null}
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {bookings.map((booking) => {
+              const isNew = newInquiryIds.has(booking.id);
+              return (
+                <tr key={booking.id} className={isNew ? 'bg-info-500/10' : undefined}>
+                  <td className="px-3 py-2">
+                    <span className="flex items-center gap-2">
+                      {isNew ? <Badge variant="info">New</Badge> : null}
+                      {customerMap[booking.customer_id]?.full_name || booking.customer_id}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">{equipmentMap[booking.equipment_id]?.name || booking.equipment_id}</td>
+                  <td className="px-3 py-2">{booking.start_date}</td>
+                  <td className="px-3 py-2">{booking.end_date}</td>
+                  <td className="px-3 py-2">
+                    <span className="flex items-center gap-1.5">
+                      <Badge variant={STATUS_VARIANT[booking.status] || 'neutral'} icon={false} className="capitalize">
+                        {booking.status}
+                      </Badge>
+                      {booking.overdue ? <Badge variant="danger">Overdue</Badge> : null}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap gap-2">
+                      <Link className="rounded-md border border-neutral-700 px-2 py-1 hover:bg-neutral-900" to={`/dashboard/bookings/${booking.id}`}>
+                        View
+                      </Link>
+                      {NEXT_STATUS[booking.status] ? (
+                        <button
+                          className="rounded-md bg-brand-500 px-2 py-1 text-xs font-semibold hover:bg-brand-600"
+                          onClick={() => moveForward(booking)}
+                          type="button"
+                        >
+                          Move to {NEXT_STATUS[booking.status]}
+                        </button>
+                      ) : null}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
-        {bookings.length === 0 ? <p className="p-4 text-sm text-neutral-400">No bookings found for these filters.</p> : null}
+        {bookings.length === 0 ? (
+          <EmptyState
+            className="border-0"
+            icon={CalendarCheck}
+            title="No bookings yet"
+            description="When customers reserve gear from your storefront — or you add a booking here — it shows up in this pipeline."
+            action={
+              <button
+                type="button"
+                onClick={() => setShowCreate(true)}
+                className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
+              >
+                Create a booking
+              </button>
+            }
+          />
+        ) : null}
       </div>
 
       <div className="mt-4 flex items-center justify-between text-sm text-neutral-300">

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Users } from 'lucide-react';
 import { api } from '../lib/api';
+import EmptyState from '../components/ui/EmptyState';
 
 export default function CustomersPage() {
   const [q, setQ] = useState('');
@@ -98,7 +100,18 @@ export default function CustomersPage() {
             ))}
           </tbody>
         </table>
-        {rows.length === 0 ? <p className="p-4 text-sm text-neutral-400">No customers found.</p> : null}
+        {rows.length === 0 ? (
+          <EmptyState
+            className="border-0"
+            icon={Users}
+            title={q ? 'No matching customers' : 'No customers yet'}
+            description={
+              q
+                ? 'Try a different name, email, or phone number.'
+                : 'Customers are created automatically when someone submits an inquiry from your storefront.'
+            }
+          />
+        ) : null}
       </div>
     </div>
   );
