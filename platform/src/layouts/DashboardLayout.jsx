@@ -16,12 +16,13 @@ import {
   PanelLeftOpen
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useNewInquiries } from '../hooks/useNewInquiries';
 import { ArkivedMark } from '../components/Wordmark';
 
 const navItems = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/dashboard/equipment', label: 'Equipment', icon: Package },
-  { to: '/dashboard/bookings', label: 'Bookings', icon: CalendarCheck },
+  { to: '/dashboard/bookings', label: 'Bookings', icon: CalendarCheck, badgeKey: 'inquiries' },
   { to: '/dashboard/calendar', label: 'Calendar', icon: CalendarDays },
   { to: '/dashboard/customers', label: 'Customers', icon: Users },
   { to: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
@@ -29,11 +30,12 @@ const navItems = [
   { to: '/dashboard/settings/team', label: 'Team', icon: UserCog }
 ];
 
-function NavItems({ collapsed, onNavigate }) {
+function NavItems({ collapsed, onNavigate, badges = {} }) {
   return (
     <nav className="space-y-1">
       {navItems.map((item) => {
         const Icon = item.icon;
+        const badgeCount = item.badgeKey ? badges[item.badgeKey] || 0 : 0;
         return (
           <NavLink
             key={item.to}
@@ -42,7 +44,7 @@ function NavItems({ collapsed, onNavigate }) {
             onClick={onNavigate}
             title={collapsed ? item.label : undefined}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
+              `relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
                 collapsed ? 'justify-center' : ''
               } ${
                 isActive
@@ -51,8 +53,27 @@ function NavItems({ collapsed, onNavigate }) {
               }`
             }
           >
-            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
-            {collapsed ? <span className="sr-only">{item.label}</span> : <span>{item.label}</span>}
+            <span className="relative shrink-0">
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              {badgeCount > 0 && collapsed ? (
+                <span className="absolute -right-1.5 -top-1.5 h-2.5 w-2.5 rounded-full bg-danger-500 ring-2 ring-neutral-950" aria-hidden="true" />
+              ) : null}
+            </span>
+            {collapsed ? (
+              <span className="sr-only">
+                {item.label}{badgeCount > 0 ? `, ${badgeCount} new` : ''}
+              </span>
+            ) : (
+              <span className="flex-1">{item.label}</span>
+            )}
+            {!collapsed && badgeCount > 0 ? (
+              <span
+                className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-danger-500 px-1.5 text-xs font-semibold text-white"
+                aria-label={`${badgeCount} new requests`}
+              >
+                {badgeCount > 99 ? '99+' : badgeCount}
+              </span>
+            ) : null}
           </NavLink>
         );
       })}
@@ -62,6 +83,7 @@ function NavItems({ collapsed, onNavigate }) {
 
 export default function DashboardLayout() {
   const auth = useAuth();
+  const { count: inquiryCount } = useNewInquiries();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -70,6 +92,7 @@ export default function DashboardLayout() {
   }
 
   const sidebarWidth = collapsed ? 'lg:grid-cols-[72px_1fr]' : 'lg:grid-cols-[240px_1fr]';
+  const badges = { inquiries: inquiryCount };
 
   return (
     <div className={`grid min-h-screen grid-cols-1 bg-neutral-900 text-neutral-50 ${sidebarWidth}`}>
@@ -101,7 +124,7 @@ export default function DashboardLayout() {
             <PanelLeftOpen className="h-5 w-5" aria-hidden="true" />
           </button>
         ) : null}
-        <NavItems collapsed={collapsed} />
+        <NavItems collapsed={collapsed} badges={badges} />
         <button
           className={`mt-6 flex items-center gap-3 rounded-md border border-neutral-750 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800 ${
             collapsed ? 'justify-center' : ''
@@ -133,7 +156,7 @@ export default function DashboardLayout() {
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <NavItems collapsed={false} onNavigate={() => setMobileOpen(false)} />
+            <NavItems collapsed={false} onNavigate={() => setMobileOpen(false)} badges={badges} />
             <button
               className="mt-6 flex items-center gap-3 rounded-md border border-neutral-750 px-3 py-2 text-sm text-neutral-300 hover:bg-neutral-800"
               onClick={auth.signOut}

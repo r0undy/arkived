@@ -1,8 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Package } from 'lucide-react';
 import { api } from '../lib/api';
+import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
 
 const PAGE_SIZE = 6;
+
+const STATUS_VARIANT = {
+  available: 'success',
+  rented: 'info',
+  maintenance: 'warning',
+  archived: 'neutral'
+};
 
 const initialForm = {
   name: '',
@@ -201,7 +211,9 @@ export default function EquipmentPage() {
             <h2 className="mt-1 text-lg font-semibold">{item.name}</h2>
             <p className="mt-2 text-sm">PHP {Number(item.daily_rate).toLocaleString()} / day</p>
             <div className="mt-2 flex items-center justify-between">
-              <span className="rounded-full bg-neutral-900 px-2 py-1 text-xs capitalize">{item.status}</span>
+              <Badge variant={STATUS_VARIANT[item.status] || 'neutral'} icon={false} className="capitalize">
+                {item.status}
+              </Badge>
               <Link
                 className="rounded border border-neutral-750 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
                 to={`/dashboard/equipment/${item.id}`}
@@ -213,7 +225,27 @@ export default function EquipmentPage() {
         ))}
       </div>
 
-      {items.length === 0 ? <p className="mt-4 text-sm text-neutral-400">No equipment found.</p> : null}
+      {items.length === 0 ? (
+        <EmptyState
+          className="mt-6"
+          icon={Package}
+          title={filters.q || filters.category || filters.status ? 'No matching equipment' : 'Add your first item'}
+          description={
+            filters.q || filters.category || filters.status
+              ? 'Try clearing your filters to see more of your inventory.'
+              : 'Your storefront needs at least one item to rent. Add your first piece of equipment to go live.'
+          }
+          action={
+            <button
+              type="button"
+              onClick={() => setFormOpen(true)}
+              className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-600"
+            >
+              + Add equipment
+            </button>
+          }
+        />
+      ) : null}
 
       <div className="mt-6 flex items-center justify-end gap-2">
         <button

@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Inbox, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
 import ActivationWidget from '../components/ActivationWidget';
+import Badge from '../components/ui/Badge';
+import Sparkline from '../components/ui/Sparkline';
+import { useNewInquiries } from '../hooks/useNewInquiries';
 import { computeCompletedSteps, shouldRouteToWelcome } from '../lib/onboarding';
 
 export default function DashboardHomePage() {
@@ -14,8 +18,11 @@ export default function DashboardHomePage() {
   const [customerLookup, setCustomerLookup] = useState({});
   const [underperformingAssets, setUnderperformingAssets] = useState([]);
   const [syncingChecklist, setSyncingChecklist] = useState(false);
+  const [volumeTrend, setVolumeTrend] = useState([]);
+  const [revenueTrend, setRevenueTrend] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const navigate = useNavigate();
+  const { newInquiries, count: inquiryCount } = useNewInquiries();
 
   useEffect(() => {
     Promise.all([
@@ -71,6 +78,16 @@ export default function DashboardHomePage() {
     }
   }, [loaded, tenant, equipmentCount, navigate]);
 
+  useEffect(() => {
+    Promise.all([
+      api.analyticsBookingVolume().catch(() => ({ data: [] })),
+      api.analyticsRevenue().catch(() => ({ data: [] }))
+    ]).then(([volumeResult, revenueResult]) => {
+      setVolumeTrend((volumeResult.data || []).map((entry) => entry.count));
+      setRevenueTrend((revenueResult.data || []).map((entry) => entry.revenue));
+    });
+  }, []);
+
   const completedSteps = useMemo(
     () => computeCompletedSteps(tenant, { equipmentCount, staffCount }),
     [tenant, equipmentCount, staffCount]
@@ -94,13 +111,17 @@ export default function DashboardHomePage() {
 
   const cards = [
     { label: 'Utilization Rate', value: `${overview?.utilizationRate ?? '--'}%` },
-    { label: 'Active Bookings', value: overview?.activeBookings ?? '--' },
+    { label: 'Active Bookings', value: overview?.activeBookings ?? '--', trend: volumeTrend },
     {
       label: 'Overdue Rentals',
       value: overview?.overdueCount ?? '--',
       alert: Number(overview?.overdueCount || 0) > 0
     },
-    { label: 'Revenue (MTD)', value: overview ? `PHP ${Number(overview.revenueMTD).toLocaleString()}` : '--' }
+    {
+      label: 'Revenue (MTD)',
+      value: overview ? `PHP ${Number(overview.revenueMTD).toLocaleString()}` : '--',
+      trend: revenueTrend
+    }
   ];
 
   return (
@@ -115,6 +136,48 @@ export default function DashboardHomePage() {
         syncing={syncingChecklist}
       />
 
+      {inquiryCount > 0 ? (
+        <section className="mt-6 rounded-xl border border-info-500/40 bg-info-500/10 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-info-500/20 text-info-500">
+                <Inbox aria-hidden="true" className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-neutral-100">
+                  {inquiryCount} new {inquiryCount === 1 ? 'request' : 'requests'} from your storefront
+                </p>
+                <p className="text-xs text-neutral-400">
+                  Customers reserved equipment online. Review and move them through the pipeline.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/dashboard/bookings"
+              className="inline-flex items-center gap-1.5 rounded-md bg-info-500 px-3 py-2 text-sm font-semibold text-white transition hover:-translate-y-px hover:brightness-110 sm:ml-auto"
+            >
+              Review requests <ArrowRight aria-hidden="true" className="h-4 w-4" />
+            </Link>
+          </div>
+
+          <ul className="mt-3 grid gap-2">
+            {newInquiries.slice(0, 3).map((booking) => (
+              <li key={booking.id}>
+                <Link
+                  to={`/dashboard/bookings/${booking.id}`}
+                  className="flex items-center justify-between rounded-lg border border-info-500/20 bg-neutral-900 px-3 py-2 text-sm transition hover:border-info-500/40"
+                >
+                  <span className="truncate text-neutral-200">
+                    {equipmentLookup[booking.equipment_id]?.name || 'Equipment'} · {booking.start_date} → {booking.end_date}
+                  </span>
+                  <Badge variant="info">New</Badge>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((card) => (
           <div
@@ -126,7 +189,12 @@ export default function DashboardHomePage() {
             }`}
           >
             <p className="text-sm text-neutral-400">{card.label}</p>
-            <p className="mt-2 text-2xl font-semibold">{card.value}</p>
+            <div className="mt-2 flex items-end justify-between gap-2">
+              <p className="text-2xl font-semibold tabular-nums">{card.value}</p>
+              {card.trend && card.trend.length > 1 ? (
+                <Sparkline data={card.trend} strokeClass={card.alert ? 'text-warning-400' : 'text-brand-400'} />
+              ) : null}
+            </div>
           </div>
         ))}
       </div>
