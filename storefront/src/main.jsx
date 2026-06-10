@@ -13,6 +13,7 @@ import { useTenant } from './hooks/useTenant';
 import { storefrontApi } from './lib/api';
 import StorefrontLayout from './layouts/StorefrontLayout';
 import StorefrontErrorBoundary from './components/StorefrontErrorBoundary';
+import StorefrontComingSoon from './components/StorefrontComingSoon';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
@@ -62,6 +63,17 @@ function App() {
     return (
       <>
         <NotFoundPage title="Tenant not found" message="This storefront slug does not exist." />
+        {showTenantDebugger ? (
+          <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
+        ) : null}
+      </>
+    );
+  }
+
+  if (tenantState.tenant.is_published === false) {
+    return (
+      <>
+        <StorefrontComingSoon tenant={tenantState.tenant} />
         {showTenantDebugger ? (
           <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
         ) : null}

@@ -128,3 +128,27 @@ export function dismissWelcome() {
     localStorage.setItem('arkived_welcome_dismissed', '1');
   }
 }
+
+/**
+ * The step the welcome wizard persists on its final ("Go live") screen. Its
+ * presence is the single source of truth for "onboarding finished" — it gates
+ * dashboard access and publishes the public storefront.
+ */
+export const GO_LIVE_STEP = 'go_live';
+
+/**
+ * Whether the tenant has finished onboarding and may use the dashboard /
+ * have a live storefront. Tenants that already have at least one item to rent
+ * (e.g. seeded or pre-onboarding accounts) are treated as onboarded so they are
+ * never locked out by the gate.
+ * @param {object} tenant
+ * @param {object} [counts] - { equipmentCount }
+ */
+export function isOnboarded(tenant, { equipmentCount = 0 } = {}) {
+  if (!tenant) return false;
+  const steps = Array.isArray(tenant.onboarding_completed_steps)
+    ? tenant.onboarding_completed_steps
+    : [];
+  if (steps.includes(GO_LIVE_STEP)) return true;
+  return equipmentCount > 0;
+}

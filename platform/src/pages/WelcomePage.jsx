@@ -16,7 +16,7 @@ import { LOGO_PRESETS, LogoPresetMark } from '../lib/logoPresets';
 import { presetToPngBlob } from '../lib/logoRender.jsx';
 import { uploadTenantAsset } from '../lib/storage';
 import { contrastRatio, darken } from '../lib/colors';
-import { dismissWelcome } from '../lib/onboarding';
+import { dismissWelcome, GO_LIVE_STEP } from '../lib/onboarding';
 import { Input, Textarea } from '../components/ui';
 import Button from '../components/ui/Button';
 
@@ -64,11 +64,6 @@ export default function WelcomePage() {
   const passesAa = contrast >= 4.5;
   const accentHover = useMemo(() => darken(accent, 0.1), [accent]);
   const activePreset = useMemo(() => LOGO_PRESETS.find((p) => p.id === presetId) || LOGO_PRESETS[0], [presetId]);
-
-  const skip = () => {
-    dismissWelcome();
-    navigate('/dashboard');
-  };
 
   const goNext = () => setStep((s) => Math.min(STEPS.length - 1, s + 1));
   const goBack = () => setStep((s) => Math.max(0, s - 1));
@@ -156,9 +151,24 @@ export default function WelcomePage() {
     }
   };
 
-  const finish = () => {
-    dismissWelcome();
-    navigate('/dashboard');
+  const finish = async () => {
+    setError('');
+    setSaving(true);
+    try {
+      // Persisting `go_live` is what publishes the storefront and unlocks the
+      // dashboard — it must succeed before we leave the wizard.
+      const result = await api.updateBranding({
+        onboarding_completed_steps: Array.from(
+          new Set([...(tenant?.onboarding_completed_steps || []), GO_LIVE_STEP])
+        )
+      });
+      setTenant(result.tenant);
+      dismissWelcome();
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError(err.message || 'Could not finish setup. Please try again.');
+      setSaving(false);
+    }
   };
 
   return (
@@ -168,9 +178,7 @@ export default function WelcomePage() {
           <Store aria-hidden="true" className="h-5 w-5 text-brand-400" />
           Arkived
         </div>
-        <button type="button" onClick={skip} className="text-sm text-neutral-400 hover:text-neutral-200">
-          Skip for now
-        </button>
+        <span className="text-xs text-neutral-500">Finish setup to publish your storefront</span>
       </header>
 
       {/* Stepper */}
@@ -409,7 +417,7 @@ export default function WelcomePage() {
               >
                 View my storefront
               </Button>
-              <Button onClick={finish} icon={Sparkles}>
+              <Button onClick={finish} icon={Sparkles} loading={saving}>
                 Go to dashboard
               </Button>
             </div>

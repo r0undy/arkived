@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { tenantRepository } from '../lib/repositories.js';
+import { equipmentRepository, isTenantPublished, tenantRepository } from '../lib/repositories.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/requireRole.js';
 import { updateTenantBrandingSchema } from '../validators/tenant.js';
@@ -39,7 +39,12 @@ tenantRouter.get('/', requireAuth, asyncHandler(async (req, res) => {
 
 tenantRouter.get('/:slug/public', asyncHandler(async (req, res) => {
   const tenant = await tenantRepository.getPublicBySlug(req.params.slug);
-  res.json({ tenant });
+  const equipment = await equipmentRepository.list(tenant.id);
+  const published = isTenantPublished(tenant, equipment.length);
+
+  // Don't leak onboarding internals to the public; expose a single flag.
+  const { onboarding_completed_steps, ...publicTenant } = tenant;
+  res.json({ tenant: { ...publicTenant, is_published: published } });
 }));
 
 tenantRouter.patch('/', requireAuth, requireRole('admin'), asyncHandler(async (req, res) => {

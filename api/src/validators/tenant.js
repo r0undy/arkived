@@ -19,7 +19,10 @@ const onboardingStepSchema = z.enum([
   'add_first_equipment',
   'set_contact_details',
   'invite_team_member',
-  'share_storefront'
+  'share_storefront',
+  // Set when the welcome wizard is finished. This is the signal that publishes
+  // the tenant's public storefront and unlocks the dashboard.
+  'go_live'
 ]);
 
 export const registerTenantSchema = z.object({

@@ -29,10 +29,23 @@ const initialForm = {
   tags: []
 };
 
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const value = String(reader.result || '');
+      const base64 = value.includes(',') ? value.split(',')[1] : value;
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+
 export default function EquipmentPage() {
   const [items, setItems] = useState([]);
   const [formOpen, setFormOpen] = useState(false);
   const [form, setForm] = useState(initialForm);
+  const [newImages, setNewImages] = useState([]);
   const [status, setStatus] = useState({ loading: false, error: '' });
   const [filters, setFilters] = useState({ q: '', category: '', status: '' });
   const [page, setPage] = useState(1);
@@ -110,13 +123,35 @@ export default function EquipmentPage() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const onSelectImages = (event) => {
+    const files = Array.from(event.target.files || []);
+    setNewImages(files);
+  };
+
   const onCreate = async (event) => {
     event.preventDefault();
     setStatus({ loading: true, error: '' });
 
     try {
-      await api.createEquipment(form);
+      const created = await api.createEquipment(form);
+      const newId = created?.data?.id;
+
+      if (newId && newImages.length > 0) {
+        for (let index = 0; index < newImages.length; index += 1) {
+          const file = newImages[index];
+          const content_base64 = await fileToBase64(file);
+          await api.uploadEquipmentImage(newId, {
+            file_name: file.name,
+            mime_type: file.type || 'image/png',
+            content_base64,
+            is_primary: index === 0,
+            display_order: index
+          });
+        }
+      }
+
       setForm(initialForm);
+      setNewImages([]);
       setStatus({ loading: false, error: '' });
       setFormOpen(false);
       await loadItems();
@@ -188,6 +223,24 @@ export default function EquipmentPage() {
               value={form.description}
               onChange={updateForm('description')}
             />
+          </label>
+
+          <label className="block text-sm text-neutral-200 md:col-span-3">
+            <span>Photos</span>
+            <input
+              className="mt-1 w-full rounded-md border border-neutral-750 bg-neutral-950 px-3 py-2 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-neutral-750 file:px-3 file:py-1 file:text-sm file:text-neutral-100"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={onSelectImages}
+            />
+            {newImages.length > 0 ? (
+              <span className="mt-1 block text-xs text-neutral-400">
+                {newImages.length} {newImages.length === 1 ? 'image' : 'images'} selected — the first becomes the cover photo.
+              </span>
+            ) : (
+              <span className="mt-1 block text-xs text-neutral-400">Optional. The first image becomes the cover photo.</span>
+            )}
           </label>
 
           {status.error ? <p className="text-sm text-danger-500 md:col-span-3">{status.error}</p> : null}

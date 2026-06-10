@@ -69,6 +69,14 @@ app.use(
 );
 app.use(express.json({ limit: '1mb' }));
 
+// API responses are per-tenant and authenticated; never let a browser or any
+// intermediary cache them, otherwise a stale (e.g. empty) list can be served
+// after the user has created data.
+app.use('/api', (_req, res, next) => {
+  res.set('Cache-Control', 'no-store');
+  next();
+});
+
 app.use('/health', healthRouter);
 app.use('/api/v1', apiRouter);
 
