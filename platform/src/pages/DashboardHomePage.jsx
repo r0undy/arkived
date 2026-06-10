@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Inbox, ArrowRight } from 'lucide-react';
+import { Inbox, ArrowRight, Store, ExternalLink, Copy, Check } from 'lucide-react';
 import { api } from '../lib/api';
 import PageHeader from '../components/ui/PageHeader';
 import ActivationWidget from '../components/ActivationWidget';
@@ -8,6 +8,60 @@ import Badge from '../components/ui/Badge';
 import Sparkline from '../components/ui/Sparkline';
 import { useNewInquiries } from '../hooks/useNewInquiries';
 import { computeCompletedSteps, shouldRouteToWelcome } from '../lib/onboarding';
+
+const STOREFRONT_DOMAIN = import.meta.env.VITE_STOREFRONT_DOMAIN || 'arkived.dev';
+
+function VisitSiteCard({ tenant }) {
+  const [copied, setCopied] = useState(false);
+  if (!tenant?.slug) return null;
+
+  const storefrontUrl = `${tenant.slug}.${STOREFRONT_DOMAIN}`;
+  const href = `https://${storefrontUrl}`;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard may be unavailable; ignore.
+    }
+  };
+
+  return (
+    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-neutral-750 bg-neutral-800 p-4 sm:flex-row sm:items-center">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-500/15 text-brand-300">
+          <Store aria-hidden="true" className="h-5 w-5" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-neutral-100">Your storefront is live</p>
+          <a href={href} target="_blank" rel="noreferrer" className="truncate font-mono text-xs text-brand-400 hover:underline">
+            {storefrontUrl}
+          </a>
+        </div>
+      </div>
+      <div className="flex items-center gap-2 sm:ml-auto">
+        <button
+          type="button"
+          onClick={copy}
+          className="inline-flex items-center gap-1.5 rounded-md border border-neutral-750 bg-neutral-900 px-3 py-2 text-sm font-medium text-neutral-300 transition hover:text-neutral-100"
+        >
+          {copied ? <Check aria-hidden="true" className="h-4 w-4 text-success-500" /> : <Copy aria-hidden="true" className="h-4 w-4" />}
+          {copied ? 'Copied' : 'Copy link'}
+        </button>
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-md bg-brand-500 px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
+        >
+          Visit site <ExternalLink aria-hidden="true" className="h-4 w-4" />
+        </a>
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardHomePage() {
   const [overview, setOverview] = useState(null);
@@ -128,6 +182,8 @@ export default function DashboardHomePage() {
   return (
     <div>
       <PageHeader title="Dashboard" subtitle="Live KPI snapshot for your rental operations." />
+
+      <VisitSiteCard tenant={tenant} />
 
       <ActivationWidget
         tenant={tenant}

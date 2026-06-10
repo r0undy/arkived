@@ -15,7 +15,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Store,
-  ExternalLink,
   ArrowRight
 } from 'lucide-react';
 import { api } from '../lib/api';
@@ -24,8 +23,6 @@ import { useNewInquiries } from '../hooks/useNewInquiries';
 import { ArkivedMark } from '../components/Wordmark';
 import ActivationLauncher from '../components/ActivationLauncher';
 import { activationSummary, isOnboarded } from '../lib/onboarding';
-
-const STOREFRONT_DOMAIN = import.meta.env.VITE_STOREFRONT_DOMAIN || 'arkived.dev';
 
 const navSections = [
   {
@@ -175,7 +172,6 @@ function WorkspaceHeader({ tenant, collapsed }) {
  */
 function StorefrontStatusBanner({ tenant, summary }) {
   if (!tenant || !summary) return null;
-  const storefrontUrl = tenant.slug ? `${tenant.slug}.${STOREFRONT_DOMAIN}` : '';
 
   if (!summary.coreComplete) {
     return (
@@ -198,27 +194,9 @@ function StorefrontStatusBanner({ tenant, summary }) {
     );
   }
 
-  if (!storefrontUrl) return null;
-
-  return (
-    <div className="border-b border-success-500/25 bg-success-500/10 px-4 py-2.5 sm:px-6">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
-        <span className="inline-flex items-center gap-1.5 font-medium text-success-500">
-          <span className="h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
-          Storefront live
-        </span>
-        <a
-          href={`https://${storefrontUrl}`}
-          target="_blank"
-          rel="noreferrer"
-          className="ml-auto inline-flex items-center gap-1 font-mono text-xs text-neutral-300 transition hover:text-neutral-50"
-        >
-          {storefrontUrl}
-          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-        </a>
-      </div>
-    </div>
-  );
+  // Once the storefront is live we no longer keep a persistent banner pinned
+  // under the navigation — the “Visit your site” card lives on the Overview page.
+  return null;
 }
 
 function UserFooter({ user, collapsed, onSignOut }) {
@@ -365,6 +343,17 @@ export default function DashboardLayout() {
             <h2 className="text-base font-semibold tracking-tight text-neutral-100">{pageTitle}</h2>
           </div>
           <div className="flex items-center gap-2">
+            {tenant?.id ? (
+              <button
+                type="button"
+                onClick={() => navigator.clipboard?.writeText(tenant.id)}
+                title={`Tenant ID: ${tenant.id} (click to copy)`}
+                className="hidden items-center gap-1.5 rounded-md border border-neutral-750 bg-neutral-900 px-2.5 py-1 font-mono text-xs text-neutral-400 transition hover:text-neutral-100 sm:inline-flex"
+              >
+                <span className="text-neutral-500">Tenant</span>
+                <span className="text-neutral-300">{String(tenant.id).slice(0, 8)}</span>
+              </button>
+            ) : null}
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-500 text-sm font-semibold text-white lg:hidden">
               {initialsOf(auth.user?.email)}
             </span>
