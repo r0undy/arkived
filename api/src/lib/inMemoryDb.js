@@ -16,6 +16,7 @@ const state = {
       contact_phone: '+63 900 000 0000',
       contact_address: 'Makati, Metro Manila',
       show_watermark: true,
+      business_hours: null,
       onboarding_completed_steps: [],
       created_at: now()
     }
@@ -122,6 +123,7 @@ export const inMemoryDb = {
       meta_description: '',
       favicon_url: '',
       og_image_url: '',
+      business_hours: null,
       onboarding_completed_steps: [],
       created_at: now()
     };

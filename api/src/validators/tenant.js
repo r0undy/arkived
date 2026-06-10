@@ -2,6 +2,17 @@ import { z } from 'zod';
 import { slugSchema } from './common.js';
 
 const hexColorSchema = z.string().regex(/^#[0-9A-F]{6}$/i, 'Color must be a valid 6-digit hex value');
+
+const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Time must be HH:MM (24-hour)');
+const dayHoursSchema = z
+  .object({ open: timeSchema, close: timeSchema })
+  .strict()
+  .nullable();
+const DAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const businessHoursSchema = z
+  .object(Object.fromEntries(DAY_KEYS.map((key) => [key, dayHoursSchema.optional()])))
+  .strict();
+
 const onboardingStepSchema = z.enum([
   'upload_logo',
   'set_accent_color',
@@ -33,6 +44,7 @@ export const updateTenantBrandingSchema = z
     meta_description: z.string().max(300).optional().or(z.literal('')),
     favicon_url: z.string().url().optional().or(z.literal('')),
     og_image_url: z.string().url().optional().or(z.literal('')),
+    business_hours: businessHoursSchema.nullable().optional(),
     onboarding_completed_steps: z.array(onboardingStepSchema).max(8).optional()
   })
   .refine((value) => Object.keys(value).length > 0, {

@@ -9,6 +9,7 @@ import { contrastRatio, darken, readableTextColor } from '../lib/colors';
 import { Button, Card, Input, Textarea, Switch, Modal, useToast, Skeleton } from '../components/ui';
 import ImageUploader from '../components/ImageUploader';
 import LogoPicker from '../components/LogoPicker';
+import BusinessHoursEditor from '../components/BusinessHoursEditor';
 
 const initialForm = {
   name: '',
@@ -21,6 +22,7 @@ const initialForm = {
   contact_email: '',
   contact_phone: '',
   contact_address: '',
+  business_hours: {},
   show_watermark: true
 };
 
@@ -57,6 +59,7 @@ export default function BrandingPage() {
         contact_email: tenant.contact_email || '',
         contact_phone: tenant.contact_phone || '',
         contact_address: tenant.contact_address || '',
+        business_hours: tenant.business_hours || {},
         show_watermark: Boolean(tenant.show_watermark)
       };
       setForm(next);
@@ -332,6 +335,11 @@ export default function BrandingPage() {
                 <Input label="Contact email" type="email" value={form.contact_email} onChange={(e) => setField('contact_email')(e.target.value)} />
                 <Input label="Contact phone" value={form.contact_phone} onChange={(e) => setField('contact_phone')(e.target.value)} />
                 <Input label="Contact address" value={form.contact_address} onChange={(e) => setField('contact_address')(e.target.value)} />
+                <div>
+                  <p className="mb-1.5 text-sm font-medium text-neutral-200">Business hours</p>
+                  <p className="mb-2 text-xs text-neutral-400">Powers the storefront “Open now” indicator. Times use your shop’s local time.</p>
+                  <BusinessHoursEditor value={form.business_hours} onChange={setField('business_hours')} />
+                </div>
                 <Switch
                   checked={form.show_watermark}
                   onChange={setField('show_watermark')}

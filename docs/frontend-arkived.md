@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.13.0
+> **Version:** 1.14.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -26,7 +26,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 |---|---|---|
 | F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark, `Tooltip` + `Tabs` shipped. |
 | F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget + floating launcher, empty states, confetti + toast at 100%. |
-| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved, live social-card preview. Business hours/social links pending. |
+| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved, live social-card preview, per-day business hours. Social links pending. |
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
@@ -203,7 +203,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Favicon:** auto-generate a favicon from the chosen logo preset/upload (render the SVG mark on the accent color to PNG/ICO sizes: 16/32/180/512); allow a dedicated favicon override. Live tab-preview mockup in the studio
 - [x] **SEO metadata:** editable storefront meta `title` template and `meta_description`, with character counters and a live Google-result preview snippet
 - [/] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview — OG image field persisted; live social-card preview (1200×630 mockup mirroring the storefront OG fallback chain) shipped
-- [/] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data) — address/contact shipped; hours + social links pending
+- [/] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data) — address/contact and per-day business hours (with storefront "open now") shipped; social links pending
 - [x] All fields validated + persisted via tenant branding (see optional backend fields in [Backend Impact](#backend-impact--scope)); graceful fallbacks when unset (favicon → logo, OG image → banner)
 
 ---
@@ -311,7 +311,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
 - [x] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
 - [x] **Search & filter persistence** via URL query params (already partially supported) so links are shareable
-- [/] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator — click-to-call, mailto, WhatsApp, and Google Maps address link shipped; business hours/"open now" pending (needs hours field)
+- [x] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator — click-to-call, mailto, WhatsApp, Google Maps address link, and a per-day business-hours editor (Branding studio) feeding a storefront "Open now/Closed" indicator (header pill + footer schedule, overnight-aware) all shipped
 - [x] **Recently viewed** strip (localStorage) to aid return browsing
 
 ---
