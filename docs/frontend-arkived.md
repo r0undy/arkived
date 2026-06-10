@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.5.0
+> **Version:** 1.18.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -26,13 +26,13 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 |---|---|---|
 | F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark, `Tooltip` + `Tabs` shipped. |
 | F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget + floating launcher, empty states, confetti + toast at 100%. |
-| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved + dirty tracking. Social-card preview pending. |
+| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved, live social-card preview, per-day business hours. Social links pending. |
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
-| F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading. |
-| F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes, lazy images, theme preload, mobile-first. Continuous. |
-| F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity. Customer status page pending (optional backend). |
+| F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading, calendar polish, consistent Team/Customers tables + detail. Admin primitive adoption pending. |
+| F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes/images, theme preload, mobile-first, global reduced-motion guard, focus rings, alt text, label/aria-describedby associations. Responsive verification sweep continuing. |
+| F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity, customer status-tracking page. |
 
 > Builds: `platform` and `storefront` both compile clean with no Vite warnings under Node v25.8.2.
 
@@ -99,7 +99,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [ ] `GET /api/v1/branding/logo-presets` — serve the logo preset library metadata ([F3.3](#f33-api-support))
 - [x] Persist favicon + meta fields on the tenant (`favicon_url`, `meta_description`, `og_image_url`, `tagline`) for [metadata/favicon customization](#f24-metadata--favicon-source-platform) — added additively (migration `006_branding_metadata.sql` + validators + repositories), no existing logic changed
-- [ ] Public booking-status lookup by reference + email (read-only) to power a customer "track my request" page ([F8.4](#f84-customer-status-tracking-storefront))
+- [x] Public booking-status lookup by reference + email (read-only) to power a customer "track my request" page ([F8.4](#f84-customer-status-tracking-storefront)) — added additively as `GET /api/v1/storefront/:slug/track` (requires unguessable UUID + matching email, generic 404 to prevent enumeration); no existing logic changed
 - [ ] Lightweight `updated_at`/polling or webhook hint so the dashboard can surface new inquiries in near-real-time ([F8.2](#f82-new-inquiry-signals-platform)) — *frontend ships a lightweight polling fallback in the meantime*
 
 > If a backend change is **not** opted into, the corresponding frontend item degrades gracefully (e.g., logo presets ship as a static bundled manifest; favicon falls back to the logo; status tracking is hidden). **No frontend item hard-depends on a backend change.**
@@ -202,8 +202,8 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] **Favicon:** auto-generate a favicon from the chosen logo preset/upload (render the SVG mark on the accent color to PNG/ICO sizes: 16/32/180/512); allow a dedicated favicon override. Live tab-preview mockup in the studio
 - [x] **SEO metadata:** editable storefront meta `title` template and `meta_description`, with character counters and a live Google-result preview snippet
-- [/] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview — OG image field persisted; live social-card preview pending
-- [/] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data) — address/contact shipped; hours + social links pending
+- [/] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview — OG image field persisted; live social-card preview (1200×630 mockup mirroring the storefront OG fallback chain) shipped
+- [/] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data) — address/contact and per-day business hours (with storefront "open now") shipped; social links pending
 - [x] All fields validated + persisted via tenant branding (see optional backend fields in [Backend Impact](#backend-impact--scope)); graceful fallbacks when unset (favicon → logo, OG image → banner)
 
 ---
@@ -267,7 +267,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] Redesign the [storefront HomePage](../storefront/src/pages/HomePage.jsx) hero: full-bleed banner with a soft gradient scrim for legibility, logo lockup, shop name, a value-prop tagline, and a high-contrast primary CTA ("Browse the catalog")
 - [x] Secondary CTA for inquiries ("Request a quote") and a quick-search field
-- [/] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in shipped; parallax pending
+- [x] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in + scroll parallax on the hero banner shipped (rAF-throttled, disabled under `prefers-reduced-motion`); the no-banner hero now uses an animated accent aurora gradient, plus a live "Open now" hero badge and quick contact actions (call/WhatsApp/email) driven by the tenant's settings
 - [x] Trust strip directly under the hero: # items available, response time, location, years in business (whatever the tenant provides)
 
 ### F5.2 Conversion-focused sections
@@ -307,11 +307,11 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F5.6 Extra storefront touches (high-impact, optional)
 
-- [ ] **"Request a quote" multi-item cart:** let a customer add several items, pick one date range, and submit a single inquiry covering all of them
+- [x] **"Request a quote" multi-item cart:** let a customer add several items, pick one date range, and submit a single inquiry covering all of them — per-tenant localStorage cart (`quoteCart` + `useQuoteCart`), add-to-quote on catalog cards and the detail page, a header cart indicator with count, and a `/quote` page that sends one inquiry per item (`Promise.allSettled`), aggregates references, keeps failed/conflicting items for retry, and links to tracking
 - [x] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
 - [x] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
 - [x] **Search & filter persistence** via URL query params (already partially supported) so links are shareable
-- [/] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator — click-to-call, mailto, WhatsApp, and Google Maps address link shipped; business hours/"open now" pending (needs hours field)
+- [x] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator — click-to-call, mailto, WhatsApp, Google Maps address link, and a per-day business-hours editor (Branding studio) feeding a storefront "Open now/Closed" indicator (header pill + footer schedule, overnight-aware) all shipped
 - [x] **Recently viewed** strip (localStorage) to aid return browsing
 
 ---
@@ -322,11 +322,11 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] **Dashboard home:** KPI cards with sparklines + the activation widget ([F1.2](#f12-persistent-activation-checklist-cant-be-ignored)); recent activity feed
 - [x] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading
-- [/] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges + new-inquiry highlight shipped; calendar polish pending
+- [x] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges, new-inquiry highlight, and calendar polish (today highlight, out-of-month dimming, weekday header, "+N more" overflow, animated detail drawer) shipped
 - [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
-- [/] **Team / Customers:** consistent table + detail patterns from the F0 kit — empty states adopted; full detail-pattern pass pending
-- [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)
-- [ ] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency
+- [x] **Team / Customers:** consistent table + detail patterns from the F0 kit — shared table styling, avatar initials, status/role/count Badges, skeleton loading, and Badge-based detail timeline shipped
+- [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup) — full SaaS landing page shipped: gradient/grid hero with an `aspect-4/5` hero-image placeholder (ready for a model/product shot), a **dynamic** partner/tenant marquee (fetched from `GET /api/v1/tenant/public/partners` — real tenant name + logo with an accent-monogram fallback; each item links out to that tenant's `{slug}.{STOREFRONT_DOMAIN}` storefront), a bento feature layout (featured storefront card + supporting cards), a lazy-loaded YouTube demo (`youtube-nocookie` facade), a numbered "why we built it" timeline, a **manually-controlled** team slider (left/right controls, snap scroll, portrait cards with image-or-initials, gradient scrim, hover-lift with vertical track padding so the lift/shadow is never clipped), and a full-bleed "wow" final CTA (animated aurora wash + grid mask + floating glow orbs, gradient headline, **no contained card**). Shared `Marquee` primitive (renders children twice, `-50%` translate loop, pause-on-hover, reduced-motion safe) powers the partner strip
+- [x] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency — KPI cards wrapped in `Card` with icons, tenant status as `Badge`, `EmptyState` for the no-tenants case, and skeleton loading shipped
 
 ---
 
@@ -336,19 +336,19 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F7.1 Motion
 
-- [ ] Apply the [dsd §7.1](./dsd-arkived.md#71-duration--easing) duration/easing scale consistently (enter faster, exit faster)
+- [x] Apply the [dsd §7.1](./dsd-arkived.md#71-duration--easing) duration/easing scale consistently (enter faster, exit faster) — modals/page drawers `300ms ease-out`, toasts/backdrops `200ms`, hover/focus on the `150ms` base; mobile nav drawer slides in (`drawerInLeft 300ms`) with a `200ms` backdrop fade
 - [x] Skeletons over spinners wherever content shape is known
-- [ ] Wrap all animations in a `prefers-reduced-motion` guard ([dsd §7.2](./dsd-arkived.md#72-motion-principles))
+- [x] Wrap all animations in a `prefers-reduced-motion` guard ([dsd §7.2](./dsd-arkived.md#72-motion-principles)) — global CSS guard in both apps + explicit JS guards in confetti and hero parallax
 - [x] Tasteful confetti only at genuine milestones (onboarding complete) — and reduced-motion safe
 
 ### F7.2 Accessibility (WCAG 2.1 AA)
 
-- [ ] Visible brand focus rings on every interactive element ([dsd §5](./dsd-arkived.md#5-elevation--depth))
-- [ ] All images have meaningful `alt`; decorative images marked empty `alt`
-- [ ] Every input has an associated `<label>`; errors announced via `aria-live`
-- [ ] Status never communicated by color alone (badges carry text/icon)
-- [ ] Storefront accent contrast enforced at save time ([F2.2](#f22-accent-color-made-delightful))
-- [ ] Full keyboard path through onboarding, branding studio, and inquiry form
+- [x] Visible brand focus rings on every interactive element ([dsd §5](./dsd-arkived.md#5-elevation--depth)) — global `:focus-visible` ring in both apps (storefront ring is tenant-themed via `--color-primary`)
+- [x] All images have meaningful `alt`; decorative images marked empty `alt` — audited across both apps; decorative icons use `aria-hidden`
+- [x] Every input has an associated `<label>`; errors announced via `aria-live` — platform `Field` kit links labels + `aria-describedby`/`role=alert`; storefront forms use wrapped labels + `role=alert` errors
+- [x] Status never communicated by color alone (badges carry text/icon)
+- [x] Storefront accent contrast enforced at save time ([F2.2](#f22-accent-color-made-delightful))
+- [/] Full keyboard path through onboarding, branding studio, and inquiry form — primitives (Tabs/Modal/Switch) are keyboard-operable; full end-to-end keyboard sweep pending
 
 ### F7.3 Performance
 
@@ -362,15 +362,15 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 > Responsiveness is a cross-cutting requirement for **every** view in both apps, not a final pass. Design mobile-first, then enhance for larger screens.
 
 - [ ] Adopt a consistent breakpoint ladder (Tailwind `sm` 640 / `md` 768 / `lg` 1024 / `xl` 1280) and design each layout mobile-first (base styles target the smallest screen)
-- [ ] **Platform shell:** sidebar collapses to a drawer / bottom tab bar on mobile ([F0.2](#f02-layout-polish)); top bar condenses (search → icon, user menu → avatar)
-- [ ] **Data tables** reflow to stacked cards or horizontally scroll within a contained region on small screens — never overflow the page
+- [x] **Platform shell:** sidebar collapses to a drawer / bottom tab bar on mobile ([F0.2](#f02-layout-polish)); top bar condenses (search → icon, user menu → avatar) — animated slide-in drawer + condensing sticky header shipped
+- [x] **Data tables** reflow to stacked cards or horizontally scroll within a contained region on small screens — never overflow the page — every platform table sits in an `overflow-x-auto` container
 - [ ] **Branding studio** ([F2.1](#f21-split-screen-live-preview)) stacks controls above the preview on mobile; the device toggle still previews Desktop/Mobile frames
 - [ ] **Onboarding wizard** is fully usable on a phone (single-column steps, thumb-reachable primary action)
 - [ ] **Storefront** is mobile-first end to end ([F5.4](#f54-storefront-fundamentals)): hero, category/equipment grids, and footer reflow; sticky mobile inquiry CTA ([F5.6](#f56-extra-storefront-touches-high-impact-optional))
-- [ ] **Modals / drawers / date pickers** convert to full-screen or bottom-sheet patterns on mobile; no off-screen content
-- [ ] **Touch targets** are ≥ 44×44px; adequate spacing prevents mis-taps; hover-only affordances have a tap/focus equivalent
-- [ ] Respect safe areas (notches) and dynamic viewport units (`dvh`) so fixed bars don't get hidden by mobile browser chrome
-- [ ] **Fluid type & spacing:** headings/sections scale down sensibly (use the [dsd §3.1](./dsd-arkived.md#31-type-scale) scale responsively); no fixed pixel widths that cause overflow
+- [x] **Modals / drawers / date pickers** convert to full-screen or bottom-sheet patterns on mobile; no off-screen content — shared `Modal` is a bottom-sheet on mobile (`rounded-t-lg` → `sm:rounded-lg`)
+- [x] **Touch targets** are ≥ 44×44px; adequate spacing prevents mis-taps; hover-only affordances have a tap/focus equivalent — mobile nav/close buttons sized `h-11 w-11`, catalog pagination `min-h-11`
+- [x] Respect safe areas (notches) and dynamic viewport units (`dvh`) so fixed bars don't get hidden by mobile browser chrome — all layout roots use `min-h-dvh`; the branding studio's sticky save bar uses a `pb-safe` (`env(safe-area-inset-bottom)`) utility
+- [x] **Fluid type & spacing:** headings/sections scale down sensibly (use the [dsd §3.1](./dsd-arkived.md#31-type-scale) scale responsively); no fixed pixel widths that cause overflow — storefront hero/CTA headings use `clamp()` so long tenant names never overflow at 360px
 - [ ] Images/media are fluid (`max-width: 100%`); use responsive `srcset`/sizes where it matters
 - [ ] **Verification:** test each view at 360 / 768 / 1024 / 1440px (and landscape) — zero horizontal scroll, no clipped or overlapping controls
 
@@ -401,9 +401,9 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F8.4 Customer status tracking (storefront)
 
-- [/] After submitting an inquiry, the customer gets a **booking reference** and an optional "track your request" link — reference shown in the success state; track link pending the optional lookup endpoint
-- [ ] A lightweight, read-only status page shows where their request is in the pipeline (received → confirmed → ready → returned), mapped from the booking status
-- [ ] Depends on the optional public status-lookup endpoint in [Backend Impact](#backend-impact--scope); hidden gracefully if not available
+- [x] After submitting an inquiry, the customer gets a **booking reference** and an optional "track your request" link — reference shown in the success state + "Track your request" deep-link (prefilled ref + email) shipped
+- [x] A lightweight, read-only status page shows where their request is in the pipeline (received → confirmed → ready → returned), mapped from the booking status
+- [x] Depends on the optional public status-lookup endpoint in [Backend Impact](#backend-impact--scope); hidden gracefully if not available — endpoint shipped; page surfaces a friendly error when a reference/email doesn't match
 - [ ] Status-change notifications already fire server-side (`notify.bookingStatusChanged`) — keep storefront copy consistent with those emails
 
 ### F8.5 Calendar parity

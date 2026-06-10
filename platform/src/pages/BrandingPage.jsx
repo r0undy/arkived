@@ -9,6 +9,7 @@ import { contrastRatio, darken, readableTextColor } from '../lib/colors';
 import { Button, Card, Input, Textarea, Switch, Modal, useToast, Skeleton } from '../components/ui';
 import ImageUploader from '../components/ImageUploader';
 import LogoPicker from '../components/LogoPicker';
+import BusinessHoursEditor from '../components/BusinessHoursEditor';
 
 const initialForm = {
   name: '',
@@ -21,6 +22,7 @@ const initialForm = {
   contact_email: '',
   contact_phone: '',
   contact_address: '',
+  business_hours: {},
   show_watermark: true
 };
 
@@ -38,12 +40,14 @@ export default function BrandingPage() {
   const [logoPickerOpen, setLogoPickerOpen] = useState(false);
   const [applyingPreset, setApplyingPreset] = useState(false);
   const [device, setDevice] = useState('desktop');
+  const [slug, setSlug] = useState('');
 
   const loadBranding = async () => {
     setLoading(true);
     try {
       const result = await api.tenant();
       const tenant = result.tenant || {};
+      setSlug(tenant.slug || '');
       const next = {
         name: tenant.name || '',
         logo_url: tenant.logo_url || '',
@@ -55,6 +59,7 @@ export default function BrandingPage() {
         contact_email: tenant.contact_email || '',
         contact_phone: tenant.contact_phone || '',
         contact_address: tenant.contact_address || '',
+        business_hours: tenant.business_hours || {},
         show_watermark: Boolean(tenant.show_watermark)
       };
       setForm(next);
@@ -148,6 +153,10 @@ export default function BrandingPage() {
   const metaPreview =
     form.meta_description ||
     `Browse equipment rentals from ${form.name || 'your shop'} and send a booking inquiry in minutes.`;
+
+  // Mirror the storefront Meta OG fallback chain: og_image → banner → logo.
+  const ogImage = form.banner_image_url || form.logo_url || '';
+  const storefrontHost = slug ? `${slug}.arkived.dev` : 'your-shop.arkived.dev';
 
   return (
     <div className="space-y-6">
@@ -293,6 +302,30 @@ export default function BrandingPage() {
                   </div>
                   <p className="mt-2 text-xs text-neutral-500">The favicon is generated from your logo. Upload a logo or pick one from the gallery to set it.</p>
                 </div>
+
+                <div>
+                  <p className="mb-1.5 text-sm font-medium text-neutral-200">Social share preview</p>
+                  <div className="overflow-hidden rounded-lg border border-neutral-750 bg-neutral-950">
+                    <div className="aspect-1200/630 w-full bg-neutral-900">
+                      {ogImage ? (
+                        <img src={ogImage} alt="Social card preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <div
+                          className="flex h-full w-full items-center justify-center"
+                          style={{ backgroundColor: form.accent_color, color: accentText }}
+                        >
+                          <span className="text-lg font-bold">{form.name || 'Your shop'}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-neutral-750 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wide text-neutral-500">{storefrontHost}</p>
+                      <p className="truncate text-sm font-semibold text-neutral-100">{form.name || 'Your shop'}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-neutral-400">{metaPreview}</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-neutral-500">How your link looks when shared on social media. Uses your banner, then logo, as the image.</p>
+                </div>
               </div>
             </Card>
 
@@ -302,6 +335,11 @@ export default function BrandingPage() {
                 <Input label="Contact email" type="email" value={form.contact_email} onChange={(e) => setField('contact_email')(e.target.value)} />
                 <Input label="Contact phone" value={form.contact_phone} onChange={(e) => setField('contact_phone')(e.target.value)} />
                 <Input label="Contact address" value={form.contact_address} onChange={(e) => setField('contact_address')(e.target.value)} />
+                <div>
+                  <p className="mb-1.5 text-sm font-medium text-neutral-200">Business hours</p>
+                  <p className="mb-2 text-xs text-neutral-400">Powers the storefront “Open now” indicator. Times use your shop’s local time.</p>
+                  <BusinessHoursEditor value={form.business_hours} onChange={setField('business_hours')} />
+                </div>
                 <Switch
                   checked={form.show_watermark}
                   onChange={setField('show_watermark')}
@@ -315,7 +353,7 @@ export default function BrandingPage() {
               <p className="text-xs text-warning-500">Supabase not configured: uploads are disabled in this environment.</p>
             ) : null}
 
-            <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-neutral-750 bg-neutral-900/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border sm:px-4">
+            <div className="pb-safe sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-neutral-750 bg-neutral-900/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border sm:px-4">
               {isDirty ? (
                 <span className="mr-auto inline-flex items-center gap-1.5 text-xs text-warning-500">
                   <span className="h-1.5 w-1.5 rounded-full bg-warning-500" aria-hidden="true" />

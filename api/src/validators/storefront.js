@@ -20,3 +20,8 @@ export const storefrontAvailabilityQuerySchema = z
     message: 'start must be on or before end',
     path: ['end']
   });
+
+export const storefrontTrackQuerySchema = z.object({
+  reference: z.string().uuid(),
+  email: z.string().email()
+});

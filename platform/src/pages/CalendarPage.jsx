@@ -177,6 +177,8 @@ export default function CalendarPage() {
     ? eachDay(startOfWeek(range.start), endOfWeek(range.end))
     : days;
 
+  const todayYmd = toYmd(new Date());
+
   return (
     <div>
       <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
@@ -249,53 +251,88 @@ export default function CalendarPage() {
         </section>
       ) : (
         <section className="mt-6 overflow-x-auto rounded-lg border border-neutral-750 bg-neutral-800">
-          <div className="grid min-w-[900px] grid-cols-7">
-            {weekDays.map((day) => (
-              <div key={toYmd(day)} className="min-h-[140px] border-r border-b border-neutral-750 p-2 last:border-r-0">
-                <p className="text-xs text-neutral-400">{day.toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short', timeZone: 'UTC' })}</p>
-                <div className="mt-2 grid gap-1">
-                  {(eventsByDate.get(toYmd(day)) || []).slice(0, 4).map((event) => (
-                    <EventButton
-                      key={`${event.id}-${toYmd(day)}`}
-                      compact
-                      event={event}
-                      equipment={equipmentById[event.equipment_id]}
-                      onClick={() => setSelected(event)}
-                    />
-                  ))}
+          {view === 'month' ? (
+            <div className="grid min-w-225 grid-cols-7 border-b border-neutral-750">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((label) => (
+                <div key={label} className="px-2 py-2 text-center text-xs font-semibold uppercase tracking-wide text-neutral-400">
+                  {label}
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+          ) : null}
+          <div className="grid min-w-225 grid-cols-7">
+            {weekDays.map((day) => {
+              const ymd = toYmd(day);
+              const dayEvents = eventsByDate.get(ymd) || [];
+              const isToday = ymd === todayYmd;
+              const outsideMonth = view === 'month' && day.getUTCMonth() !== anchorDate.getUTCMonth();
+              return (
+                <div
+                  key={ymd}
+                  className={`min-h-35 border-r border-b border-neutral-750 p-2 last:border-r-0 ${
+                    outsideMonth ? 'bg-neutral-900/40' : ''
+                  } ${isToday ? 'bg-brand-500/5' : ''}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className={`text-xs ${outsideMonth ? 'text-neutral-600' : 'text-neutral-400'}`}>
+                      {day.toLocaleDateString(undefined, { month: 'short', day: 'numeric', weekday: 'short', timeZone: 'UTC' })}
+                    </p>
+                    {isToday ? (
+                      <span className="inline-flex items-center rounded-full bg-brand-500 px-1.5 text-[10px] font-semibold text-white">
+                        Today
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-2 grid gap-1">
+                    {dayEvents.slice(0, 4).map((event) => (
+                      <EventButton
+                        key={`${event.id}-${ymd}`}
+                        compact
+                        event={event}
+                        equipment={equipmentById[event.equipment_id]}
+                        onClick={() => setSelected(event)}
+                      />
+                    ))}
+                    {dayEvents.length > 4 ? (
+                      <span className="px-1 text-[10px] font-medium text-neutral-400">+{dayEvents.length - 4} more</span>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}
 
       {selected ? (
-        <aside className="fixed right-0 top-0 z-40 h-full w-full max-w-md border-l border-neutral-750 bg-neutral-900 p-5 shadow-2xl">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-lg font-semibold tracking-tight">Event Detail</h3>
-            <button className="rounded-md border border-neutral-700 px-2 py-1 text-xs" onClick={() => setSelected(null)} type="button">
-              Close
-            </button>
-          </div>
+        <div className="fixed inset-0 z-40" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setSelected(null)} />
+          <aside className="absolute right-0 top-0 h-full w-full max-w-md animate-[modalIn_0.2s_ease-out] border-l border-neutral-750 bg-neutral-900 p-5 shadow-2xl">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-lg font-semibold tracking-tight">Event Detail</h3>
+              <button className="rounded-md border border-neutral-700 px-2 py-1 text-xs" onClick={() => setSelected(null)} type="button">
+                Close
+              </button>
+            </div>
 
-          <div className="mt-4 space-y-2 text-sm">
-            <Row label="Type" value={selected.type} />
-            <Row label="Status" value={selected.status} />
-            <Row label="Equipment" value={equipmentById[selected.equipment_id]?.name || selected.equipment_id} />
-            <Row label="Start" value={selected.start_date} />
-            <Row label="End" value={selected.end_date} />
-          </div>
+            <div className="mt-4 space-y-2 text-sm">
+              <Row label="Type" value={selected.type} />
+              <Row label="Status" value={selected.status} />
+              <Row label="Equipment" value={equipmentById[selected.equipment_id]?.name || selected.equipment_id} />
+              <Row label="Start" value={selected.start_date} />
+              <Row label="End" value={selected.end_date} />
+            </div>
 
-          {selected.booking_id ? (
-            <Link
-              className="mt-5 inline-block rounded-md bg-brand-500 px-3 py-2 text-sm font-semibold hover:bg-brand-600"
-              to={`/dashboard/bookings/${selected.booking_id}`}
-            >
-              Open booking detail
-            </Link>
-          ) : null}
-        </aside>
+            {selected.booking_id ? (
+              <Link
+                className="mt-5 inline-block rounded-md bg-brand-500 px-3 py-2 text-sm font-semibold hover:bg-brand-600"
+                to={`/dashboard/bookings/${selected.booking_id}`}
+              >
+                Open booking detail
+              </Link>
+            ) : null}
+          </aside>
+        </div>
       ) : null}
     </div>
   );

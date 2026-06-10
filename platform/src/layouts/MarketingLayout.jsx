@@ -3,7 +3,7 @@ import { ArkivedMark } from '../components/Wordmark';
 
 export default function MarketingLayout() {
   return (
-    <div className="min-h-screen bg-neutral-900 text-neutral-50">
+    <div className="flex min-h-dvh flex-col bg-neutral-900 text-neutral-50">
       <header className="sticky top-0 z-30 border-b border-neutral-750 bg-neutral-900/85 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <Link className="flex items-center gap-2" to="/">
@@ -23,7 +23,7 @@ export default function MarketingLayout() {
           </nav>
         </div>
       </header>
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
       <footer className="border-t border-neutral-750">

@@ -19,6 +19,19 @@ tenantRouter.get('/public/tenants', asyncHandler(async (_req, res) => {
   return res.json({ data });
 }));
 
+// Public directory of tenants for the marketing "trusted by" marquee. Returns
+// only safe public fields (no contact info) and is available in all envs.
+tenantRouter.get('/public/partners', asyncHandler(async (_req, res) => {
+  const tenants = await tenantRepository.listPublicTenants();
+  const data = tenants.map((tenant) => ({
+    slug: tenant.slug,
+    name: tenant.name,
+    logo_url: tenant.logo_url || '',
+    accent_color: tenant.accent_color || '#6366f1'
+  }));
+  return res.json({ data });
+}));
+
 tenantRouter.get('/', requireAuth, asyncHandler(async (req, res) => {
   const tenant = await tenantRepository.getById(req.user.tenant_id);
   res.json({ tenant });

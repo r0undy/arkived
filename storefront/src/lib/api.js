@@ -39,5 +39,9 @@ export const storefrontApi = {
     const suffix = query ? `?${query}` : '';
     return request(`/api/v1/storefront/${slug}/catalog/${equipmentId}/availability${suffix}`);
   },
-  inquiry: (body) => request('/api/v1/bookings/inquiry', { method: 'POST', body })
+  inquiry: (body) => request('/api/v1/bookings/inquiry', { method: 'POST', body }),
+  track: (slug, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return request(`/api/v1/storefront/${slug}/track?${query}`);
+  }
 };

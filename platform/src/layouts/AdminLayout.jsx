@@ -7,7 +7,7 @@ export default function AdminLayout() {
   const auth = useAuth();
 
   return (
-    <div className="grid min-h-screen grid-cols-1 bg-neutral-900 text-neutral-50 md:grid-cols-[260px_1fr]">
+    <div className="grid min-h-dvh grid-cols-1 bg-neutral-900 text-neutral-50 md:grid-cols-[260px_1fr]">
       <aside className="border-r border-neutral-750 bg-neutral-950 p-4">
         <Link className="mb-2 block text-xl font-semibold tracking-tight" to="/admin">
           arkived

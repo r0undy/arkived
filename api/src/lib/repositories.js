@@ -35,12 +35,18 @@ export const tenantRepository = {
     if (!hasSupabase) {
       return inMemoryDb
         .listTenants()
-        .map((tenant) => ({ id: tenant.id, slug: tenant.slug, name: tenant.name, accent_color: tenant.accent_color }));
+        .map((tenant) => ({
+          id: tenant.id,
+          slug: tenant.slug,
+          name: tenant.name,
+          logo_url: tenant.logo_url || '',
+          accent_color: tenant.accent_color
+        }));
     }
 
     const { data, error } = await supabase
       .from('tenants')
-      .select('id, slug, name, accent_color')
+      .select('id, slug, name, logo_url, accent_color')
       .order('created_at', { ascending: true });
 
     if (error) {
@@ -62,7 +68,7 @@ export const tenantRepository = {
     return safeSingle(
       supabase
         .from('tenants')
-        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, business_hours')
         .eq('slug', slug)
         .single(),
       'Tenant not found'
@@ -81,7 +87,7 @@ export const tenantRepository = {
     return safeSingle(
       supabase
         .from('tenants')
-        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, onboarding_completed_steps')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, business_hours, onboarding_completed_steps')
         .eq('id', id)
         .single(),
       'Tenant not found'
@@ -128,7 +134,7 @@ export const tenantRepository = {
         .from('tenants')
         .update(payload)
         .eq('id', tenantId)
-        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, onboarding_completed_steps')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, business_hours, onboarding_completed_steps')
         .single(),
       'Tenant not found'
     );
