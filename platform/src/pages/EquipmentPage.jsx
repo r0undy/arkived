@@ -50,10 +50,12 @@ export default function EquipmentPage() {
   const [filters, setFilters] = useState({ q: '', category: '', status: '' });
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [view, setView] = useState('card');
 
   const loadItems = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const result = await api.equipment({
         q: filters.q || undefined,
@@ -62,8 +64,9 @@ export default function EquipmentPage() {
       });
       setItems(result.data || []);
       setPage(1);
-    } catch (_error) {
+    } catch (error) {
       setItems([]);
+      setLoadError(error?.message || 'Could not load your inventory. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -273,6 +276,18 @@ export default function EquipmentPage() {
           {Array.from({ length: PAGE_SIZE }).map((_, index) => (
             <SkeletonCard key={index} />
           ))}
+        </div>
+      ) : loadError ? (
+        <div className="mt-6 rounded-lg border border-danger-500/40 bg-danger-500/10 p-4">
+          <p className="text-sm font-semibold text-danger-500">Couldn't load your inventory</p>
+          <p className="mt-1 text-sm text-neutral-300">{loadError}</p>
+          <button
+            type="button"
+            onClick={loadItems}
+            className="mt-3 rounded-md border border-neutral-750 bg-neutral-900 px-3 py-1.5 text-sm font-medium text-neutral-100 transition hover:bg-neutral-800"
+          >
+            Retry
+          </button>
         </div>
       ) : items.length === 0 ? (
         <EmptyState

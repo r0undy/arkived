@@ -8,6 +8,23 @@ const resolveApiUrl = () => {
 
 const API_URL = resolveApiUrl();
 
+/**
+ * Build a query string from a params object, skipping null/undefined/empty
+ * values. This is important because `new URLSearchParams({ q: undefined })`
+ * serialises to the literal string `q=undefined`, which the API then treats as
+ * a real filter value (and `status=undefined` even fails enum validation),
+ * making lists come back empty.
+ */
+const buildQuery = (params = {}) => {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === '') continue;
+    search.append(key, String(value));
+  }
+  const query = search.toString();
+  return query ? `?${query}` : '';
+};
+
 const request = async (path, { method = 'GET', body, headers = {} } = {}) => {
   const token = localStorage.getItem('arkived_token') || '';
   const response = await fetch(`${API_URL}${path}`, {
@@ -40,11 +57,7 @@ export const api = {
   tenant: () => request('/api/v1/tenant'),
   publicPartners: () => request('/api/v1/tenant/public/partners'),
 
-  equipment: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const suffix = query ? `?${query}` : '';
-    return request(`/api/v1/equipment${suffix}`);
-  },
+  equipment: (params = {}) => request(`/api/v1/equipment${buildQuery(params)}`),
   equipmentById: (id) => request(`/api/v1/equipment/${id}`),
   createEquipment: (body) => request('/api/v1/equipment', { method: 'POST', body }),
   updateEquipment: (id, body) => request(`/api/v1/equipment/${id}`, { method: 'PATCH', body }),
@@ -66,24 +79,12 @@ export const api = {
   deleteMaintenanceLog: (equipmentId, logId) =>
     request(`/api/v1/equipment/${equipmentId}/maintenance/${logId}`, { method: 'DELETE' }),
 
-  customers: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const suffix = query ? `?${query}` : '';
-    return request(`/api/v1/customers${suffix}`);
-  },
+  customers: (params = {}) => request(`/api/v1/customers${buildQuery(params)}`),
   createCustomer: (body) => request('/api/v1/customers', { method: 'POST', body }),
   customerBookings: (id) => request(`/api/v1/customers/${id}/bookings`),
 
-  bookings: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const suffix = query ? `?${query}` : '';
-    return request(`/api/v1/bookings${suffix}`);
-  },
-  bookingsCalendar: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const suffix = query ? `?${query}` : '';
-    return request(`/api/v1/bookings/calendar${suffix}`);
-  },
+  bookings: (params = {}) => request(`/api/v1/bookings${buildQuery(params)}`),
+  bookingsCalendar: (params = {}) => request(`/api/v1/bookings/calendar${buildQuery(params)}`),
   bookingById: (id) => request(`/api/v1/bookings/${id}`),
   createBooking: (body) => request('/api/v1/bookings', { method: 'POST', body }),
   updateBooking: (id, body) => request(`/api/v1/bookings/${id}`, { method: 'PATCH', body }),
@@ -92,25 +93,14 @@ export const api = {
       method: 'PATCH',
       body: { status }
     }),
-  equipmentAvailability: (id, params) => {
-    const query = new URLSearchParams(params).toString();
-    return request(`/api/v1/equipment/${id}/availability?${query}`);
-  },
+  equipmentAvailability: (id, params) => request(`/api/v1/equipment/${id}/availability${buildQuery(params)}`),
 
   overview: () => request('/api/v1/analytics/overview'),
   analyticsRevenue: () => request('/api/v1/analytics/revenue'),
   analyticsRevenueByCategory: () => request('/api/v1/analytics/revenue-by-category'),
   analyticsTopEquipment: () => request('/api/v1/analytics/top-equipment'),
-  analyticsUtilization: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const suffix = query ? `?${query}` : '';
-    return request(`/api/v1/analytics/utilization${suffix}`);
-  },
-  analyticsBookingVolume: (params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const suffix = query ? `?${query}` : '';
-    return request(`/api/v1/analytics/booking-volume${suffix}`);
-  },
+  analyticsUtilization: (params = {}) => request(`/api/v1/analytics/utilization${buildQuery(params)}`),
+  analyticsBookingVolume: (params = {}) => request(`/api/v1/analytics/booking-volume${buildQuery(params)}`),
 
   staff: () => request('/api/v1/staff'),
   inviteStaff: (body) => request('/api/v1/staff/invite', { method: 'POST', body }),

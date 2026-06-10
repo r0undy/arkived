@@ -20,14 +20,20 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [stats, setStats] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     setLoading(true);
+    setLoadError('');
     api.customers({ q: q || undefined })
       .then((result) => setCustomers(result.data || []))
-      .catch(() => setCustomers([]))
+      .catch((error) => {
+        setCustomers([]);
+        setLoadError(error?.message || 'Could not load your customers. Please try again.');
+      })
       .finally(() => setLoading(false));
-  }, [q]);
+  }, [q, reloadKey]);
 
   useEffect(() => {
     const run = async () => {
@@ -83,6 +89,20 @@ export default function CustomersPage() {
           </div>
         </label>
       </div>
+
+      {loadError ? (
+        <div className="mt-6 rounded-lg border border-danger-500/40 bg-danger-500/10 p-4">
+          <p className="text-sm font-semibold text-danger-500">Couldn't load your customers</p>
+          <p className="mt-1 text-sm text-neutral-300">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => setReloadKey((value) => value + 1)}
+            className="mt-3 rounded-md border border-neutral-750 bg-neutral-900 px-3 py-1.5 text-sm font-medium text-neutral-100 transition hover:bg-neutral-800"
+          >
+            Retry
+          </button>
+        </div>
+      ) : null}
 
       <TableContainer className="mt-6">
         <Table>
