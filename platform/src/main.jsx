@@ -159,3 +159,15 @@ createRoot(document.getElementById('root')).render(
     </AppErrorBoundary>
   </React.StrictMode>
 );
+
+// Fade out the instant boot loader once the app has mounted and painted.
+function dismissAppLoader() {
+  const loader = document.getElementById('app-loader');
+  if (!loader) return;
+  loader.classList.add('is-hidden');
+  loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+  // Fallback removal in case the transitionend event never fires.
+  setTimeout(() => loader.remove(), 800);
+}
+
+requestAnimationFrame(() => requestAnimationFrame(dismissAppLoader));

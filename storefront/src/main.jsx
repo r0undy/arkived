@@ -23,6 +23,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import TenantDebugger from './components/TenantDebugger';
 import TenantLoadingScreen from './components/TenantLoadingScreen';
 import { BookingTrackerProvider } from './components/BookingTrackerProvider';
+import StorefrontSplash from './components/StorefrontSplash';
 
 const shouldShowTenantDebugger = () => (
   import.meta.env.DEV && import.meta.env.VITE_ENABLE_TENANT_DEBUGGER === 'true'
@@ -33,6 +34,7 @@ function App() {
   const [equipment, setEquipment] = useState([]);
   const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [catalogError, setCatalogError] = useState('');
+  const [splashDone, setSplashDone] = useState(false);
   const showTenantDebugger = shouldShowTenantDebugger();
 
   useEffect(() => {
@@ -49,69 +51,60 @@ function App() {
       .finally(() => setLoadingCatalog(false));
   }, [tenantState.tenant]);
 
+  const debugger_ = showTenantDebugger ? (
+    <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
+  ) : null;
+
+  let content;
   if (tenantState.loading) {
-    return (
-      <>
-        <TenantLoadingScreen />
-        {showTenantDebugger ? (
-          <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
-        ) : null}
-      </>
-    );
-  }
-
-  if (tenantState.error || !tenantState.tenant) {
-    return (
-      <>
-        <NotFoundPage title="Tenant not found" message="This storefront slug does not exist." />
-        {showTenantDebugger ? (
-          <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
-        ) : null}
-      </>
-    );
-  }
-
-  if (tenantState.tenant.is_published === false) {
-    return (
-      <>
-        <StorefrontComingSoon tenant={tenantState.tenant} />
-        {showTenantDebugger ? (
-          <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
-        ) : null}
-      </>
+    content = <TenantLoadingScreen />;
+  } else if (tenantState.error || !tenantState.tenant) {
+    content = <NotFoundPage title="Tenant not found" message="This storefront slug does not exist." />;
+  } else if (tenantState.tenant.is_published === false) {
+    content = <StorefrontComingSoon tenant={tenantState.tenant} />;
+  } else {
+    content = (
+      <BrowserRouter>
+        <BookingTrackerProvider>
+          <Routes>
+            <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
+              <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
+              <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
+              <Route
+                path="/catalog/:id"
+                element={
+                  <CatalogDetailRoute
+                    equipmentList={equipment}
+                    equipment={equipment}
+                    slug={tenantState.tenant.slug}
+                    tenant={tenantState.tenant}
+                    loadingCatalog={loadingCatalog}
+                    catalogError={catalogError}
+                  />
+                }
+              />
+              <Route path="/track" element={<TrackRequestPage tenant={tenantState.tenant} />} />
+              <Route path="/quote" element={<QuotePage tenant={tenantState.tenant} />} />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </BookingTrackerProvider>
+      </BrowserRouter>
     );
   }
 
   return (
-    <BrowserRouter>
-      <BookingTrackerProvider>
-        <Routes>
-          <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
-            <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
-            <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
-            <Route
-              path="/catalog/:id"
-              element={
-                <CatalogDetailRoute
-                  equipmentList={equipment}
-                  equipment={equipment}
-                  slug={tenantState.tenant.slug}
-                  tenant={tenantState.tenant}
-                  loadingCatalog={loadingCatalog}
-                  catalogError={catalogError}
-                />
-              }
-            />
-            <Route path="/track" element={<TrackRequestPage tenant={tenantState.tenant} />} />
-            <Route path="/quote" element={<QuotePage tenant={tenantState.tenant} />} />
-          </Route>
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </BookingTrackerProvider>
-      {showTenantDebugger ? (
-        <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
+    <>
+      {content}
+      {debugger_}
+      {!splashDone ? (
+        <StorefrontSplash
+          tenant={tenantState.tenant}
+          ready={!tenantState.loading}
+          onDone={() => setSplashDone(true)}
+        />
       ) : null}
-    </BrowserRouter>
+    </>
   );
 }
 

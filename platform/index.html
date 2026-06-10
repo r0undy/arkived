@@ -4,8 +4,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Arkived Platform</title>
+    <style>
+      #app-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #171717;
+        transition: opacity 0.5s ease;
+      }
+      #app-loader.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .app-loader__word {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        font-weight: 800;
+        font-size: 2rem;
+        letter-spacing: -0.03em;
+        color: #fafafa;
+        animation: app-loader-pulse 1.3s ease-in-out infinite;
+      }
+      @keyframes app-loader-pulse {
+        0%,
+        100% {
+          opacity: 0.45;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
   <body class="bg-neutral-900 text-neutral-50">
+    <div id="app-loader" aria-hidden="true">
+      <span class="app-loader__word">arkived</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
