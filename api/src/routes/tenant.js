@@ -27,7 +27,11 @@ tenantRouter.get('/public/partners', asyncHandler(async (_req, res) => {
     slug: tenant.slug,
     name: tenant.name,
     logo_url: tenant.logo_url || '',
-    accent_color: tenant.accent_color || '#6366f1'
+    accent_color: tenant.accent_color || '#6366f1',
+    banner_image_url: tenant.banner_image_url || '',
+    tagline: tenant.tagline || '',
+    description: tenant.meta_description || '',
+    location: tenant.contact_address || ''
   }));
   return res.json({ data });
 }));

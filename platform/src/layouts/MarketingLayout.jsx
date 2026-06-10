@@ -11,6 +11,9 @@ export default function MarketingLayout() {
             <span className="text-xl font-bold tracking-tight">arkived</span>
           </Link>
           <nav className="flex items-center gap-1 sm:gap-3">
+            <Link className="rounded-md px-3 py-2 text-sm text-neutral-200 transition hover:text-brand-400 sm:px-4" to="/partners">
+              Partners
+            </Link>
             <Link className="rounded-md px-3 py-2 text-sm text-neutral-200 transition hover:text-brand-400 sm:px-4" to="/login">
               Login
             </Link>
@@ -30,6 +33,7 @@ export default function MarketingLayout() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-6 text-sm text-neutral-500 sm:flex-row">
           <p>© {new Date().getFullYear()} Arkived. Rent smarter. Grow faster.</p>
           <div className="flex items-center gap-4">
+            <Link className="hover:text-neutral-300" to="/partners">Partners</Link>
             <Link className="hover:text-neutral-300" to="/login">Login</Link>
             <Link className="hover:text-neutral-300" to="/signup">Get started</Link>
             <a

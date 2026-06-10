@@ -133,24 +133,39 @@ function LiveShops({ partners }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [hovering, setHovering] = useState(false);
 
+  // Cap the homepage spotlight so a long tenant list never overwhelms the
+  // landing page — the full directory lives on /partners.
+  const MAX_VISIBLE = 6;
+  const visible = partners.slice(0, MAX_VISIBLE);
+  const hasMore = partners.length > MAX_VISIBLE;
+
   // Auto-rotate the spotlight until the visitor interacts.
   useEffect(() => {
-    if (hovering || partners.length <= 1) return undefined;
+    if (hovering || visible.length <= 1) return undefined;
     const id = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % partners.length);
+      setActiveIndex((prev) => (prev + 1) % visible.length);
     }, 3200);
     return () => clearInterval(id);
-  }, [hovering, partners.length]);
+  }, [hovering, visible.length]);
 
-  const active = partners[Math.min(activeIndex, partners.length - 1)];
+  const active = visible[Math.min(activeIndex, visible.length - 1)];
   const accent = active?.accent_color || '#6366f1';
 
   return (
     <div className="border-t border-neutral-750 bg-neutral-950/40 py-12">
       <div className="mx-auto max-w-6xl px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
-          Live shops running on Arkived
-        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
+            Live shops running on Arkived
+          </p>
+          <Link
+            to="/partners"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-brand-400 transition hover:text-brand-300"
+          >
+            {partners.length > 1 ? `View all ${partners.length} partners` : 'View all partners'}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </Link>
+        </div>
 
         <div
           className="mt-8 grid items-stretch gap-4 lg:grid-cols-[1.1fr_0.9fr]"
@@ -192,9 +207,9 @@ function LiveShops({ partners }) {
                 Visit storefront
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" aria-hidden="true" />
               </span>
-              {partners.length > 1 ? (
+              {visible.length > 1 ? (
                 <div className="flex items-center gap-1.5" aria-hidden="true">
-                  {partners.map((partner, index) => (
+                  {visible.map((partner, index) => (
                     <span
                       key={partner.slug}
                       className="h-1.5 rounded-full transition-all duration-300"
@@ -211,7 +226,7 @@ function LiveShops({ partners }) {
 
           {/* Selectable shop list */}
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-2">
-            {partners.map((partner, index) => {
+            {visible.map((partner, index) => {
               const isActive = index === activeIndex;
               return (
                 <button
@@ -234,6 +249,15 @@ function LiveShops({ partners }) {
                 </button>
               );
             })}
+            {hasMore ? (
+              <Link
+                to="/partners"
+                className="flex items-center justify-center gap-2 rounded-2xl border border-dashed border-neutral-700 bg-neutral-900/40 px-3 py-2.5 text-sm font-semibold text-neutral-300 transition hover:border-brand-500/60 hover:text-brand-300"
+              >
+                +{partners.length - MAX_VISIBLE} more
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            ) : null}
           </div>
         </div>
       </div>

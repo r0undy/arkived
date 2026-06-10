@@ -46,6 +46,7 @@ const lazyWithReload = (factory) =>
   );
 
 const HomePage = lazyWithReload(() => import('./pages/HomePage'));
+const PartnersPage = lazyWithReload(() => import('./pages/PartnersPage'));
 const LoginPage = lazyWithReload(() => import('./pages/LoginPage'));
 const SignupPage = lazyWithReload(() => import('./pages/SignupPage'));
 const WelcomePage = lazyWithReload(() => import('./pages/WelcomePage'));
@@ -112,6 +113,7 @@ const router = createBrowserRouter([
     errorElement: <RouteError />,
     children: [
       { path: '/', element: routeElement(HomePage) },
+      { path: '/partners', element: routeElement(PartnersPage) },
       { path: '/login', element: routeElement(LoginPage) },
       { path: '/signup', element: routeElement(SignupPage) }
     ]
