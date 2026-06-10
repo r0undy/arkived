@@ -22,6 +22,10 @@ export const updateTenantBrandingSchema = z
     contact_phone: z.string().max(40).optional().or(z.literal('')),
     contact_address: z.string().max(240).optional().or(z.literal('')),
     show_watermark: z.boolean().optional(),
+    tagline: z.string().max(160).optional().or(z.literal('')),
+    meta_description: z.string().max(300).optional().or(z.literal('')),
+    favicon_url: z.string().url().optional().or(z.literal('')),
+    og_image_url: z.string().url().optional().or(z.literal('')),
     onboarding_completed_steps: z.array(onboardingStepSchema).max(8).optional()
   })
   .refine((value) => Object.keys(value).length > 0, {

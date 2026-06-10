@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
 import { storefrontApi } from '../lib/api';
+import Meta from '../components/Meta';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const toYmd = (value) => new Date(value).toISOString().slice(0, 10);
@@ -11,8 +13,6 @@ const addDays = (value, days) => {
 };
 
 export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
-  const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  const canonicalUrl = item?.id ? `${origin}/catalog/${item.id}` : `${origin}/catalog`;
   const title = item ? `${item.name} | ${tenant?.name || 'Catalog'}` : 'Equipment not found';
   const description = item
     ? `View pricing, availability, and booking inquiry form for ${item.name}.`
@@ -21,9 +21,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
   if (!item) {
     return (
       <>
-        <title>{title}</title>
-        <meta content={description} name="description" />
-        <link href={canonicalUrl} rel="canonical" />
+        <Meta tenant={tenant} title={title} description={description} path="/catalog" />
 
         <div className="rounded-lg border border-slate-200 bg-white p-6">
           <p className="text-slate-600">Equipment not found.</p>
@@ -76,6 +74,16 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
     [availability]
   );
 
+  const estimate = useMemo(() => {
+    if (!form.start_date || !form.end_date) return null;
+    const start = new Date(form.start_date);
+    const end = new Date(form.end_date);
+    const days = Math.round((end - start) / DAY_MS) + 1;
+    if (!Number.isFinite(days) || days <= 0) return null;
+    const deposit = Number(item.deposit || 0);
+    return { days, deposit, total: days * Number(item.daily_rate || 0) + deposit };
+  }, [form.start_date, form.end_date, item.daily_rate, item.deposit]);
+
   const updateField = (key) => (event) => {
     const value = event.target.value;
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -85,7 +93,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
     event.preventDefault();
     setStatus({ loading: true, error: '', success: '' });
     try {
-      await storefrontApi.inquiry({
+      const result = await storefrontApi.inquiry({
         tenant_slug: tenant.slug,
         equipment_id: item.id,
         start_date: form.start_date,
@@ -95,7 +103,14 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
         phone: form.phone || null,
         message: form.message || null
       });
-      setStatus({ loading: false, error: '', success: 'Inquiry submitted. We will contact you soon.' });
+      const reference = result?.data?.id ? String(result.data.id).slice(0, 8).toUpperCase() : '';
+      setStatus({
+        loading: false,
+        error: '',
+        success: reference
+          ? `Request received! ${tenant?.name || 'The shop'} has your inquiry. Your reference is #${reference}.`
+          : `Request received! ${tenant?.name || 'The shop'} will get back to you shortly.`
+      });
       setForm({
         name: '',
         email: '',
@@ -109,7 +124,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
       setStatus({
         loading: false,
         error: isConflict
-          ? 'Selected dates are no longer available. Please choose a different date range.'
+          ? 'Those dates were just taken. Please pick a different range — availability has been refreshed below.'
           : (error.message || 'Failed to submit inquiry'),
         success: ''
       });
@@ -118,9 +133,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
 
   return (
     <>
-      <title>{title}</title>
-      <meta content={description} name="description" />
-      <link href={canonicalUrl} rel="canonical" />
+      <Meta tenant={tenant} title={title} description={description} path={item?.id ? `/catalog/${item.id}` : '/catalog'} image={item?.images?.[0]?.storage_url} />
 
       <div className="space-y-6">
         <article className="rounded-xl border border-slate-200 bg-white p-6">
@@ -174,34 +187,62 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
 
         <section className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="text-xl font-semibold tracking-tight">Inquiry / Booking Request</h2>
-          <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={submitInquiry}>
-            <Field label="Name" onChange={updateField('name')} required value={form.name} />
-            <Field label="Email" onChange={updateField('email')} required type="email" value={form.email} />
-            <Field label="Phone" onChange={updateField('phone')} value={form.phone} />
-            <Field label="Start Date" min={toYmd(new Date())} onChange={updateField('start_date')} required type="date" value={form.start_date} />
-            <Field label="End Date" min={form.start_date || toYmd(new Date())} onChange={updateField('end_date')} required type="date" value={form.end_date} />
-            <label className="block text-sm text-slate-700 md:col-span-2">
-              <span>Message</span>
-              <textarea
-                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2"
-                onChange={updateField('message')}
-                rows={3}
-                value={form.message}
-              />
-            </label>
+          {item.status === 'maintenance' || item.status === 'archived' ? (
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              This item is currently unavailable for booking. You can still send an inquiry and we'll follow up when it's back.
+            </div>
+          ) : null}
+          {status.success ? (
+            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
+              </div>
+              <p className="mt-3 font-semibold text-emerald-800">{status.success}</p>
+              <p className="mt-1 text-sm text-emerald-700">We'll reach out by email to confirm availability and next steps.</p>
+              <button
+                type="button"
+                className="mt-4 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                onClick={() => setStatus({ loading: false, error: '', success: '' })}
+              >
+                Send another request
+              </button>
+            </div>
+          ) : (
+            <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={submitInquiry}>
+              <Field label="Name" onChange={updateField('name')} required value={form.name} />
+              <Field label="Email" onChange={updateField('email')} required type="email" value={form.email} />
+              <Field label="Phone" onChange={updateField('phone')} value={form.phone} />
+              <Field label="Start Date" min={toYmd(new Date())} onChange={updateField('start_date')} required type="date" value={form.start_date} />
+              <Field label="End Date" min={form.start_date || toYmd(new Date())} onChange={updateField('end_date')} required type="date" value={form.end_date} />
+              <label className="block text-sm text-slate-700 md:col-span-2">
+                <span>Message</span>
+                <textarea
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+                  onChange={updateField('message')}
+                  rows={3}
+                  value={form.message}
+                />
+              </label>
 
-            {status.error ? <p className="text-sm text-red-600 md:col-span-2">{status.error}</p> : null}
-            {status.success ? <p className="text-sm text-emerald-700 md:col-span-2">{status.success}</p> : null}
+              {estimate ? (
+                <div className="md:col-span-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  Estimated total: <span className="font-semibold">PHP {estimate.total.toLocaleString()}</span>{' '}
+                  <span className="text-slate-500">({estimate.days} day{estimate.days === 1 ? '' : 's'} × PHP {Number(item.daily_rate).toLocaleString()}{estimate.deposit ? ` + PHP ${estimate.deposit.toLocaleString()} deposit` : ''})</span>
+                </div>
+              ) : null}
 
-            <button
-              className="w-fit rounded-md px-4 py-2 text-sm font-semibold"
-              disabled={status.loading}
-              style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
-              type="submit"
-            >
-              {status.loading ? 'Submitting...' : 'Submit inquiry'}
-            </button>
-          </form>
+              {status.error ? <p className="text-sm text-rose-600 md:col-span-2">{status.error}</p> : null}
+
+              <button
+                className="inline-flex w-fit items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:opacity-60"
+                disabled={status.loading}
+                style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
+                type="submit"
+              >
+                {status.loading ? 'Submitting…' : 'Submit inquiry'}
+              </button>
+            </form>
+          )}
         </section>
 
         <section className="rounded-xl border border-slate-200 bg-white p-6">

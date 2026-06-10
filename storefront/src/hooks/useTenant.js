@@ -9,6 +9,7 @@ const normalizeSlug = (value) => String(value || '')
   .trim()
   .toLowerCase()
   .replace(/[^a-z0-9-]/g, '');
+const DEV_FORCE_LOCAL_TENANT = normalizeSlug(import.meta.env.VITE_DEV_FORCE_TENANT_SLUG || '');
 
 const hexToRgb = (hex) => {
   const match = /^#([0-9a-f]{6})$/i.exec(String(hex || ''));
@@ -44,9 +45,20 @@ const primaryForeground = (accent) => (
   contrastRatio(accent, '#ffffff') >= 4.5 ? '#ffffff' : '#0f172a'
 );
 
+const darkenHex = (hex, amount = 0.1) => {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  const clamp = (n) => Math.max(0, Math.min(255, Math.round(n)));
+  const toHex = (n) => clamp(n).toString(16).padStart(2, '0');
+  return `#${toHex(rgb.r * (1 - amount))}${toHex(rgb.g * (1 - amount))}${toHex(rgb.b * (1 - amount))}`;
+};
+
 const inferSlug = () => {
   const host = window.location.hostname;
   if (isLocalHost(host)) {
+    if (import.meta.env.DEV && DEV_FORCE_LOCAL_TENANT) {
+      return DEV_FORCE_LOCAL_TENANT;
+    }
     const queryTenant = new URLSearchParams(window.location.search).get('tenant');
     return normalizeSlug(queryTenant) || DEFAULT_LOCAL_TENANT;
   }
@@ -55,10 +67,43 @@ const inferSlug = () => {
   return normalizeSlug(first) || DEFAULT_LOCAL_TENANT;
 };
 
+const setMetaTag = (selector, attr, value) => {
+  if (!value) return;
+  let tag = document.head.querySelector(selector);
+  if (!tag) {
+    tag = document.createElement('meta');
+    const [, key, val] = /\[(.+?)="(.+?)"\]/.exec(selector) || [];
+    if (key && val) tag.setAttribute(key, val);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute(attr, value);
+};
+
+const applyFavicon = (tenant) => {
+  const href = tenant?.favicon_url || tenant?.logo_url;
+  if (!href) return;
+  let link = document.head.querySelector('link[rel="icon"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    document.head.appendChild(link);
+  }
+  link.href = href;
+
+  let apple = document.head.querySelector('link[rel="apple-touch-icon"]');
+  if (!apple) {
+    apple = document.createElement('link');
+    apple.rel = 'apple-touch-icon';
+    document.head.appendChild(apple);
+  }
+  apple.href = href;
+};
+
 const applyTenantTheme = (tenant) => {
   const accent = tenant?.accent_color || '#6366f1';
   const foreground = primaryForeground(accent);
   const onWhite = contrastRatio(accent, '#ffffff') >= 4.5 ? accent : '#0f172a';
+  const hover = darkenHex(accent, 0.1);
   let styleTag = document.getElementById(THEME_STYLE_ID);
 
   if (!styleTag) {
@@ -70,11 +115,14 @@ const applyTenantTheme = (tenant) => {
   styleTag.textContent = `
     :root {
       --color-primary: ${accent};
-      --color-primary-hover: ${accent};
+      --color-primary-hover: ${hover};
       --color-primary-foreground: ${foreground};
       --color-primary-on-white: ${onWhite};
     }
   `;
+
+  setMetaTag('meta[name="theme-color"]', 'content', accent);
+  applyFavicon(tenant);
 };
 
 export const useTenant = () => {

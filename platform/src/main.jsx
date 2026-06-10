@@ -13,6 +13,7 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import PlatformOwnerRoute from './components/PlatformOwnerRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
+import { ToastProvider } from './components/ui';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -91,7 +92,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AppErrorBoundary>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </AppErrorBoundary>
   </React.StrictMode>
 );

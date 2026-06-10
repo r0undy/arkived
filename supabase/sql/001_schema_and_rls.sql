@@ -15,6 +15,10 @@ create table if not exists public.tenants (
   contact_phone text,
   contact_address text,
   show_watermark boolean not null default true,
+  tagline text,
+  meta_description text,
+  favicon_url text,
+  og_image_url text,
   onboarding_completed_steps text[] not null default '{}',
   plan text not null default 'starter' check (plan in ('starter', 'pro', 'enterprise')),
   created_at timestamptz not null default now()
