@@ -345,7 +345,7 @@ export default function BrandingPage() {
               <p className="text-xs text-warning-500">Supabase not configured: uploads are disabled in this environment.</p>
             ) : null}
 
-            <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-neutral-750 bg-neutral-900/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border sm:px-4">
+            <div className="pb-safe sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-neutral-750 bg-neutral-900/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border sm:px-4">
               {isDirty ? (
                 <span className="mr-auto inline-flex items-center gap-1.5 text-xs text-warning-500">
                   <span className="h-1.5 w-1.5 rounded-full bg-warning-500" aria-hidden="true" />

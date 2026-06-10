@@ -108,6 +108,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
 @keyframes confettiFall {
   0% {
     opacity: 1;

@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.11.0
+> **Version:** 1.12.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -368,9 +368,9 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [ ] **Onboarding wizard** is fully usable on a phone (single-column steps, thumb-reachable primary action)
 - [ ] **Storefront** is mobile-first end to end ([F5.4](#f54-storefront-fundamentals)): hero, category/equipment grids, and footer reflow; sticky mobile inquiry CTA ([F5.6](#f56-extra-storefront-touches-high-impact-optional))
 - [x] **Modals / drawers / date pickers** convert to full-screen or bottom-sheet patterns on mobile; no off-screen content — shared `Modal` is a bottom-sheet on mobile (`rounded-t-lg` → `sm:rounded-lg`)
-- [ ] **Touch targets** are ≥ 44×44px; adequate spacing prevents mis-taps; hover-only affordances have a tap/focus equivalent
-- [ ] Respect safe areas (notches) and dynamic viewport units (`dvh`) so fixed bars don't get hidden by mobile browser chrome
-- [ ] **Fluid type & spacing:** headings/sections scale down sensibly (use the [dsd §3.1](./dsd-arkived.md#31-type-scale) scale responsively); no fixed pixel widths that cause overflow
+- [x] **Touch targets** are ≥ 44×44px; adequate spacing prevents mis-taps; hover-only affordances have a tap/focus equivalent — mobile nav/close buttons sized `h-11 w-11`, catalog pagination `min-h-11`
+- [x] Respect safe areas (notches) and dynamic viewport units (`dvh`) so fixed bars don't get hidden by mobile browser chrome — all layout roots use `min-h-dvh`; the branding studio's sticky save bar uses a `pb-safe` (`env(safe-area-inset-bottom)`) utility
+- [x] **Fluid type & spacing:** headings/sections scale down sensibly (use the [dsd §3.1](./dsd-arkived.md#31-type-scale) scale responsively); no fixed pixel widths that cause overflow — storefront hero/CTA headings use `clamp()` so long tenant names never overflow at 360px
 - [ ] Images/media are fluid (`max-width: 100%`); use responsive `srcset`/sizes where it matters
 - [ ] **Verification:** test each view at 360 / 768 / 1024 / 1440px (and landscape) — zero horizontal scroll, no clipped or overlapping controls
 

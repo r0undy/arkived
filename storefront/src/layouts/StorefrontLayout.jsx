@@ -14,7 +14,7 @@ export default function StorefrontLayout({ tenant }) {
   const waLink = whatsappLink(tenant.contact_phone);
   const mapLink = mapsLink(tenant.contact_address);
   return (
-    <div className="flex min-h-screen flex-col text-slate-900">
+    <div className="flex min-h-dvh flex-col text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
           <Link to="/" className="flex items-center gap-2">

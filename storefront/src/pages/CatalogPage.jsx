@@ -121,7 +121,7 @@ export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
             <p>{filtered.length} items</p>
             <div className="flex items-center gap-2">
               <button
-                className="rounded-lg border border-slate-300 px-3 py-1.5 disabled:opacity-40"
+                className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 py-1.5 disabled:opacity-40"
                 disabled={page <= 1}
                 onClick={() => setPage((value) => Math.max(1, value - 1))}
                 type="button"
@@ -130,7 +130,7 @@ export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
               </button>
               <span>Page {page} / {totalPages}</span>
               <button
-                className="rounded-lg border border-slate-300 px-3 py-1.5 disabled:opacity-40"
+                className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 py-1.5 disabled:opacity-40"
                 disabled={page >= totalPages}
                 onClick={() => setPage((value) => Math.min(totalPages, value + 1))}
                 type="button"

@@ -96,7 +96,7 @@ export default function DashboardLayout() {
   const badges = { inquiries: inquiryCount };
 
   return (
-    <div className={`grid min-h-screen grid-cols-1 bg-neutral-900 text-neutral-50 ${sidebarWidth}`}>
+    <div className={`grid min-h-dvh grid-cols-1 bg-neutral-900 text-neutral-50 ${sidebarWidth}`}>
       {/* Desktop sidebar */}
       <aside className="hidden flex-col border-r border-neutral-750 bg-neutral-950 p-3 lg:flex">
         <div className={`mb-6 flex items-center ${collapsed ? 'justify-center' : 'justify-between'} px-1`}>
@@ -149,7 +149,7 @@ export default function DashboardLayout() {
                 <span className="text-lg font-bold tracking-tight">arkived</span>
               </Link>
               <button
-                className="rounded-md p-1.5 text-neutral-400 hover:bg-neutral-800"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-md text-neutral-400 hover:bg-neutral-800"
                 onClick={() => setMobileOpen(false)}
                 type="button"
                 aria-label="Close menu"
@@ -171,11 +171,11 @@ export default function DashboardLayout() {
       ) : null}
 
       {/* Main column */}
-      <div className="flex min-h-screen flex-col">
+      <div className="flex min-h-dvh flex-col">
         <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-neutral-750 bg-neutral-900/90 px-4 py-3 backdrop-blur sm:px-6">
           <div className="flex items-center gap-3">
             <button
-              className="rounded-md p-1.5 text-neutral-300 hover:bg-neutral-800 lg:hidden"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-md text-neutral-300 hover:bg-neutral-800 lg:hidden"
               onClick={() => setMobileOpen(true)}
               type="button"
               aria-label="Open menu"

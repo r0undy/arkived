@@ -100,7 +100,7 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
                 <img src={tenant.logo_url} alt={`${tenant.name} logo`} className="mb-5 h-14 w-14 rounded-xl bg-white/90 object-contain p-1.5" />
               ) : null}
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/80">Equipment rentals</p>
-              <h1 className="mt-3 text-4xl font-extrabold tracking-tight text-white drop-shadow-sm md:text-5xl">{tenant.name}</h1>
+              <h1 className="mt-3 text-[clamp(1.875rem,6vw,3.25rem)] font-extrabold leading-tight tracking-tight text-white drop-shadow-sm">{tenant.name}</h1>
               <p className="mt-4 max-w-xl text-lg text-white/90">
                 {tenant.tagline || 'Browse available gear, compare rates, and submit a booking inquiry in minutes.'}
               </p>
@@ -229,7 +229,7 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
           className="overflow-hidden rounded-3xl px-6 py-12 text-center sm:px-10"
           style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))' }}
         >
-          <h2 className="text-3xl font-extrabold tracking-tight" style={{ color: 'var(--color-primary-foreground)' }}>
+          <h2 className="text-[clamp(1.5rem,4vw,2rem)] font-extrabold tracking-tight" style={{ color: 'var(--color-primary-foreground)' }}>
             Ready to rent?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-base" style={{ color: 'var(--color-primary-foreground)', opacity: 0.9 }}>
