@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.9.0
+> **Version:** 1.10.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -326,7 +326,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
 - [x] **Team / Customers:** consistent table + detail patterns from the F0 kit — shared table styling, avatar initials, status/role/count Badges, skeleton loading, and Badge-based detail timeline shipped
 - [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)
-- [ ] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency
+- [x] **Admin panel:** keep dense and data-first, but adopt the shared primitives for consistency — KPI cards wrapped in `Card` with icons, tenant status as `Badge`, `EmptyState` for the no-tenants case, and skeleton loading shipped
 
 ---
 
