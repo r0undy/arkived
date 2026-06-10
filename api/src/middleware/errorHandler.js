@@ -1,10 +1,14 @@
 import { ZodError } from 'zod';
 
-export const errorHandler = (err, _req, res, _next) => {
+export const errorHandler = (err, req, res, _next) => {
   const isValidation = err instanceof ZodError;
   const statusCode = isValidation ? 400 : (err.statusCode || 500);
   const code = isValidation ? 'VALIDATION_ERROR' : (err.code || 'INTERNAL_ERROR');
   const isProd = process.env.NODE_ENV === 'production';
+
+  if (statusCode >= 500) {
+    console.error(`[error] ${req.method} ${req.originalUrl} -> ${code}:`, err);
+  }
 
   const validationMessage = isValidation
     ? err.issues?.[0]?.message || 'Invalid request payload'
