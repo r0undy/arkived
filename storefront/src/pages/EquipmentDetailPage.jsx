@@ -4,7 +4,7 @@ import { CheckCircle2, Link2, Check, X, Plus } from 'lucide-react';
 import { storefrontApi } from '../lib/api';
 import Meta from '../components/Meta';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
-import BookingTrackingToast from '../components/BookingTrackingToast';
+import { useBookingTracker } from '../components/BookingTrackerProvider';
 import { ProductJsonLd } from '../components/StructuredData';
 import { recordRecentlyViewed, getRecentlyViewed } from '../lib/recentlyViewed';
 import { useQuoteCart } from '../hooks/useQuoteCart';
@@ -47,7 +47,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
     message: ''
   });
   const [status, setStatus] = useState({ loading: false, error: '', success: '' });
-  const [tracker, setTracker] = useState(null);
+  const { showTracker } = useBookingTracker();
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [recent, setRecent] = useState([]);
@@ -149,7 +149,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
         trackEmail: form.email
       });
       if (result?.data?.id) {
-        setTracker({ reference: result.data.id, email: form.email });
+        showTracker({ reference: result.data.id, email: form.email });
       }
       setForm({
         name: '',
@@ -425,14 +425,6 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
             onClick={(event) => event.stopPropagation()}
           />
         </div>
-      ) : null}
-
-      {tracker ? (
-        <BookingTrackingToast
-          reference={tracker.reference}
-          email={tracker.email}
-          onClose={() => setTracker(null)}
-        />
       ) : null}
     </>
   );

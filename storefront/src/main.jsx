@@ -22,6 +22,7 @@ import QuotePage from './pages/QuotePage';
 import NotFoundPage from './pages/NotFoundPage';
 import TenantDebugger from './components/TenantDebugger';
 import TenantLoadingScreen from './components/TenantLoadingScreen';
+import { BookingTrackerProvider } from './components/BookingTrackerProvider';
 
 const shouldShowTenantDebugger = () => (
   import.meta.env.DEV && import.meta.env.VITE_ENABLE_TENANT_DEBUGGER === 'true'
@@ -83,28 +84,30 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
-          <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
-          <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
-          <Route
-            path="/catalog/:id"
-            element={
-              <CatalogDetailRoute
-                equipmentList={equipment}
-                equipment={equipment}
-                slug={tenantState.tenant.slug}
-                tenant={tenantState.tenant}
-                loadingCatalog={loadingCatalog}
-                catalogError={catalogError}
-              />
-            }
-          />
-          <Route path="/track" element={<TrackRequestPage tenant={tenantState.tenant} />} />
-          <Route path="/quote" element={<QuotePage tenant={tenantState.tenant} />} />
-        </Route>
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <BookingTrackerProvider>
+        <Routes>
+          <Route element={<StorefrontLayout tenant={tenantState.tenant} />}>
+            <Route path="/" element={<HomePage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
+            <Route path="/catalog" element={<CatalogPage equipment={equipment} tenant={tenantState.tenant} catalogError={catalogError} />} />
+            <Route
+              path="/catalog/:id"
+              element={
+                <CatalogDetailRoute
+                  equipmentList={equipment}
+                  equipment={equipment}
+                  slug={tenantState.tenant.slug}
+                  tenant={tenantState.tenant}
+                  loadingCatalog={loadingCatalog}
+                  catalogError={catalogError}
+                />
+              }
+            />
+            <Route path="/track" element={<TrackRequestPage tenant={tenantState.tenant} />} />
+            <Route path="/quote" element={<QuotePage tenant={tenantState.tenant} />} />
+          </Route>
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </BookingTrackerProvider>
       {showTenantDebugger ? (
         <TenantDebugger activeSlug={tenantState.slug} onChange={tenantState.setSlug} />
       ) : null}
