@@ -1,33 +1,53 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Check, CheckCircle2, Rocket, Sparkles } from 'lucide-react';
 import ProgressRing from './ui/ProgressRing';
+import Confetti from './ui/Confetti';
+import { useToast } from './ui';
 import { ACTIVATION_STEPS, activationSummary } from '../lib/onboarding';
+
+const CELEBRATED_KEY = 'arkived_activation_celebrated';
 
 /**
  * Persistent activation checklist (Frontend Roadmap F1.2).
  *
  * Stays docked on the dashboard until core activation hits 100%, then collapses
  * into a subtle "Setup complete" state. The next incomplete step is visually the
- * loudest thing — gently pulsing — so the user can't miss it.
+ * loudest thing — gently pulsing — so the user can't miss it. Fires a one-time
+ * celebratory toast + confetti when activation first reaches 100%.
  */
 export default function ActivationWidget({ tenant, equipmentCount = 0, staffCount = 0, syncing = false }) {
   const summary = activationSummary(tenant, { equipmentCount, staffCount });
+  const { push } = useToast();
+  const [celebrate, setCelebrate] = useState(false);
+
+  useEffect(() => {
+    if (!summary.coreComplete || !tenant) return;
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem(CELEBRATED_KEY) === '1') return;
+    localStorage.setItem(CELEBRATED_KEY, '1');
+    setCelebrate(true);
+    push('🎉 Setup complete — your storefront is live!', 'success', 6000);
+  }, [summary.coreComplete, tenant, push]);
 
   if (summary.coreComplete) {
     return (
-      <section className="mt-6 flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-500/10 px-4 py-3">
-        <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-success-500" />
-        <div>
-          <p className="text-sm font-semibold text-neutral-100">Setup complete</p>
-          <p className="text-xs text-neutral-400">Your storefront is live and ready to take bookings.</p>
-        </div>
-        <Link
-          to="/dashboard/settings/branding"
-          className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-success-500 hover:underline"
-        >
-          Refine branding <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
-        </Link>
-      </section>
+      <>
+        {celebrate ? <Confetti /> : null}
+        <section className="mt-6 flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-500/10 px-4 py-3">
+          <CheckCircle2 aria-hidden="true" className="h-5 w-5 text-success-500" />
+          <div>
+            <p className="text-sm font-semibold text-neutral-100">Setup complete</p>
+            <p className="text-xs text-neutral-400">Your storefront is live and ready to take bookings.</p>
+          </div>
+          <Link
+            to="/dashboard/settings/branding"
+            className="ml-auto inline-flex items-center gap-1 text-xs font-semibold text-success-500 hover:underline"
+          >
+            Refine branding <ArrowRight aria-hidden="true" className="h-3.5 w-3.5" />
+          </Link>
+        </section>
+      </>
     );
   }
 

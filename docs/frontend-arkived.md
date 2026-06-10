@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.2.0
+> **Version:** 1.3.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -25,12 +25,12 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 | Phase | Status | Notes |
 |---|---|---|
 | F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark. `Tooltip`/`Tabs` still pending. |
-| F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget, empty states. Confetti + floating launcher pending. |
+| F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget, empty states, confetti + toast at 100%. Floating launcher pending. |
 | F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon. Social-card preview + reset pending. |
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
-| F4 — Supabase storage | 🟡 Partial | Shared uploader + compression done. Multi-image drag-reorder + lightbox pending. |
-| F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO. JSON-LD + social proof pending. |
-| F6 — Dashboard polish | 🟡 Partial | KPI sparklines, badges, new-inquiry highlight. Card/table toggle + skeletons pending. |
+| F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
+| F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
+| F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading. |
 | F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes, lazy images, theme preload, mobile-first. Continuous. |
 | F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity. Customer status page pending (optional backend). |
 
@@ -163,7 +163,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
   - [x] Share your storefront link
 - [x] Each item deep-links to the exact page/field that completes it
 - [x] The widget stays visible (and gently pulses the next action) until 100%, then collapses into a subtle "Setup complete ✓" state
-- [ ] Celebratory toast + subtle confetti when the checklist hits 100%
+- [x] Celebratory toast + subtle confetti when the checklist hits 100%
 
 ### F1.3 Empty states as onboarding
 
@@ -249,7 +249,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [/] Equipment create/edit supports **multiple images** with a drag-to-reorder gallery; first image = primary — reorder/primary API wired; platform drag-reorder UI pending
 - [x] Equipment cards (dashboard + storefront) show real photos with `loading="lazy"` and a branded placeholder when none exist
-- [/] Equipment detail page: primary image + thumbnail strip with lightbox — storefront detail has thumbnail strip; lightbox pending
+- [x] Equipment detail page: primary image + thumbnail strip with lightbox — storefront detail has thumbnail strip + zoom lightbox
 
 ### F4.3 Resilience (already partially in place)
 
@@ -275,14 +275,14 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Category showcase** — visual cards with representative imagery, not plain pills
 - [x] **Featured / popular equipment** — rich cards: real photo, name, condition badge, daily rate, availability hint, hover-lift, quick "Inquire" affordance
 - [x] **How it works** — a 3-step "Browse → Request → Pick up" strip to reduce perceived friction
-- [ ] **Social proof** — testimonials / ratings block (graceful when empty)
+- [x] **Social proof** — testimonials / ratings block (graceful when empty)
 - [x] **Final CTA band** — accent-colored call-to-action before the footer
 - [x] Rich, branded footer: contact, hours, map/address, social, and the conditional "Powered by Arkived" badge ([PoweredByArkivedBadge](../storefront/src/components/PoweredByArkivedBadge.jsx))
 
 ### F5.3 Catalog & detail glow-up
 
 - [x] Catalog: refined card grid, sticky search + category chips, condition/price filters, empty + loading skeletons
-- [/] Equipment detail: image gallery/lightbox, clear pricing & deposit, read-only availability calendar, related items — gallery + pricing + availability shipped; lightbox/related items pending
+- [x] Equipment detail: image gallery/lightbox, clear pricing & deposit, read-only availability calendar, related items — gallery + lightbox + pricing + availability + recently-viewed shipped
 - [x] **Availability-aware date picker:** the inquiry date range consumes `GET /storefront/:slug/catalog/:id/availability` so already-booked / maintenance dates are visibly disabled before submit — preventing the `409 BOOKING_CONFLICT` round-trip
 - [x] **Inquiry form as the star**: prominent, low-friction, inline validation, live price estimate (days × daily rate + deposit), instant success state with the booking reference and clear next steps; never leaves the user guessing ([dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions))
 - [x] Out-of-stock / in-maintenance items show a clear, on-brand "Currently unavailable" state instead of a dead-end
@@ -302,17 +302,17 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] Per-page `<title>` using the tenant template (e.g., `"Drill Press — ConstructionPro Rentals"`) and unique `<meta name="description">`
 - [x] **Open Graph + Twitter cards** on every page (`og:title`, `og:description`, `og:image`, `twitter:card`) so shared links render rich previews
 - [x] `<link rel="canonical">` per page; sensible `lang`, `theme-color` (= tenant accent), and viewport meta
-- [ ] **Structured data (JSON-LD):** `LocalBusiness` for the shop + `Product`/`Offer` for equipment to improve search appearance
+- [x] **Structured data (JSON-LD):** `LocalBusiness` for the shop + `Product`/`Offer` for equipment to improve search appearance
 - [x] `robots`/`sitemap` friendliness; `theme-color` matches the tenant accent for mobile browser chrome
 
 ### F5.6 Extra storefront touches (high-impact, optional)
 
 - [ ] **"Request a quote" multi-item cart:** let a customer add several items, pick one date range, and submit a single inquiry covering all of them
-- [ ] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
-- [ ] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
+- [x] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
+- [x] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
 - [ ] **Search & filter persistence** via URL query params (already partially supported) so links are shareable
 - [ ] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator
-- [ ] **Recently viewed** strip (localStorage) to aid return browsing
+- [x] **Recently viewed** strip (localStorage) to aid return browsing
 
 ---
 
@@ -321,7 +321,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 > Bring the authenticated experience up to the same bar as onboarding and storefront.
 
 - [x] **Dashboard home:** KPI cards with sparklines + the activation widget ([F1.2](#f12-persistent-activation-checklist-cant-be-ignored)); recent activity feed
-- [/] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading — photo thumbnails, labeled status badges, search & filters shipped; card/table toggle + skeletons pending
+- [x] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading
 - [/] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges + new-inquiry highlight shipped; calendar polish pending
 - [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
 - [/] **Team / Customers:** consistent table + detail patterns from the F0 kit — empty states adopted; full detail-pattern pass pending
@@ -337,9 +337,9 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 ### F7.1 Motion
 
 - [ ] Apply the [dsd §7.1](./dsd-arkived.md#71-duration--easing) duration/easing scale consistently (enter faster, exit faster)
-- [ ] Skeletons over spinners wherever content shape is known
+- [x] Skeletons over spinners wherever content shape is known
 - [ ] Wrap all animations in a `prefers-reduced-motion` guard ([dsd §7.2](./dsd-arkived.md#72-motion-principles))
-- [ ] Tasteful confetti only at genuine milestones (onboarding complete) — and reduced-motion safe
+- [x] Tasteful confetti only at genuine milestones (onboarding complete) — and reduced-motion safe
 
 ### F7.2 Accessibility (WCAG 2.1 AA)
 
