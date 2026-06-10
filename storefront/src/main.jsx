@@ -15,6 +15,7 @@ import StorefrontLayout from './layouts/StorefrontLayout';
 import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
+import TrackRequestPage from './pages/TrackRequestPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TenantDebugger from './components/TenantDebugger';
 import TenantLoadingScreen from './components/TenantLoadingScreen';
@@ -85,6 +86,7 @@ function App() {
               />
             }
           />
+          <Route path="/track" element={<TrackRequestPage tenant={tenantState.tenant} />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.6.0
+> **Version:** 1.7.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -32,7 +32,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
 | F6 — Dashboard polish | ✅ Done | KPI sparklines, badges, new-inquiry highlight, card/table toggle, skeleton loading. |
 | F7 — Motion/a11y/perf/responsive | 🟡 Ongoing | Lazy routes, lazy images, theme preload, mobile-first. Continuous. |
-| F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity. Customer status page pending (optional backend). |
+| F8 — Connectivity | ✅ Done | Inquiry→booking, new-request signals, maintenance reflection, calendar parity, customer status-tracking page. |
 
 > Builds: `platform` and `storefront` both compile clean with no Vite warnings under Node v25.8.2.
 
@@ -99,7 +99,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [ ] `GET /api/v1/branding/logo-presets` — serve the logo preset library metadata ([F3.3](#f33-api-support))
 - [x] Persist favicon + meta fields on the tenant (`favicon_url`, `meta_description`, `og_image_url`, `tagline`) for [metadata/favicon customization](#f24-metadata--favicon-source-platform) — added additively (migration `006_branding_metadata.sql` + validators + repositories), no existing logic changed
-- [ ] Public booking-status lookup by reference + email (read-only) to power a customer "track my request" page ([F8.4](#f84-customer-status-tracking-storefront))
+- [x] Public booking-status lookup by reference + email (read-only) to power a customer "track my request" page ([F8.4](#f84-customer-status-tracking-storefront)) — added additively as `GET /api/v1/storefront/:slug/track` (requires unguessable UUID + matching email, generic 404 to prevent enumeration); no existing logic changed
 - [ ] Lightweight `updated_at`/polling or webhook hint so the dashboard can surface new inquiries in near-real-time ([F8.2](#f82-new-inquiry-signals-platform)) — *frontend ships a lightweight polling fallback in the meantime*
 
 > If a backend change is **not** opted into, the corresponding frontend item degrades gracefully (e.g., logo presets ship as a static bundled manifest; favicon falls back to the logo; status tracking is hidden). **No frontend item hard-depends on a backend change.**
@@ -401,9 +401,9 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F8.4 Customer status tracking (storefront)
 
-- [/] After submitting an inquiry, the customer gets a **booking reference** and an optional "track your request" link — reference shown in the success state; track link pending the optional lookup endpoint
-- [ ] A lightweight, read-only status page shows where their request is in the pipeline (received → confirmed → ready → returned), mapped from the booking status
-- [ ] Depends on the optional public status-lookup endpoint in [Backend Impact](#backend-impact--scope); hidden gracefully if not available
+- [x] After submitting an inquiry, the customer gets a **booking reference** and an optional "track your request" link — reference shown in the success state + "Track your request" deep-link (prefilled ref + email) shipped
+- [x] A lightweight, read-only status page shows where their request is in the pipeline (received → confirmed → ready → returned), mapped from the booking status
+- [x] Depends on the optional public status-lookup endpoint in [Backend Impact](#backend-impact--scope); hidden gracefully if not available — endpoint shipped; page surfaces a friendly error when a reference/email doesn't match
 - [ ] Status-change notifications already fire server-side (`notify.bookingStatusChanged`) — keep storefront copy consistent with those emails
 
 ### F8.5 Calendar parity

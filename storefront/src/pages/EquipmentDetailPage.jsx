@@ -138,7 +138,9 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
         error: '',
         success: reference
           ? `Request received! ${tenant?.name || 'The shop'} has your inquiry. Your reference is #${reference}.`
-          : `Request received! ${tenant?.name || 'The shop'} will get back to you shortly.`
+          : `Request received! ${tenant?.name || 'The shop'} will get back to you shortly.`,
+        trackRef: result?.data?.id || '',
+        trackEmail: form.email
       });
       setForm({
         name: '',
@@ -249,13 +251,24 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
               </div>
               <p className="mt-3 font-semibold text-emerald-800">{status.success}</p>
               <p className="mt-1 text-sm text-emerald-700">We'll reach out by email to confirm availability and next steps.</p>
-              <button
-                type="button"
-                className="mt-4 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
-                onClick={() => setStatus({ loading: false, error: '', success: '' })}
-              >
-                Send another request
-              </button>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                {status.trackRef ? (
+                  <Link
+                    to={`/track?ref=${encodeURIComponent(status.trackRef)}&email=${encodeURIComponent(status.trackEmail || '')}`}
+                    className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
+                  >
+                    Track your request
+                  </Link>
+                ) : null}
+                <button
+                  type="button"
+                  className="rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                  onClick={() => setStatus({ loading: false, error: '', success: '' })}
+                >
+                  Send another request
+                </button>
+              </div>
             </div>
           ) : (
             <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={submitInquiry}>

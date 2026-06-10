@@ -124,6 +124,7 @@ export default function StorefrontLayout({ tenant }) {
                 <ul className="mt-3 space-y-2 text-sm text-slate-600">
                   <li><Link to="/" className="hover:text-slate-900">Home</Link></li>
                   <li><Link to="/catalog" className="hover:text-slate-900">Catalog</Link></li>
+                  <li><Link to="/track" className="hover:text-slate-900">Track your request</Link></li>
                 </ul>
               </div>
             </div>
