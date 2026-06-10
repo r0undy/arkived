@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   BarChart3,
   Users,
-  Sparkles,
   Check,
   ImageIcon
 } from 'lucide-react';
@@ -67,25 +66,25 @@ function PartnerLink({ partner }) {
       target="_blank"
       rel="noreferrer"
       title={`Visit ${partner.name}`}
-      className="group inline-flex shrink-0 items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-3 transition hover:-translate-y-0.5 hover:border-neutral-700 hover:bg-neutral-800"
+      className="group flex w-32 shrink-0 flex-col items-center gap-3 text-center sm:w-40"
     >
       {partner.logo_url ? (
         <img
           src={partner.logo_url}
-          alt=""
+          alt={partner.name}
           loading="lazy"
-          className="h-8 w-8 shrink-0 rounded-md object-contain opacity-80 transition group-hover:opacity-100"
+          className="h-16 w-16 shrink-0 rounded-2xl object-contain opacity-70 transition duration-300 group-hover:scale-105 group-hover:opacity-100 sm:h-20 sm:w-20"
         />
       ) : (
         <span
           aria-hidden="true"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white"
+          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-bold text-white opacity-80 transition duration-300 group-hover:scale-105 group-hover:opacity-100 sm:h-20 sm:w-20 sm:text-3xl"
           style={{ backgroundColor: partner.accent_color || '#6366f1' }}
         >
           {initialsOf(partner.name)}
         </span>
       )}
-      <span className="whitespace-nowrap text-lg font-bold tracking-tight text-neutral-500 transition-colors group-hover:text-neutral-200">
+      <span className="whitespace-nowrap text-sm font-semibold tracking-tight text-neutral-500 transition-colors group-hover:text-neutral-200">
         {partner.name}
       </span>
     </a>
@@ -124,11 +123,7 @@ export default function HomePage() {
         />
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
           <div className="motion-safe:animate-[fadeInUp_0.5s_ease-out]">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-300">
-              <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-              The operating system for rental shops
-            </span>
-            <h1 className="mt-5 text-[clamp(2.25rem,5vw,3.75rem)] font-extrabold leading-[1.05] tracking-tight">
+            <h1 className="text-[clamp(2.25rem,5vw,3.75rem)] font-extrabold leading-[1.05] tracking-tight">
               Stop juggling spreadsheets.
               <span className="bg-linear-to-r from-brand-400 via-info-400 to-brand-300 bg-clip-text text-transparent"> Start renting smarter.</span>
             </h1>
@@ -178,10 +173,7 @@ export default function HomePage() {
 
         {/* Partner marquee */}
         {partners.length > 0 ? (
-          <div className="border-t border-neutral-750 bg-neutral-950/40 py-8">
-            <p className="mb-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-neutral-500">
-              Trusted by rental shops everywhere
-            </p>
+          <div className="border-t border-neutral-750 bg-neutral-950/40 py-10">
             <Marquee duration={32} className="mask-[linear-gradient(to_right,transparent,black_6%,black_94%,transparent)]">
               {partners.map((partner) => (
                 <PartnerLink key={partner.slug} partner={partner} />
@@ -308,44 +300,23 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="relative isolate overflow-hidden border-t border-neutral-750">
-        {/* Animated aurora wash */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(50%_60%_at_20%_20%,rgba(99,102,241,0.28),transparent),radial-gradient(45%_55%_at_85%_30%,rgba(14,165,233,0.22),transparent),radial-gradient(60%_60%_at_50%_100%,rgba(99,102,241,0.18),transparent)] bg-size-[160%_160%] motion-safe:animate-[auroraShift_16s_ease-in-out_infinite]"
-        />
-        {/* Grid texture, faded toward edges */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 opacity-[0.15] bg-[linear-gradient(to_right,#334155_1px,transparent_1px),linear-gradient(to_bottom,#334155_1px,transparent_1px)] bg-size-[48px_48px] mask-[radial-gradient(70%_70%_at_50%_50%,black,transparent)]"
-        />
-        {/* Floating glow orbs */}
-        <div aria-hidden="true" className="pointer-events-none absolute -left-16 top-10 -z-10 h-56 w-56 rounded-full bg-brand-500/20 blur-3xl motion-safe:animate-[floatY_7s_ease-in-out_infinite]" />
-        <div aria-hidden="true" className="pointer-events-none absolute -right-10 bottom-6 -z-10 h-64 w-64 rounded-full bg-info-500/20 blur-3xl motion-safe:animate-[floatY_9s_ease-in-out_infinite]" />
-
-        <div className="mx-auto max-w-3xl px-6 py-24 text-center lg:py-32">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-300">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            Launch in minutes
-          </span>
-          <h2 className="mt-5 text-[clamp(2rem,5vw,3.5rem)] font-extrabold leading-[1.05] tracking-tight">
-            Ready to run a{' '}
-            <span className="bg-linear-to-r from-brand-400 via-info-400 to-brand-300 bg-clip-text text-transparent">
-              smarter rental business?
-            </span>
+      <section className="border-t border-neutral-750">
+        <div className="mx-auto max-w-2xl px-6 py-24 text-center lg:py-32">
+          <h2 className="text-[clamp(1.75rem,4vw,2.75rem)] font-extrabold leading-tight tracking-tight">
+            Ready to run a smarter rental business?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-300">
+          <p className="mx-auto mt-4 max-w-xl text-lg text-neutral-400">
             Create your workspace, customize your storefront, and take your first booking today.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 font-semibold shadow-[0_8px_30px_rgba(99,102,241,0.35)] transition hover:-translate-y-0.5 hover:bg-brand-600"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-500 px-6 py-3 font-semibold transition hover:-translate-y-0.5 hover:bg-brand-600"
               to="/signup"
             >
               Create tenant workspace <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
             <Link
-              className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-900/50 px-6 py-3 font-semibold text-neutral-100 backdrop-blur transition hover:bg-neutral-800"
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-750 px-6 py-3 font-semibold text-neutral-100 transition hover:bg-neutral-800"
               to="/login"
             >
               Open dashboard
