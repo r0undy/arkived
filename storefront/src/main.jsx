@@ -16,6 +16,7 @@ import HomePage from './pages/HomePage';
 import CatalogPage from './pages/CatalogPage';
 import EquipmentDetailPage from './pages/EquipmentDetailPage';
 import TrackRequestPage from './pages/TrackRequestPage';
+import QuotePage from './pages/QuotePage';
 import NotFoundPage from './pages/NotFoundPage';
 import TenantDebugger from './components/TenantDebugger';
 import TenantLoadingScreen from './components/TenantLoadingScreen';
@@ -87,6 +88,7 @@ function App() {
             }
           />
           <Route path="/track" element={<TrackRequestPage tenant={tenantState.tenant} />} />
+          <Route path="/quote" element={<QuotePage tenant={tenantState.tenant} />} />
         </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2, Link2, Check, X } from 'lucide-react';
+import { CheckCircle2, Link2, Check, X, Plus } from 'lucide-react';
 import { storefrontApi } from '../lib/api';
 import Meta from '../components/Meta';
 import { ProductJsonLd } from '../components/StructuredData';
 import { recordRecentlyViewed, getRecentlyViewed } from '../lib/recentlyViewed';
+import { useQuoteCart } from '../hooks/useQuoteCart';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const toYmd = (value) => new Date(value).toISOString().slice(0, 10);
@@ -47,6 +48,8 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [recent, setRecent] = useState([]);
+  const { has: inQuoteCart, add: addToQuote, remove: removeFromQuote } = useQuoteCart(tenant?.slug);
+  const inQuote = inQuoteCart(item.id);
 
   useEffect(() => {
     setActiveImage(item.images?.[0]?.storage_url || '');
@@ -174,15 +177,30 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
               <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
               <h1 className="mt-2 text-3xl font-bold tracking-tight">{item.name}</h1>
             </div>
-            <button
-              type="button"
-              onClick={copyLink}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              aria-label="Copy link to this item"
-            >
-              {copied ? <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
-              {copied ? 'Copied' : 'Share'}
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => (inQuote ? removeFromQuote(item.id) : addToQuote(item))}
+                aria-pressed={inQuote}
+                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                  inQuote
+                    ? 'border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700'
+                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                {inQuote ? <Check className="h-4 w-4" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
+                {inQuote ? 'In quote' : 'Add to quote'}
+              </button>
+              <button
+                type="button"
+                onClick={copyLink}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                aria-label="Copy link to this item"
+              >
+                {copied ? <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+                {copied ? 'Copied' : 'Share'}
+              </button>
+            </div>
           </div>
 
           {(item.images?.length || 0) > 0 ? (

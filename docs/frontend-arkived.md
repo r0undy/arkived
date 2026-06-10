@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.12.0
+> **Version:** 1.13.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -307,7 +307,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F5.6 Extra storefront touches (high-impact, optional)
 
-- [ ] **"Request a quote" multi-item cart:** let a customer add several items, pick one date range, and submit a single inquiry covering all of them
+- [x] **"Request a quote" multi-item cart:** let a customer add several items, pick one date range, and submit a single inquiry covering all of them — per-tenant localStorage cart (`quoteCart` + `useQuoteCart`), add-to-quote on catalog cards and the detail page, a header cart indicator with count, and a `/quote` page that sends one inquiry per item (`Promise.allSettled`), aggregates references, keeps failed/conflicting items for retry, and links to tracking
 - [x] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
 - [x] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
 - [x] **Search & filter persistence** via URL query params (already partially supported) so links are shareable

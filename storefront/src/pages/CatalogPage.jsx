@@ -105,7 +105,7 @@ export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
         {paged.length > 0 ? (
           <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {paged.map((item) => (
-              <EquipmentCard key={item.id} item={item} />
+              <EquipmentCard key={item.id} item={item} slug={tenant?.slug} />
             ))}
           </div>
         ) : (

@@ -167,7 +167,7 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
           {featured.length > 0 ? (
             <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {featured.map((item) => (
-                <EquipmentCard key={item.id} item={item} />
+                <EquipmentCard key={item.id} item={item} slug={tenant?.slug} />
               ))}
             </div>
           ) : (

@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle, FileText } from 'lucide-react';
 import PoweredByArkivedBadge from '../components/PoweredByArkivedBadge';
+import { useQuoteCart } from '../hooks/useQuoteCart';
 
 const whatsappLink = (phone) => {
   const digits = String(phone || '').replace(/[^\d]/g, '');
@@ -13,6 +14,7 @@ const mapsLink = (address) =>
 export default function StorefrontLayout({ tenant }) {
   const waLink = whatsappLink(tenant.contact_phone);
   const mapLink = mapsLink(tenant.contact_address);
+  const { count: quoteCount } = useQuoteCart(tenant.slug);
   return (
     <div className="flex min-h-dvh flex-col text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -46,6 +48,24 @@ export default function StorefrontLayout({ tenant }) {
               }
             >
               Catalog
+            </NavLink>
+            <NavLink
+              to="/quote"
+              className={({ isActive }) =>
+                `relative inline-flex items-center gap-1.5 rounded-md px-3 py-2 transition ${isActive ? 'text-slate-900' : 'text-slate-500 hover:text-slate-900'}`
+              }
+              aria-label={quoteCount > 0 ? `Quote, ${quoteCount} items` : 'Quote'}
+            >
+              <FileText className="h-4 w-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Quote</span>
+              {quoteCount > 0 ? (
+                <span
+                  className="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold text-white"
+                  style={{ backgroundColor: 'var(--color-primary)' }}
+                >
+                  {quoteCount > 99 ? '99+' : quoteCount}
+                </span>
+              ) : null}
             </NavLink>
             <Link
               to="/catalog"
