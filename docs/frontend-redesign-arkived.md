@@ -1,7 +1,7 @@
 # Dashboard Redesign — Arkived
 
-> **Version:** 0.2.0
-> **Status:** R1 (Shell) + R2 (PageHeader) landed
+> **Version:** 0.3.0
+> **Status:** R1 (Shell) + R2 (PageHeader) + R3 tables landed
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
 > **References:** [frontend-arkived.md](./frontend-arkived.md) · [dsd-arkived.md](./dsd-arkived.md) · [prd-arkived.md](./prd-arkived.md)
@@ -78,10 +78,10 @@ A focused initiative to elevate the **operator dashboard** (App 1, authenticated
 - [ ] Alert state (e.g. overdue > 0) tints the card border `danger-500/40` and the value `danger-400` — no full red fill.
 
 ### 5.3 Tables (Equipment, Bookings, Customers, Team)
-- [ ] Unify on one table style: header row `text-xs uppercase tracking-wide text-neutral-500`, rows divided by `divide-neutral-800`, row hover `bg-neutral-800/60`, `h-12` rows.
-- [ ] Status via `Badge` only (consistent variants). Right-align numeric/action columns.
-- [ ] Loading = `Skeleton` rows (already present); empty = `EmptyState` with an icon + a primary action.
-- [ ] Card/table toggle (already on Equipment) — apply the same affordance everywhere a grid makes sense.
+- [x] Unify on one table style: header row `text-[11px] uppercase tracking-wider text-neutral-500`, rows divided by `divide-neutral-800`, row hover `bg-neutral-800/60`. Extracted a shared `Table` / `TableContainer` / `THead` / `Th` / `TBody` / `Tr` / `Td` primitive set in `components/ui/Table.jsx`.
+- [x] Status via `Badge` only (consistent variants). Right-align numeric/action columns (`<Th align="right">` / `<Td align="right">`, `tabular-nums`).
+- [x] Loading = `Skeleton` rows (already present); empty = `EmptyState` with an icon + a primary action.
+- [x] Card/table toggle (already on Equipment) — apply the same affordance everywhere a grid makes sense.
 
 ### 5.4 Detail pages (Equipment, Customer, Booking)
 - [ ] Two-column on `lg`: primary content + a sticky right rail for metadata/actions. Consistent back link (`← Bookings`).
@@ -125,7 +125,7 @@ A focused initiative to elevate the **operator dashboard** (App 1, authenticated
 |---|---|---|---|
 | **R1 — Shell** | Sidebar (grouping, active rail, user footer, workspace header), top bar (page title, `+ New`, bell) | Shell looks intentional; collapse animates; mobile drawer matches | ✅ Done (`+ New`/bell deferred to R3) |
 | **R2 — Page rhythm** | `PageHeader` primitive + adopt on all 8 pages; standardized KPI cards | Every page opens with consistent header + spacing | ✅ PageHeader done; KPI cards pending |
-| **R3 — Data surfaces** | Unified table style, badges, empty/error states across lists | One table language; no blank states | ⏳ |
+| **R3 — Data surfaces** | Unified table style, badges, empty/error states across lists | One table language; no blank states | ✅ Tables unified; `+ New`/bell pending |
 | **R4 — Detail + polish** | Detail-page two-column rails, component audit, motion/stagger | Detail pages consistent; transitions smooth | ⏳ |
 | **R5 — A11y + QA** | aria sweep, contrast checks, build verification both apps | Clean build, no contrast regressions | ⏳ |
 
