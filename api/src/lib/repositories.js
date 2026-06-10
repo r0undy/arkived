@@ -30,6 +30,19 @@ const storagePathFromPublicUrl = (url) => {
   return url.slice(index + marker.length);
 };
 
+/**
+ * A tenant's public storefront is only "published" once the owner has finished
+ * the welcome wizard (which writes the `go_live` step). Tenants seeded or
+ * created before onboarding existed are treated as live when they already have
+ * at least one item to rent, so the demo storefront keeps working.
+ */
+export function isTenantPublished(tenant, equipmentCount = 0) {
+  const steps = Array.isArray(tenant?.onboarding_completed_steps)
+    ? tenant.onboarding_completed_steps
+    : [];
+  return steps.includes('go_live') || equipmentCount > 0;
+}
+
 export const tenantRepository = {
   async listPublicTenants() {
     if (!hasSupabase) {
@@ -68,7 +81,7 @@ export const tenantRepository = {
     return safeSingle(
       supabase
         .from('tenants')
-        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, business_hours')
+        .select('id, slug, name, logo_url, accent_color, banner_image_url, contact_email, contact_phone, contact_address, show_watermark, tagline, meta_description, favicon_url, og_image_url, business_hours, onboarding_completed_steps')
         .eq('slug', slug)
         .single(),
       'Tenant not found'

@@ -13,13 +13,19 @@ import {
   Menu,
   X,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Store,
+  ExternalLink,
+  ArrowRight
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { useNewInquiries } from '../hooks/useNewInquiries';
 import { ArkivedMark } from '../components/Wordmark';
 import ActivationLauncher from '../components/ActivationLauncher';
+import { activationSummary, isOnboarded } from '../lib/onboarding';
+
+const STOREFRONT_DOMAIN = import.meta.env.VITE_STOREFRONT_DOMAIN || 'arkived.dev';
 
 const navSections = [
   {
@@ -162,6 +168,59 @@ function WorkspaceHeader({ tenant, collapsed }) {
   );
 }
 
+/**
+ * Persistent storefront-status banner. Once onboarding is finished the
+ * storefront is live; until every core activation step is done we keep nudging
+ * the owner so their public site is fully set up.
+ */
+function StorefrontStatusBanner({ tenant, summary }) {
+  if (!tenant || !summary) return null;
+  const storefrontUrl = tenant.slug ? `${tenant.slug}.${STOREFRONT_DOMAIN}` : '';
+
+  if (!summary.coreComplete) {
+    return (
+      <div className="border-b border-warning-500/30 bg-warning-500/10 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
+          <Store aria-hidden="true" className="h-4 w-4 shrink-0 text-warning-500" />
+          <span className="font-medium text-warning-500">Your storefront isn't fully set up.</span>
+          <span className="text-neutral-300">Finish the remaining steps so customers see a complete site.</span>
+          {summary.nextStep ? (
+            <Link
+              to={summary.nextStep.href}
+              className="ml-auto inline-flex items-center gap-1 rounded-md bg-warning-500/15 px-2.5 py-1 text-xs font-semibold text-warning-500 transition hover:bg-warning-500/25"
+            >
+              {summary.nextStep.label}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  if (!storefrontUrl) return null;
+
+  return (
+    <div className="border-b border-success-500/25 bg-success-500/10 px-4 py-2.5 sm:px-6">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1.5 text-sm">
+        <span className="inline-flex items-center gap-1.5 font-medium text-success-500">
+          <span className="h-2 w-2 rounded-full bg-success-500" aria-hidden="true" />
+          Storefront live
+        </span>
+        <a
+          href={`https://${storefrontUrl}`}
+          target="_blank"
+          rel="noreferrer"
+          className="ml-auto inline-flex items-center gap-1 font-mono text-xs text-neutral-300 transition hover:text-neutral-50"
+        >
+          {storefrontUrl}
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function UserFooter({ user, collapsed, onSignOut }) {
   if (collapsed) {
     return (
@@ -211,17 +270,21 @@ export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tenant, setTenant] = useState(null);
+  const [counts, setCounts] = useState({ equipmentCount: 0, staffCount: 0 });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let active = true;
-    api
-      .tenant()
-      .then((res) => {
-        if (active) setTenant(res?.tenant || null);
-      })
-      .catch(() => {
-        if (active) setTenant(null);
-      });
+    Promise.all([
+      api.tenant().then((res) => res?.tenant || null).catch(() => null),
+      api.equipment().then((res) => (res?.data || []).length).catch(() => 0),
+      api.staff().then((res) => (res?.data || []).length).catch(() => 0)
+    ]).then(([tenantResult, equipmentCount, staffCount]) => {
+      if (!active) return;
+      setTenant(tenantResult);
+      setCounts({ equipmentCount, staffCount });
+      setLoaded(true);
+    });
     return () => {
       active = false;
     };
@@ -231,6 +294,13 @@ export default function DashboardLayout() {
     return <Navigate to="/admin" replace />;
   }
 
+  // Gate the entire dashboard until onboarding is finished. A brand-new tenant
+  // is forced into the welcome wizard and cannot reach any dashboard route.
+  if (loaded && tenant && !isOnboarded(tenant, counts)) {
+    return <Navigate to="/welcome" replace />;
+  }
+
+  const summary = tenant ? activationSummary(tenant, counts) : null;
   const sidebarWidth = collapsed ? 'lg:grid-cols-[76px_1fr]' : 'lg:grid-cols-[248px_1fr]';
   const badges = { inquiries: inquiryCount };
   const pageTitle = titleForPath(location.pathname);
@@ -300,6 +370,7 @@ export default function DashboardLayout() {
             </span>
           </div>
         </header>
+        <StorefrontStatusBanner tenant={tenant} summary={summary} />
         <main className="mx-auto w-full max-w-7xl flex-1 p-4 sm:p-6">
           <Outlet />
         </main>

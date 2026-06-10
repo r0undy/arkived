@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
-import { bookingRepository, customerRepository, equipmentRepository, tenantRepository } from '../lib/repositories.js';
+import { bookingRepository, customerRepository, equipmentRepository, isTenantPublished, tenantRepository } from '../lib/repositories.js';
 import { AppError } from '../lib/errors.js';
 import {
   storefrontAvailabilityQuerySchema,
@@ -11,10 +11,19 @@ import {
 
 export const storefrontRouter = Router();
 
+const STOREFRONT_OFFLINE = new AppError(
+  404,
+  'This storefront is not published yet.',
+  'STOREFRONT_NOT_PUBLISHED'
+);
+
 storefrontRouter.get('/:slug/catalog', asyncHandler(async (req, res) => {
   const params = storefrontParamsSchema.parse(req.params);
   const tenant = await tenantRepository.getPublicBySlug(params.slug);
   const equipment = await equipmentRepository.list(tenant.id);
+  if (!isTenantPublished(tenant, equipment.length)) {
+    throw STOREFRONT_OFFLINE;
+  }
   res.json({ data: equipment });
 }));
 
@@ -22,6 +31,9 @@ storefrontRouter.get('/:slug/catalog/:equipmentId', asyncHandler(async (req, res
   const params = storefrontEquipmentParamsSchema.parse(req.params);
   const tenant = await tenantRepository.getPublicBySlug(params.slug);
   const equipment = await equipmentRepository.list(tenant.id);
+  if (!isTenantPublished(tenant, equipment.length)) {
+    throw STOREFRONT_OFFLINE;
+  }
   const item = equipment.find((entry) => entry.id === params.equipmentId);
 
   if (!item) {

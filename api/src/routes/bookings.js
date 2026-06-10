@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { asyncHandler } from '../lib/asyncHandler.js';
 import { AppError } from '../lib/errors.js';
 import { notify } from '../lib/notify.js';
-import { bookingRepository, customerRepository, equipmentRepository, tenantRepository } from '../lib/repositories.js';
+import { bookingRepository, customerRepository, equipmentRepository, isTenantPublished, tenantRepository } from '../lib/repositories.js';
 import { requireAuth } from '../middleware/auth.js';
 import { requireRole } from '../middleware/requireRole.js';
 import {
@@ -20,6 +20,11 @@ bookingsRouter.post('/inquiry', asyncHandler(async (req, res) => {
   const payload = publicBookingInquirySchema.parse(req.body);
   const tenant = await tenantRepository.getPublicBySlug(payload.tenant_slug);
   await equipmentRepository.getById(tenant.id, payload.equipment_id);
+
+  const tenantEquipment = await equipmentRepository.list(tenant.id);
+  if (!isTenantPublished(tenant, tenantEquipment.length)) {
+    throw new AppError(404, 'This storefront is not published yet.', 'STOREFRONT_NOT_PUBLISHED');
+  }
 
   const hasOverlap = await bookingRepository.hasDateOverlap(
     tenant.id,

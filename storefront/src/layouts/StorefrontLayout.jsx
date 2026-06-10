@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { Mail, Phone, MapPin, MessageCircle, FileText, Clock } from 'lucide-react';
 import PoweredByArkivedBadge from '../components/PoweredByArkivedBadge';
+import BusinessHoursModal from '../components/BusinessHoursModal';
 import { useQuoteCart } from '../hooks/useQuoteCart';
-import { getOpenState, hasBusinessHours, listBusinessHours } from '../lib/businessHours';
+import { getOpenState, hasBusinessHours } from '../lib/businessHours';
 
 const whatsappLink = (phone) => {
   const digits = String(phone || '').replace(/[^\d]/g, '');
@@ -18,6 +20,7 @@ export default function StorefrontLayout({ tenant }) {
   const { count: quoteCount } = useQuoteCart(tenant.slug);
   const showHours = hasBusinessHours(tenant.business_hours);
   const openState = showHours ? getOpenState(tenant.business_hours) : null;
+  const [hoursOpen, setHoursOpen] = useState(false);
   return (
     <div className="flex min-h-dvh flex-col text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -71,15 +74,18 @@ export default function StorefrontLayout({ tenant }) {
               ) : null}
             </NavLink>
             {openState ? (
-              <span
-                className={`hidden items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold sm:inline-flex ${
-                  openState.isOpen ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+              <button
+                type="button"
+                onClick={() => setHoursOpen(true)}
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition ${
+                  openState.isOpen ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
-                title={`${openState.todayLabel}: ${openState.todayRange}`}
+                title="View opening hours"
+                aria-haspopup="dialog"
               >
-                <Clock className="h-3 w-3" aria-hidden="true" />
-                {openState.isOpen ? 'Open now' : 'Closed'}
-              </span>
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">{openState.isOpen ? 'Open now' : 'Closed'}</span>
+              </button>
             ) : null}
             <Link
               to="/catalog"
@@ -152,27 +158,22 @@ export default function StorefrontLayout({ tenant }) {
               </ul>
 
               {showHours ? (
-                <div className="mt-5">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-slate-900">Hours</h3>
-                    <span
-                      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
-                        openState.isOpen ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${openState.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} aria-hidden="true" />
-                      {openState.isOpen ? 'Open now' : 'Closed'}
-                    </span>
-                  </div>
-                  <ul className="mt-3 space-y-1 text-sm text-slate-600">
-                    {listBusinessHours(tenant.business_hours).map((row) => (
-                      <li key={row.key} className={`flex items-center justify-between gap-4 ${row.key === openState.todayKey ? 'font-semibold text-slate-900' : ''}`}>
-                        <span>{row.label}</span>
-                        <span className="tabular-nums">{row.range}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setHoursOpen(true)}
+                  className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-slate-900"
+                >
+                  <Clock className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                  <span>View opening hours</span>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      openState.isOpen ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    <span className={`h-1.5 w-1.5 rounded-full ${openState.isOpen ? 'bg-emerald-500' : 'bg-slate-400'}`} aria-hidden="true" />
+                    {openState.isOpen ? 'Open now' : 'Closed'}
+                  </span>
+                </button>
               ) : null}
             </div>
 
@@ -194,6 +195,15 @@ export default function StorefrontLayout({ tenant }) {
           </div>
         </div>
       </footer>
+
+      {showHours ? (
+        <BusinessHoursModal
+          open={hoursOpen}
+          onClose={() => setHoursOpen(false)}
+          hours={tenant.business_hours}
+          openState={openState}
+        />
+      ) : null}
     </div>
   );
 }
