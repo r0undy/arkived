@@ -170,190 +170,213 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
       <Meta tenant={tenant} title={title} description={description} path={item?.id ? `/catalog/${item.id}` : '/catalog'} image={item?.images?.[0]?.storage_url} />
       <ProductJsonLd tenant={tenant} item={item} />
 
-      <div className="space-y-6 pb-20 md:pb-0">
-        <article className="rounded-xl border border-slate-200 bg-white p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight">{item.name}</h1>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => (inQuote ? removeFromQuote(item.id) : addToQuote(item))}
-                aria-pressed={inQuote}
-                className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
-                  inQuote
-                    ? 'border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700'
-                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                {inQuote ? <Check className="h-4 w-4" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
-                {inQuote ? 'In quote' : 'Add to quote'}
-              </button>
-              <button
-                type="button"
-                onClick={copyLink}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-                aria-label="Copy link to this item"
-              >
-                {copied ? <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
-                {copied ? 'Copied' : 'Share'}
-              </button>
-            </div>
-          </div>
+      <div className="pb-20 md:pb-0">
+        <Link to="/catalog" className="inline-flex items-center gap-1 text-sm font-medium text-slate-500 transition hover:text-slate-800">
+          ← Back to catalog
+        </Link>
 
-          {(item.images?.length || 0) > 0 ? (
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={() => setLightboxOpen(true)}
-                className="block w-full cursor-zoom-in"
-                aria-label="View larger image"
-              >
-                <img
-                  alt={item.name}
-                  className="h-64 w-full rounded-lg border border-slate-200 object-cover"
-                  loading="eager"
-                  src={activeImage || item.images[0].storage_url}
-                />
-              </button>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {item.images.map((image) => (
-                  <button key={image.id} onClick={() => setActiveImage(image.storage_url)} type="button">
-                    <img
-                      alt={`${item.name} thumbnail`}
-                      className={`h-14 w-20 rounded border object-cover ${activeImage === image.storage_url ? 'border-slate-900' : 'border-slate-200'}`}
-                      loading="lazy"
-                      src={image.storage_url}
-                    />
-                  </button>
-                ))}
+        <div className="mt-4 grid gap-10 lg:grid-cols-[1fr_360px]">
+          {/* Left column — open content, no card slabs */}
+          <div className="space-y-8">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
+                <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{item.name}</h1>
               </div>
-            </div>
-          ) : null}
-
-          <p className="mt-4 max-w-3xl text-slate-700">{item.description || 'No description yet.'}</p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Stat label="Daily rate" value={`PHP ${Number(item.daily_rate).toLocaleString()}`} />
-            <Stat label="Deposit" value={`PHP ${Number(item.deposit || 0).toLocaleString()}`} />
-            <Stat label="Condition" value={item.condition || 'good'} />
-            <Stat label="Status" value={item.status || 'available'} />
-          </div>
-        </article>
-
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-xl font-semibold tracking-tight">Availability (Read-only)</h2>
-          <div className="mt-3 grid gap-2">
-            {availabilityError ? <p className="text-sm text-red-700">{availabilityError}</p> : null}
-            {unavailableRanges.map((entry) => (
-              <p key={entry.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-                Unavailable: {entry.start_date} to {entry.end_date} ({entry.status})
-              </p>
-            ))}
-            {unavailableRanges.length === 0 && !availabilityError ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
-          </div>
-        </section>
-
-        <section id="inquiry" className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-xl font-semibold tracking-tight">Inquiry / Booking Request</h2>
-          {item.status === 'maintenance' || item.status === 'archived' ? (
-            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              This item is currently unavailable for booking. You can still send an inquiry and we'll follow up when it's back.
-            </div>
-          ) : null}
-          {status.success ? (
-            <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
-              </div>
-              <p className="mt-3 font-semibold text-emerald-800">{status.success}</p>
-              <p className="mt-1 text-sm text-emerald-700">We'll reach out by email to confirm availability and next steps.</p>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-                {status.trackRef ? (
-                  <Link
-                    to={`/track?ref=${encodeURIComponent(status.trackRef)}&email=${encodeURIComponent(status.trackEmail || '')}`}
-                    className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
-                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
-                  >
-                    Track your request
-                  </Link>
-                ) : null}
+              <div className="flex shrink-0 items-center gap-2">
                 <button
                   type="button"
-                  className="rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
-                  onClick={() => setStatus({ loading: false, error: '', success: '' })}
+                  onClick={() => (inQuote ? removeFromQuote(item.id) : addToQuote(item))}
+                  aria-pressed={inQuote}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                    inQuote
+                      ? 'border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700'
+                      : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
                 >
-                  Send another request
+                  {inQuote ? <Check className="h-4 w-4" aria-hidden="true" /> : <Plus className="h-4 w-4" aria-hidden="true" />}
+                  {inQuote ? 'In quote' : 'Add to quote'}
+                </button>
+                <button
+                  type="button"
+                  onClick={copyLink}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  aria-label="Copy link to this item"
+                >
+                  {copied ? <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+                  {copied ? 'Copied' : 'Share'}
                 </button>
               </div>
             </div>
-          ) : (
-            <form className="mt-4 grid gap-3 md:grid-cols-2" onSubmit={submitInquiry}>
-              <Field label="Name" onChange={updateField('name')} required value={form.name} />
-              <Field label="Email" onChange={updateField('email')} required type="email" value={form.email} />
-              <Field label="Phone" onChange={updateField('phone')} value={form.phone} />
-              <Field label="Start Date" min={toYmd(new Date())} onChange={updateField('start_date')} required type="date" value={form.start_date} />
-              <Field label="End Date" min={form.start_date || toYmd(new Date())} onChange={updateField('end_date')} required type="date" value={form.end_date} />
-              <label className="block text-sm text-slate-700 md:col-span-2">
-                <span>Message</span>
-                <textarea
-                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2"
-                  onChange={updateField('message')}
-                  rows={3}
-                  value={form.message}
-                />
-              </label>
 
-              {estimate ? (
-                <div className="md:col-span-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-                  Estimated total: <span className="font-semibold">PHP {estimate.total.toLocaleString()}</span>{' '}
-                  <span className="text-slate-500">({estimate.days} day{estimate.days === 1 ? '' : 's'} × PHP {Number(item.daily_rate).toLocaleString()}{estimate.deposit ? ` + PHP ${estimate.deposit.toLocaleString()} deposit` : ''})</span>
+            {/* Gallery */}
+            {(item.images?.length || 0) > 0 ? (
+              <div>
+                <button
+                  type="button"
+                  onClick={() => setLightboxOpen(true)}
+                  className="block w-full cursor-zoom-in"
+                  aria-label="View larger image"
+                >
+                  <img
+                    alt={item.name}
+                    className="h-80 w-full rounded-2xl border border-slate-200 object-cover"
+                    loading="eager"
+                    src={activeImage || item.images[0].storage_url}
+                  />
+                </button>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {item.images.map((image) => (
+                    <button key={image.id} onClick={() => setActiveImage(image.storage_url)} type="button">
+                      <img
+                        alt={`${item.name} thumbnail`}
+                        className={`h-14 w-20 rounded-lg border object-cover ${activeImage === image.storage_url ? 'border-slate-900' : 'border-slate-200'}`}
+                        loading="lazy"
+                        src={image.storage_url}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {/* Description + key stats */}
+            <div>
+              <p className="max-w-3xl text-slate-700">{item.description || 'No description yet.'}</p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                <Stat label="Daily rate" value={`PHP ${Number(item.daily_rate).toLocaleString()}`} />
+                <Stat label="Deposit" value={`PHP ${Number(item.deposit || 0).toLocaleString()}`} />
+                <Stat label="Condition" value={item.condition || 'good'} />
+                <Stat label="Status" value={item.status || 'available'} />
+              </div>
+            </div>
+
+            {/* Availability */}
+            <section className="border-t border-slate-200/70 pt-6">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Availability</h2>
+              <div className="mt-3 grid gap-2">
+                {availabilityError ? <p className="text-sm text-red-700">{availabilityError}</p> : null}
+                {unavailableRanges.map((entry) => (
+                  <p key={entry.id} className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                    Unavailable: {entry.start_date} to {entry.end_date} ({entry.status})
+                  </p>
+                ))}
+                {unavailableRanges.length === 0 && !availabilityError ? <p className="text-sm text-slate-600">No blocked dates in the next 90 days.</p> : null}
+              </div>
+            </section>
+
+            {/* Related */}
+            <section className="border-t border-slate-200/70 pt-6">
+              <h2 className="text-lg font-semibold tracking-tight text-slate-900">Related equipment</h2>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {related.map((entry) => (
+                  <Link key={entry.id} className="rounded-lg border border-slate-200 bg-white p-3 transition hover:border-slate-300 hover:shadow-sm" to={`/catalog/${entry.id}`}>
+                    <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
+                    <p className="mt-1 font-semibold">{entry.name}</p>
+                    <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
+                  </Link>
+                ))}
+                {related.length === 0 ? <p className="text-sm text-slate-600">No related items available.</p> : null}
+              </div>
+            </section>
+
+            {/* Recently viewed */}
+            {recent.length > 0 ? (
+              <section className="border-t border-slate-200/70 pt-6">
+                <h2 className="text-lg font-semibold tracking-tight text-slate-900">Recently viewed</h2>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {recent.map((entry) => (
+                    <Link key={entry.id} className="rounded-lg border border-slate-200 bg-white p-3 transition hover:border-slate-300 hover:shadow-sm" to={`/catalog/${entry.id}`}>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
+                      <p className="mt-1 font-semibold">{entry.name}</p>
+                      <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+
+          {/* Right rail — the single card: inquiry / booking request */}
+          <aside className="lg:sticky lg:top-6 lg:h-fit">
+            <section id="inquiry" className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-xl font-semibold tracking-tight">Request a quote</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                From <span className="font-semibold text-slate-900">PHP {Number(item.daily_rate).toLocaleString()}</span>/day
+              </p>
+              {item.status === 'maintenance' || item.status === 'archived' ? (
+                <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  This item is currently unavailable for booking. You can still send an inquiry and we'll follow up when it's back.
                 </div>
               ) : null}
+              {status.success ? (
+                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                    <CheckCircle2 className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <p className="mt-3 font-semibold text-emerald-800">{status.success}</p>
+                  <p className="mt-1 text-sm text-emerald-700">We'll reach out by email to confirm availability and next steps.</p>
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                    {status.trackRef ? (
+                      <Link
+                        to={`/track?ref=${encodeURIComponent(status.trackRef)}&email=${encodeURIComponent(status.trackEmail || '')}`}
+                        className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+                        style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
+                      >
+                        Track your request
+                      </Link>
+                    ) : null}
+                    <button
+                      type="button"
+                      className="rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                      onClick={() => setStatus({ loading: false, error: '', success: '' })}
+                    >
+                      Send another request
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <form className="mt-4 grid gap-3" onSubmit={submitInquiry}>
+                  <Field label="Name" onChange={updateField('name')} required value={form.name} />
+                  <Field label="Email" onChange={updateField('email')} required type="email" value={form.email} />
+                  <Field label="Phone" onChange={updateField('phone')} value={form.phone} />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Field label="Start Date" min={toYmd(new Date())} onChange={updateField('start_date')} required type="date" value={form.start_date} />
+                    <Field label="End Date" min={form.start_date || toYmd(new Date())} onChange={updateField('end_date')} required type="date" value={form.end_date} />
+                  </div>
+                  <label className="block text-sm text-slate-700">
+                    <span>Message</span>
+                    <textarea
+                      className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+                      onChange={updateField('message')}
+                      rows={3}
+                      value={form.message}
+                    />
+                  </label>
 
-              {status.error ? <p role="alert" className="text-sm text-rose-600 md:col-span-2">{status.error}</p> : null}
+                  {estimate ? (
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                      Estimated total: <span className="font-semibold">PHP {estimate.total.toLocaleString()}</span>{' '}
+                      <span className="text-slate-500">({estimate.days} day{estimate.days === 1 ? '' : 's'} × PHP {Number(item.daily_rate).toLocaleString()}{estimate.deposit ? ` + PHP ${estimate.deposit.toLocaleString()} deposit` : ''})</span>
+                    </div>
+                  ) : null}
 
-              <button
-                className="inline-flex w-fit items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:opacity-60"
-                disabled={status.loading}
-                style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
-                type="submit"
-              >
-                {status.loading ? 'Submitting…' : 'Submit inquiry'}
-              </button>
-            </form>
-          )}
-        </section>
+                  {status.error ? <p role="alert" className="text-sm text-rose-600">{status.error}</p> : null}
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="text-xl font-semibold tracking-tight">Related Equipment</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map((entry) => (
-              <Link key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100" to={`/catalog/${entry.id}`}>
-                <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
-                <p className="mt-1 font-semibold">{entry.name}</p>
-                <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
-              </Link>
-            ))}
-            {related.length === 0 ? <p className="text-sm text-slate-600">No related items available.</p> : null}
-          </div>
-        </section>
-
-        {recent.length > 0 ? (
-          <section className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="text-xl font-semibold tracking-tight">Recently viewed</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {recent.map((entry) => (
-                <Link key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100" to={`/catalog/${entry.id}`}>
-                  <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
-                  <p className="mt-1 font-semibold">{entry.name}</p>
-                  <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
-                </Link>
-              ))}
-            </div>
-          </section>
-        ) : null}
+                  <button
+                    className="inline-flex w-full items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:opacity-60"
+                    disabled={status.loading}
+                    style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
+                    type="submit"
+                  >
+                    {status.loading ? 'Submitting…' : 'Submit inquiry'}
+                  </button>
+                </form>
+              )}
+            </section>
+          </aside>
+        </div>
       </div>
 
       {/* Sticky mobile inquiry CTA (F5.6) */}

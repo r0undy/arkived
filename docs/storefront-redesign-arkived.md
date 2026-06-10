@@ -1,7 +1,7 @@
 # Storefront Redesign — Arkived
 
-> **Version:** 0.2.0
-> **Status:** Home page de-carded (S1–S3 done) — other pages pending
+> **Version:** 0.3.0
+> **Status:** Home page de-carded (S1–S3) + detail page two-column refactor (S4) done
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
 > **References:** [frontend-arkived.md](./frontend-arkived.md) · [frontend-redesign-arkived.md](./frontend-redesign-arkived.md) · [dsd-arkived.md](./dsd-arkived.md#8-app-2-theming-system) · [prd-arkived.md](./prd-arkived.md)
@@ -84,10 +84,10 @@ The home page is **card-on-card-on-card**. Almost every section is a bordered wh
 
 ## 5. Other Storefront Pages (lighter pass)
 
-- [ ] **Catalog** — ensure the filter bar isn't another heavy card; products grid is the focus. Reuse the new category pills.
-- [ ] **Equipment detail** — verify the gallery + info rail aren't over-boxed; keep one card for the sticky inquiry/quote panel only.
-- [ ] **Quote / Track request** — keep a single form card; remove decorative panels around supporting copy.
-- [ ] **StorefrontLayout** — confirm header/footer are clean hairlines; open-now pill + schedule already good.
+- [x] **Catalog** — already clean: filter bar is not a card, products grid is the focus, and category filters are already pill buttons. Left as-is.
+- [x] **Equipment detail** — de-slabbed: was 5 stacked white card sections; now an open two-column layout (back link + open header, gallery, description, key-stat chips, availability, related, recently-viewed — separated by hairlines) with the **inquiry/booking form as the single sticky right-rail card**. Mobile stacks the rail below; sticky mobile CTA + lightbox preserved.
+- [x] **Quote / Track request** — already correct: each keeps a single form/summary card; Quote's per-item rows are cart line items (kept), Track is one form card + one result card.
+- [x] **StorefrontLayout** — header/footer already clean hairlines; open-now pill + schedule good. No change needed.
 
 ---
 
@@ -102,12 +102,12 @@ The home page is **card-on-card-on-card**. Almost every section is a bordered wh
 
 ## 7. Phased Plan
 
-| Phase | Scope | Exit criteria |
-|---|---|---|
-| **S1 — De-card the home page** | Remove trust-strip cards, dark how-it-works slab, why-choose cards, gradient CTA; convert to open sections | Home page has 1 card type (products) only |
-| **S2 — Reorder + categories pills** | Featured above categories; categories → pills; trust facts inline in hero | Products lead; no category card grid |
-| **S3 — Editorial polish** | Section header consistency, whitespace scale, hairlines, accent audit | Calm rhythm, minimal brand fills |
-| **S4 — Other pages + QA** | Catalog/detail/quote light pass; build verify | Storefront builds clean; consistent system |
+| Phase | Scope | Exit criteria | Status |
+|---|---|---|---|
+| **S1 — De-card the home page** | Remove trust-strip cards, dark how-it-works slab, why-choose cards, gradient CTA; convert to open sections | Home page has 1 card type (products) only | ✅ Done |
+| **S2 — Reorder + categories pills** | Featured above categories; categories → pills; trust facts inline in hero | Products lead; no category card grid | ✅ Done |
+| **S3 — Editorial polish** | Section header consistency, whitespace scale, hairlines, accent audit | Calm rhythm, minimal brand fills | ✅ Done |
+| **S4 — Other pages + QA** | Catalog/detail/quote light pass; build verify | Storefront builds clean; consistent system | ✅ Done |
 
 ---
 
