@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.5.0
+> **Version:** 1.6.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -26,7 +26,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 |---|---|---|
 | F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark, `Tooltip` + `Tabs` shipped. |
 | F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget + floating launcher, empty states, confetti + toast at 100%. |
-| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved + dirty tracking. Social-card preview pending. |
+| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved, live social-card preview. Business hours/social links pending. |
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
@@ -202,7 +202,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] **Favicon:** auto-generate a favicon from the chosen logo preset/upload (render the SVG mark on the accent color to PNG/ICO sizes: 16/32/180/512); allow a dedicated favicon override. Live tab-preview mockup in the studio
 - [x] **SEO metadata:** editable storefront meta `title` template and `meta_description`, with character counters and a live Google-result preview snippet
-- [/] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview — OG image field persisted; live social-card preview pending
+- [/] **Social sharing (Open Graph / Twitter):** editable OG image (defaults to banner or logo-on-accent), OG title/description, with a live social-card preview — OG image field persisted; live social-card preview (1200×630 mockup mirroring the storefront OG fallback chain) shipped
 - [/] **Optional fields:** business hours, address/map link, and social links (used in storefront footer + structured data) — address/contact shipped; hours + social links pending
 - [x] All fields validated + persisted via tenant branding (see optional backend fields in [Backend Impact](#backend-impact--scope)); graceful fallbacks when unset (favicon → logo, OG image → banner)
 
@@ -267,7 +267,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] Redesign the [storefront HomePage](../storefront/src/pages/HomePage.jsx) hero: full-bleed banner with a soft gradient scrim for legibility, logo lockup, shop name, a value-prop tagline, and a high-contrast primary CTA ("Browse the catalog")
 - [x] Secondary CTA for inquiries ("Request a quote") and a quick-search field
-- [/] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in shipped; parallax pending
+- [x] Subtle parallax / fade-in on scroll (motion-reduced safe) — fade-in + scroll parallax on the hero banner shipped (rAF-throttled, disabled under `prefers-reduced-motion`)
 - [x] Trust strip directly under the hero: # items available, response time, location, years in business (whatever the tenant provides)
 
 ### F5.2 Conversion-focused sections
@@ -322,7 +322,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 - [x] **Dashboard home:** KPI cards with sparklines + the activation widget ([F1.2](#f12-persistent-activation-checklist-cant-be-ignored)); recent activity feed
 - [x] **Equipment list:** card/table toggle, photo thumbnails, status badges, inline search & filters, skeleton loading
-- [/] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges + new-inquiry highlight shipped; calendar polish pending
+- [x] **Bookings:** clear status pipeline (`reserved → payment → dispatched → returned → inspected → closed`, matching [bookings.js](../api/src/routes/bookings.js)) with color-coded, labeled badges; calendar view polish; new-inquiry highlight — labeled badges, new-inquiry highlight, and calendar polish (today highlight, out-of-month dimming, weekday header, "+N more" overflow, animated detail drawer) shipped
 - [x] **Analytics:** clean charts using the DSD palette; tabular-nums for figures ([dsd §3.3](./dsd-arkived.md#33-typography-rules))
 - [/] **Team / Customers:** consistent table + detail patterns from the F0 kit — empty states adopted; full detail-pattern pass pending
 - [x] **Marketing site (`/`, login, signup):** modern hero, social proof, and a signup flow that hands straight into the [welcome wizard](#f11-full-screen-welcome-wizard-post-signup)

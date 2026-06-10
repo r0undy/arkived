@@ -38,12 +38,14 @@ export default function BrandingPage() {
   const [logoPickerOpen, setLogoPickerOpen] = useState(false);
   const [applyingPreset, setApplyingPreset] = useState(false);
   const [device, setDevice] = useState('desktop');
+  const [slug, setSlug] = useState('');
 
   const loadBranding = async () => {
     setLoading(true);
     try {
       const result = await api.tenant();
       const tenant = result.tenant || {};
+      setSlug(tenant.slug || '');
       const next = {
         name: tenant.name || '',
         logo_url: tenant.logo_url || '',
@@ -148,6 +150,10 @@ export default function BrandingPage() {
   const metaPreview =
     form.meta_description ||
     `Browse equipment rentals from ${form.name || 'your shop'} and send a booking inquiry in minutes.`;
+
+  // Mirror the storefront Meta OG fallback chain: og_image → banner → logo.
+  const ogImage = form.banner_image_url || form.logo_url || '';
+  const storefrontHost = slug ? `${slug}.arkived.dev` : 'your-shop.arkived.dev';
 
   return (
     <div className="space-y-6">
@@ -292,6 +298,30 @@ export default function BrandingPage() {
                     <span className="text-sm text-neutral-300">{form.name || 'Your shop'} — browser tab preview</span>
                   </div>
                   <p className="mt-2 text-xs text-neutral-500">The favicon is generated from your logo. Upload a logo or pick one from the gallery to set it.</p>
+                </div>
+
+                <div>
+                  <p className="mb-1.5 text-sm font-medium text-neutral-200">Social share preview</p>
+                  <div className="overflow-hidden rounded-lg border border-neutral-750 bg-neutral-950">
+                    <div className="aspect-1200/630 w-full bg-neutral-900">
+                      {ogImage ? (
+                        <img src={ogImage} alt="Social card preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <div
+                          className="flex h-full w-full items-center justify-center"
+                          style={{ backgroundColor: form.accent_color, color: accentText }}
+                        >
+                          <span className="text-lg font-bold">{form.name || 'Your shop'}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="border-t border-neutral-750 px-3 py-2">
+                      <p className="text-[11px] uppercase tracking-wide text-neutral-500">{storefrontHost}</p>
+                      <p className="truncate text-sm font-semibold text-neutral-100">{form.name || 'Your shop'}</p>
+                      <p className="mt-0.5 line-clamp-2 text-xs text-neutral-400">{metaPreview}</p>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-neutral-500">How your link looks when shared on social media. Uses your banner, then logo, as the image.</p>
                 </div>
               </div>
             </Card>

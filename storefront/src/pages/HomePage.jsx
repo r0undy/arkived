@@ -1,8 +1,43 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, CalendarCheck, Truck, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch, Star, ThumbsUp, Headset } from 'lucide-react';
 import Meta from '../components/Meta';
 import EquipmentCard from '../components/EquipmentCard';
 import { LocalBusinessJsonLd } from '../components/StructuredData';
+
+/** Subtle scroll parallax for the hero background, disabled under reduced-motion. */
+function useParallax() {
+  const ref = useRef(null);
+  const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        const el = ref.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        // Only animate while the hero is near the viewport.
+        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
+        setOffset(rect.top * -0.15);
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return { ref, offset };
+}
 
 const HOW_IT_WORKS = [
   { icon: Search, title: 'Browse', body: 'Explore the catalog and find the gear you need.' },
@@ -26,6 +61,7 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
   const categories = Array.from(new Set(available.map((item) => item.category).filter(Boolean))).slice(0, 6);
   const featured = available.slice(0, 6);
   const heroImage = tenant.banner_image_url;
+  const parallax = useParallax();
 
   return (
     <>
@@ -38,16 +74,24 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
         ) : null}
 
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl">
+        <section ref={parallax.ref} className="relative overflow-hidden rounded-3xl">
+          {heroImage ? (
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 -top-16 -bottom-16 will-change-transform"
+              style={{
+                backgroundImage: `url(${heroImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                transform: `translate3d(0, ${parallax.offset}px, 0)`
+              }}
+            />
+          ) : null}
           <div
             className="relative flex min-h-105 flex-col justify-center px-6 py-14 sm:px-10 md:min-h-120 md:px-14"
             style={
               heroImage
-                ? {
-                    backgroundImage: `linear-gradient(to top, rgba(15,23,42,0.85), rgba(15,23,42,0.35)), url(${heroImage})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center'
-                  }
+                ? { background: 'linear-gradient(to top, rgba(15,23,42,0.85), rgba(15,23,42,0.35))' }
                 : { background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))' }
             }
           >
