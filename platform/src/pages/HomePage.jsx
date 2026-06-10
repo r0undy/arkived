@@ -99,12 +99,12 @@ const STORY = [
 
 const TEAM = [
   { name: 'Rhandie J. Sales Jr.', role: 'Full-stack DevOps & Cloud Engineer', tone: 'bg-linear-to-br from-brand-500 to-info-500' },
-  { name: 'Donna Reymatias', role: 'Team Member', tone: 'bg-linear-to-br from-info-500 to-brand-600' },
-  { name: 'Emmanuel Oaing', role: 'Team Member', tone: 'bg-linear-to-br from-success-500 to-info-500' },
-  { name: 'Kerby Correa', role: 'Team Member', tone: 'bg-linear-to-br from-warning-500 to-danger-500' },
-  { name: 'Nicholas Jose', role: 'Team Member', tone: 'bg-linear-to-br from-danger-500 to-brand-500' },
-  { name: 'Samantha Paquibot', role: 'Team Member', tone: 'bg-linear-to-br from-brand-600 to-success-500' },
-  { name: 'Akisha Lei de Castro', role: 'Team Member', tone: 'bg-linear-to-br from-info-500 to-success-500' }
+  { name: 'Donna Reymatias', role: 'Quality Assurance & Researcher', tone: 'bg-linear-to-br from-info-500 to-brand-600' },
+  { name: 'Emmanuel Oaing', role: 'Quality Assurance & Researcher', tone: 'bg-linear-to-br from-success-500 to-info-500' },
+  { name: 'Kerby Correa', role: 'Quality Assurance & Researcher', tone: 'bg-linear-to-br from-warning-500 to-danger-500' },
+  { name: 'Nicholas Jose', role: 'Quality Assurance & Researcher', tone: 'bg-linear-to-br from-danger-500 to-brand-500' },
+  { name: 'Samantha Paquibot', role: 'Quality Assurance & Researcher', tone: 'bg-linear-to-br from-brand-600 to-success-500' },
+  { name: 'Akisha Lei de Castro', role: 'Quality Assurance & Researcher', tone: 'bg-linear-to-br from-info-500 to-success-500' }
 ];
 
 function ShopMark({ partner, className = '' }) {
