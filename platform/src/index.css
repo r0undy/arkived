@@ -90,6 +90,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+@keyframes confettiFall {
+  0% {
+    opacity: 1;
+    transform: translateY(-10vh) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(60vh) rotate(540deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

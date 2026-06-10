@@ -7,4 +7,6 @@ export { Skeleton, SkeletonText, SkeletonCard } from './Skeleton';
 export { default as EmptyState } from './EmptyState';
 export { default as ProgressRing } from './ProgressRing';
 export { default as Switch } from './Switch';
+export { default as Tooltip } from './Tooltip';
+export { default as Tabs } from './Tabs';
 export { ToastProvider, useToast } from './Toast';

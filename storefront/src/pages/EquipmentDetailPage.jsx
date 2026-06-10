@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Link2, Check, X } from 'lucide-react';
 import { storefrontApi } from '../lib/api';
 import Meta from '../components/Meta';
+import { ProductJsonLd } from '../components/StructuredData';
+import { recordRecentlyViewed, getRecentlyViewed } from '../lib/recentlyViewed';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const toYmd = (value) => new Date(value).toISOString().slice(0, 10);
@@ -42,10 +44,37 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
     message: ''
   });
   const [status, setStatus] = useState({ loading: false, error: '', success: '' });
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [recent, setRecent] = useState([]);
 
   useEffect(() => {
     setActiveImage(item.images?.[0]?.storage_url || '');
   }, [item.id, item.images]);
+
+  useEffect(() => {
+    recordRecentlyViewed(tenant?.slug, item);
+    setRecent(getRecentlyViewed(tenant?.slug, item.id).slice(0, 4));
+  }, [tenant?.slug, item.id, item]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape') setLightboxOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxOpen]);
+
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard may be unavailable; ignore.
+    }
+  };
 
   useEffect(() => {
     const run = async () => {
@@ -134,20 +163,41 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
   return (
     <>
       <Meta tenant={tenant} title={title} description={description} path={item?.id ? `/catalog/${item.id}` : '/catalog'} image={item?.images?.[0]?.storage_url} />
+      <ProductJsonLd tenant={tenant} item={item} />
 
-      <div className="space-y-6">
+      <div className="space-y-6 pb-20 md:pb-0">
         <article className="rounded-xl border border-slate-200 bg-white p-6">
-          <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">{item.name}</h1>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-wide text-slate-500">{item.category}</p>
+              <h1 className="mt-2 text-3xl font-bold tracking-tight">{item.name}</h1>
+            </div>
+            <button
+              type="button"
+              onClick={copyLink}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              aria-label="Copy link to this item"
+            >
+              {copied ? <Check className="h-4 w-4 text-emerald-600" aria-hidden="true" /> : <Link2 className="h-4 w-4" aria-hidden="true" />}
+              {copied ? 'Copied' : 'Share'}
+            </button>
+          </div>
 
           {(item.images?.length || 0) > 0 ? (
             <div className="mt-4">
-              <img
-                alt={item.name}
-                className="h-64 w-full rounded-lg border border-slate-200 object-cover"
-                loading="eager"
-                src={activeImage || item.images[0].storage_url}
-              />
+              <button
+                type="button"
+                onClick={() => setLightboxOpen(true)}
+                className="block w-full cursor-zoom-in"
+                aria-label="View larger image"
+              >
+                <img
+                  alt={item.name}
+                  className="h-64 w-full rounded-lg border border-slate-200 object-cover"
+                  loading="eager"
+                  src={activeImage || item.images[0].storage_url}
+                />
+              </button>
               <div className="mt-2 flex flex-wrap gap-2">
                 {item.images.map((image) => (
                   <button key={image.id} onClick={() => setActiveImage(image.storage_url)} type="button">
@@ -185,7 +235,7 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
           </div>
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <section id="inquiry" className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="text-xl font-semibold tracking-tight">Inquiry / Booking Request</h2>
           {item.status === 'maintenance' || item.status === 'archived' ? (
             <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
@@ -258,7 +308,65 @@ export default function EquipmentDetailPage({ item, tenant, equipment = [] }) {
             {related.length === 0 ? <p className="text-sm text-slate-600">No related items available.</p> : null}
           </div>
         </section>
+
+        {recent.length > 0 ? (
+          <section className="rounded-xl border border-slate-200 bg-white p-6">
+            <h2 className="text-xl font-semibold tracking-tight">Recently viewed</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {recent.map((entry) => (
+                <Link key={entry.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 hover:bg-slate-100" to={`/catalog/${entry.id}`}>
+                  <p className="text-xs uppercase tracking-wide text-slate-500">{entry.category}</p>
+                  <p className="mt-1 font-semibold">{entry.name}</p>
+                  <p className="mt-1 text-sm text-slate-600">PHP {Number(entry.daily_rate || 0).toLocaleString()} / day</p>
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
+
+      {/* Sticky mobile inquiry CTA (F5.6) */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 backdrop-blur md:hidden">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-xs text-slate-500">From</p>
+            <p className="text-base font-bold text-slate-900">PHP {Number(item.daily_rate).toLocaleString()}<span className="text-xs font-normal text-slate-500">/day</span></p>
+          </div>
+          <a
+            href="#inquiry"
+            className="inline-flex flex-1 items-center justify-center rounded-lg px-5 py-3 text-sm font-semibold"
+            style={{ backgroundColor: 'var(--color-primary)', color: 'var(--color-primary-foreground)' }}
+          >
+            Request a quote
+          </a>
+        </div>
+      </div>
+
+      {/* Lightbox (F4.2 / F5.3) */}
+      {lightboxOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${item.name} image`}
+          onClick={() => setLightboxOpen(false)}
+        >
+          <button
+            type="button"
+            className="absolute right-4 top-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" aria-hidden="true" />
+          </button>
+          <img
+            alt={item.name}
+            className="max-h-[85vh] max-w-full rounded-lg object-contain"
+            src={activeImage || item.images?.[0]?.storage_url}
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      ) : null}
     </>
   );
 }

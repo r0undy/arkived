@@ -1,8 +1,18 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
-import { Mail, Phone, MapPin } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageCircle } from 'lucide-react';
 import PoweredByArkivedBadge from '../components/PoweredByArkivedBadge';
 
+const whatsappLink = (phone) => {
+  const digits = String(phone || '').replace(/[^\d]/g, '');
+  return digits ? `https://wa.me/${digits}` : '';
+};
+
+const mapsLink = (address) =>
+  address ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}` : '';
+
 export default function StorefrontLayout({ tenant }) {
+  const waLink = whatsappLink(tenant.contact_phone);
+  const mapLink = mapsLink(tenant.contact_address);
   return (
     <div className="flex min-h-screen flex-col text-slate-900">
       <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
@@ -78,12 +88,28 @@ export default function StorefrontLayout({ tenant }) {
                   <li className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-slate-400" aria-hidden="true" />
                     <a href={`tel:${tenant.contact_phone}`} className="hover:text-slate-900">{tenant.contact_phone}</a>
+                    {waLink ? (
+                      <a
+                        href={waLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-full border border-slate-200 px-2 py-0.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50"
+                      >
+                        <MessageCircle className="h-3 w-3" aria-hidden="true" /> WhatsApp
+                      </a>
+                    ) : null}
                   </li>
                 ) : null}
                 {tenant.contact_address ? (
                   <li className="flex items-center gap-2">
                     <MapPin className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                    <span>{tenant.contact_address}</span>
+                    {mapLink ? (
+                      <a href={mapLink} target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 hover:underline">
+                        {tenant.contact_address}
+                      </a>
+                    ) : (
+                      <span>{tenant.contact_address}</span>
+                    )}
                   </li>
                 ) : null}
                 {!tenant.contact_email && !tenant.contact_phone && !tenant.contact_address ? (

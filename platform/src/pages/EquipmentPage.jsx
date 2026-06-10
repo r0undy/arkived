@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Package } from 'lucide-react';
+import { Package, LayoutGrid, List } from 'lucide-react';
 import { api } from '../lib/api';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
+import { SkeletonCard } from '../components/ui/Skeleton';
 
 const PAGE_SIZE = 6;
 
@@ -34,8 +35,11 @@ export default function EquipmentPage() {
   const [filters, setFilters] = useState({ q: '', category: '', status: '' });
   const [page, setPage] = useState(1);
   const [imageById, setImageById] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('card');
 
   const loadItems = async () => {
+    setLoading(true);
     try {
       const result = await api.equipment({
         q: filters.q || undefined,
@@ -46,6 +50,8 @@ export default function EquipmentPage() {
       setPage(1);
     } catch (_error) {
       setItems([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -197,35 +203,43 @@ export default function EquipmentPage() {
         </form>
       ) : null}
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {pageItems.map((item) => (
-          <article key={item.id} className="rounded-lg border border-neutral-750 bg-neutral-800 p-4">
-            <div className="h-32 overflow-hidden rounded-md bg-neutral-900">
-              {imageById[item.id] ? (
-                <img alt={item.name} className="h-full w-full object-cover" src={imageById[item.id]} />
-              ) : (
-                <div className="flex h-full items-center justify-center text-xs text-neutral-500">No image</div>
-              )}
-            </div>
-            <p className="mt-3 text-xs uppercase tracking-wide text-neutral-400">{item.category}</p>
-            <h2 className="mt-1 text-lg font-semibold">{item.name}</h2>
-            <p className="mt-2 text-sm">PHP {Number(item.daily_rate).toLocaleString()} / day</p>
-            <div className="mt-2 flex items-center justify-between">
-              <Badge variant={STATUS_VARIANT[item.status] || 'neutral'} icon={false} className="capitalize">
-                {item.status}
-              </Badge>
-              <Link
-                className="rounded border border-neutral-750 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
-                to={`/dashboard/equipment/${item.id}`}
-              >
-                Open detail
-              </Link>
-            </div>
-          </article>
-        ))}
+      <div className="mt-6 flex items-center justify-between">
+        <p className="text-sm text-neutral-400">
+          {loading ? 'Loading inventory…' : `${items.length} ${items.length === 1 ? 'item' : 'items'}`}
+        </p>
+        <div className="inline-flex rounded-md border border-neutral-750 bg-neutral-800 p-0.5">
+          <button
+            type="button"
+            aria-label="Card view"
+            aria-pressed={view === 'card'}
+            onClick={() => setView('card')}
+            className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition ${
+              view === 'card' ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" /> Cards
+          </button>
+          <button
+            type="button"
+            aria-label="Table view"
+            aria-pressed={view === 'table'}
+            onClick={() => setView('table')}
+            className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-medium transition ${
+              view === 'table' ? 'bg-neutral-700 text-white' : 'text-neutral-400 hover:text-neutral-200'
+            }`}
+          >
+            <List className="h-3.5 w-3.5" /> Table
+          </button>
+        </div>
       </div>
 
-      {items.length === 0 ? (
+      {loading ? (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: PAGE_SIZE }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      ) : items.length === 0 ? (
         <EmptyState
           className="mt-6"
           icon={Package}
@@ -245,27 +259,106 @@ export default function EquipmentPage() {
             </button>
           }
         />
-      ) : null}
+      ) : view === 'card' ? (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {pageItems.map((item) => (
+            <article key={item.id} className="rounded-lg border border-neutral-750 bg-neutral-800 p-4">
+              <div className="h-32 overflow-hidden rounded-md bg-neutral-900">
+                {imageById[item.id] ? (
+                  <img alt={item.name} className="h-full w-full object-cover" src={imageById[item.id]} />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-xs text-neutral-500">No image</div>
+                )}
+              </div>
+              <p className="mt-3 text-xs uppercase tracking-wide text-neutral-400">{item.category}</p>
+              <h2 className="mt-1 text-lg font-semibold">{item.name}</h2>
+              <p className="mt-2 text-sm">PHP {Number(item.daily_rate).toLocaleString()} / day</p>
+              <div className="mt-2 flex items-center justify-between">
+                <Badge variant={STATUS_VARIANT[item.status] || 'neutral'} icon={false} className="capitalize">
+                  {item.status}
+                </Badge>
+                <Link
+                  className="rounded border border-neutral-750 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
+                  to={`/dashboard/equipment/${item.id}`}
+                >
+                  Open detail
+                </Link>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-4 overflow-x-auto rounded-lg border border-neutral-750">
+          <table className="w-full min-w-150 text-left text-sm">
+            <thead className="bg-neutral-800 text-xs uppercase tracking-wide text-neutral-400">
+              <tr>
+                <th className="px-4 py-3 font-medium">Item</th>
+                <th className="px-4 py-3 font-medium">Category</th>
+                <th className="px-4 py-3 font-medium">Daily rate</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-800">
+              {pageItems.map((item) => (
+                <tr key={item.id} className="bg-neutral-900 hover:bg-neutral-800/60">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-neutral-800">
+                        {imageById[item.id] ? (
+                          <img alt={item.name} className="h-full w-full object-cover" src={imageById[item.id]} />
+                        ) : (
+                          <div className="flex h-full items-center justify-center text-neutral-600">
+                            <Package className="h-4 w-4" />
+                          </div>
+                        )}
+                      </div>
+                      <span className="font-medium text-neutral-100">{item.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-neutral-400">{item.category}</td>
+                  <td className="px-4 py-3">PHP {Number(item.daily_rate).toLocaleString()}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant={STATUS_VARIANT[item.status] || 'neutral'} icon={false} className="capitalize">
+                      {item.status}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      className="rounded border border-neutral-750 px-3 py-1 text-xs text-neutral-200 hover:bg-neutral-700"
+                      to={`/dashboard/equipment/${item.id}`}
+                    >
+                      Open detail
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      <div className="mt-6 flex items-center justify-end gap-2">
-        <button
-          className="rounded border border-neutral-750 px-3 py-1 text-sm disabled:opacity-50"
-          disabled={page <= 1}
-          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-          type="button"
-        >
-          Prev
-        </button>
-        <p className="text-sm text-neutral-400">Page {page} of {totalPages}</p>
-        <button
-          className="rounded border border-neutral-750 px-3 py-1 text-sm disabled:opacity-50"
-          disabled={page >= totalPages}
-          onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-          type="button"
-        >
-          Next
-        </button>
-      </div>
+      {!loading && items.length > 0 ? (
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            className="rounded border border-neutral-750 px-3 py-1 text-sm disabled:opacity-50"
+            disabled={page <= 1}
+            onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+            type="button"
+          >
+            Prev
+          </button>
+          <p className="text-sm text-neutral-400">Page {page} of {totalPages}</p>
+          <button
+            className="rounded border border-neutral-750 px-3 py-1 text-sm disabled:opacity-50"
+            disabled={page >= totalPages}
+            onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+            type="button"
+          >
+            Next
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

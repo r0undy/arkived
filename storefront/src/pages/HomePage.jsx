@@ -1,12 +1,19 @@
 import { Link } from 'react-router-dom';
-import { Search, CalendarCheck, Truck, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch } from 'lucide-react';
+import { Search, CalendarCheck, Truck, ShieldCheck, Clock, MapPin, ArrowRight, PackageSearch, Star, ThumbsUp, Headset } from 'lucide-react';
 import Meta from '../components/Meta';
 import EquipmentCard from '../components/EquipmentCard';
+import { LocalBusinessJsonLd } from '../components/StructuredData';
 
 const HOW_IT_WORKS = [
   { icon: Search, title: 'Browse', body: 'Explore the catalog and find the gear you need.' },
   { icon: CalendarCheck, title: 'Request', body: 'Pick your dates and send a quick booking inquiry.' },
   { icon: Truck, title: 'Pick up', body: 'We confirm availability and get you ready to go.' }
+];
+
+const REASONS = [
+  { icon: ShieldCheck, title: 'Quality you can trust', body: 'Every item is inspected and maintained between rentals.' },
+  { icon: Headset, title: 'Real, responsive support', body: 'Questions before you book? We reply fast and clearly.' },
+  { icon: ThumbsUp, title: 'Simple, fair pricing', body: 'Transparent daily rates and deposits — no surprises.' }
 ];
 
 export default function HomePage({ tenant, equipment = [], catalogError = '' }) {
@@ -23,6 +30,7 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
   return (
     <>
       <Meta tenant={tenant} title={title} description={description} path="/" />
+      <LocalBusinessJsonLd tenant={tenant} />
 
       <div className="space-y-12">
         {catalogError ? (
@@ -139,6 +147,33 @@ export default function HomePage({ tenant, equipment = [], catalogError = '' }) 
                   <p className="mt-4 text-sm font-semibold uppercase tracking-wide text-white/50">Step {index + 1}</p>
                   <h3 className="mt-1 text-lg font-semibold text-white">{step.title}</h3>
                   <p className="mt-1 text-sm text-white/70">{step.body}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Why rent with us (social proof — graceful value-prop when no testimonials) */}
+        <section>
+          <div className="flex items-center justify-center gap-1 text-amber-400" aria-hidden="true">
+            {[0, 1, 2, 3, 4].map((i) => (
+              <Star key={i} className="h-5 w-5 fill-current" />
+            ))}
+          </div>
+          <h2 className="mt-3 text-center text-2xl font-bold tracking-tight text-slate-900">Why customers choose {tenant.name}</h2>
+          <div className="mt-8 grid gap-5 sm:grid-cols-3">
+            {REASONS.map((reason) => {
+              const Icon = reason.icon;
+              return (
+                <div key={reason.title} className="rounded-2xl border border-slate-200 bg-white p-6 text-center">
+                  <div
+                    className="mx-auto flex h-12 w-12 items-center justify-center rounded-full text-white"
+                    style={{ backgroundColor: 'var(--color-primary)' }}
+                  >
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{reason.title}</h3>
+                  <p className="mt-1 text-sm text-slate-600">{reason.body}</p>
                 </div>
               );
             })}

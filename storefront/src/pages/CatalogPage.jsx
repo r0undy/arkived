@@ -1,22 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Search, PackageSearch } from 'lucide-react';
 import Meta from '../components/Meta';
 import EquipmentCard from '../components/EquipmentCard';
 
 export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
-  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const title = tenant?.name ? `${tenant.name} Catalog` : 'Catalog';
   const description = tenant?.name
     ? `Explore rentable equipment from ${tenant.name}.`
     : 'Explore available rental equipment.';
-  const initialCategory = useMemo(
-    () => new URLSearchParams(location.search).get('category') || '',
-    [location.search]
-  );
-  const [q, setQ] = useState('');
-  const [category, setCategory] = useState(initialCategory);
-  const [page, setPage] = useState(1);
+  const urlCategory = searchParams.get('category') || '';
+  const urlQuery = searchParams.get('q') || '';
+  const urlPage = Math.max(1, Number(searchParams.get('page')) || 1);
+  const [q, setQ] = useState(urlQuery);
+  const [category, setCategory] = useState(urlCategory);
+  const [page, setPage] = useState(urlPage);
   const pageSize = 9;
 
   const categories = useMemo(
@@ -36,10 +35,19 @@ export default function CatalogPage({ equipment, tenant, catalogError = '' }) {
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize);
 
+  // Keep the URL in sync with the active filters so links are shareable.
   useEffect(() => {
-    setCategory(initialCategory);
-    setPage(1);
-  }, [initialCategory]);
+    const next = {};
+    if (q) next.q = q;
+    if (category) next.category = category;
+    if (page > 1) next.page = String(page);
+    setSearchParams(next, { replace: true });
+  }, [q, category, page, setSearchParams]);
+
+  // Adopt external URL changes (back/forward, shared link) into local state.
+  useEffect(() => {
+    setCategory(urlCategory);
+  }, [urlCategory]);
 
   const setCategoryFilter = (value) => {
     setCategory(value);
