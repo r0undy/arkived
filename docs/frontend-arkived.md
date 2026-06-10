@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.3.0
+> **Version:** 1.4.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -24,8 +24,8 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 
 | Phase | Status | Notes |
 |---|---|---|
-| F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark. `Tooltip`/`Tabs` still pending. |
-| F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget, empty states, confetti + toast at 100%. Floating launcher pending. |
+| F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark, `Tooltip` + `Tabs` shipped. |
+| F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget + floating launcher, empty states, confetti + toast at 100%. |
 | F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon. Social-card preview + reset pending. |
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
@@ -120,7 +120,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] `Toast` — bottom-right, auto-dismiss, slide-in/slide-out (success/error/info)
 - [x] `Skeleton` — shimmer loader primitives (text line, card, avatar, image) to replace spinners
 - [x] `EmptyState` — icon + headline + body + primary action, per [dsd §9.2](./dsd-arkived.md#92-ui-copy-conventions)
-- [/] `Tooltip`, `Tabs`, `Stepper`, `ProgressRing`, `Switch` (toggle) — `ProgressRing`, `Switch`, and an inline `Stepper` (welcome wizard) shipped; `Tooltip`/`Tabs` pending
+- [x] `Tooltip`, `Tabs`, `Stepper`, `ProgressRing`, `Switch` (toggle) — `Tooltip`, `Tabs`, `ProgressRing`, `Switch`, and an inline `Stepper` (welcome wizard) all shipped
 
 ### F0.2 Layout polish
 
@@ -153,7 +153,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F1.2 Persistent activation checklist (can't be ignored)
 
-- [/] A docked **"Get started" widget** pinned to the dashboard (top of `DashboardHomePage` + a floating launcher button) showing a `ProgressRing` with % complete — docked widget shipped; floating launcher pending
+- [x] A docked **"Get started" widget** pinned to the dashboard (top of `DashboardHomePage` + a floating launcher button) showing a `ProgressRing` with % complete — docked widget + floating launcher (popover checklist, hides at 100%) shipped
 - [x] Checklist items with live completion detection:
   - [x] Upload your logo
   - [x] Choose your accent color
@@ -310,7 +310,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [ ] **"Request a quote" multi-item cart:** let a customer add several items, pick one date range, and submit a single inquiry covering all of them
 - [x] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
 - [x] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
-- [ ] **Search & filter persistence** via URL query params (already partially supported) so links are shareable
+- [x] **Search & filter persistence** via URL query params (already partially supported) so links are shareable
 - [ ] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator
 - [x] **Recently viewed** strip (localStorage) to aid return browsing
 

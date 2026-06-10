@@ -18,6 +18,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useNewInquiries } from '../hooks/useNewInquiries';
 import { ArkivedMark } from '../components/Wordmark';
+import ActivationLauncher from '../components/ActivationLauncher';
 
 const navItems = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard, end: true },
@@ -196,6 +197,7 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      <ActivationLauncher />
     </div>
   );
 }
