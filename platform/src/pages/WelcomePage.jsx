@@ -5,10 +5,12 @@ import {
   ArrowRight,
   Check,
   ExternalLink,
+  ImagePlus,
   Loader2,
   PartyPopper,
   Sparkles,
-  Store
+  Store,
+  X
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
@@ -19,11 +21,34 @@ import { contrastRatio, darken } from '../lib/colors';
 import { dismissWelcome, GO_LIVE_STEP } from '../lib/onboarding';
 import { Input, Textarea } from '../components/ui';
 import Button from '../components/ui/Button';
+import BusinessHoursEditor from '../components/BusinessHoursEditor';
 
 const SWATCHES = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#0f172a'];
 const STOREFRONT_DOMAIN = import.meta.env.VITE_STOREFRONT_DOMAIN || 'arkived.dev';
 
 const STEPS = ['Your shop', 'Pick a look', 'First item', 'Go live'];
+
+// A friendly weekday-default so owners start from something sensible.
+const DEFAULT_BUSINESS_HOURS = {
+  mon: { open: '09:00', close: '17:00' },
+  tue: { open: '09:00', close: '17:00' },
+  wed: { open: '09:00', close: '17:00' },
+  thu: { open: '09:00', close: '17:00' },
+  fri: { open: '09:00', close: '17:00' },
+  sat: null,
+  sun: null
+};
+
+const fileToBase64 = (file) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const value = String(reader.result || '');
+      resolve(value.includes(',') ? value.split(',')[1] : value);
+    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
 
 export default function WelcomePage() {
   const auth = useAuth();
@@ -35,9 +60,11 @@ export default function WelcomePage() {
   const [error, setError] = useState('');
 
   const [shopName, setShopName] = useState('');
+  const [businessHours, setBusinessHours] = useState(DEFAULT_BUSINESS_HOURS);
   const [accent, setAccent] = useState('#6366f1');
   const [presetId, setPresetId] = useState('box');
   const [item, setItem] = useState({ name: '', category: '', daily_rate: '', description: '' });
+  const [itemImages, setItemImages] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -47,6 +74,9 @@ export default function WelcomePage() {
         const t = result.tenant;
         setTenant(t);
         setShopName(t?.name || '');
+        if (t?.business_hours && Object.keys(t.business_hours).length > 0) {
+          setBusinessHours(t.business_hours);
+        }
         if (/^#[0-9a-f]{6}$/i.test(t?.accent_color || '')) setAccent(t.accent_color);
       })
       .catch(() => {});
@@ -76,7 +106,7 @@ export default function WelcomePage() {
     }
     setSaving(true);
     try {
-      const result = await api.updateBranding({ name: shopName.trim() });
+      const result = await api.updateBranding({ name: shopName.trim(), business_hours: businessHours });
       setTenant(result.tenant);
       goNext();
     } catch (err) {
@@ -128,12 +158,28 @@ export default function WelcomePage() {
     }
     setSaving(true);
     try {
-      await api.createEquipment({
+      const created = await api.createEquipment({
         name: item.name.trim(),
         category: item.category.trim(),
         daily_rate: rate,
         description: item.description.trim()
       });
+
+      const newId = created?.data?.id;
+      if (newId && itemImages.length > 0) {
+        for (let index = 0; index < itemImages.length; index += 1) {
+          const file = itemImages[index];
+          const content_base64 = await fileToBase64(file);
+          await api.uploadEquipmentImage(newId, {
+            file_name: file.name,
+            mime_type: file.type || 'image/png',
+            content_base64,
+            is_primary: index === 0,
+            display_order: index
+          });
+        }
+      }
+
       try {
         await api.updateBranding({
           onboarding_completed_steps: Array.from(
@@ -236,6 +282,14 @@ export default function WelcomePage() {
             <div className="mt-4 rounded-lg border border-neutral-750 bg-neutral-950 px-4 py-3">
               <p className="text-xs text-neutral-500">Your storefront address</p>
               <p className="mt-0.5 font-mono text-sm text-brand-400">{storefrontUrl}</p>
+            </div>
+
+            <div className="mt-6">
+              <p className="text-sm font-medium text-neutral-200">Opening hours</p>
+              <p className="mt-1 text-xs text-neutral-400">Powers the storefront “Open now” indicator. You can change these later.</p>
+              <div className="mt-3">
+                <BusinessHoursEditor value={businessHours} onChange={setBusinessHours} />
+              </div>
             </div>
 
             <div className="mt-8 flex justify-end">
@@ -374,6 +428,44 @@ export default function WelcomePage() {
                 onChange={(event) => setItem((prev) => ({ ...prev, description: event.target.value }))}
                 placeholder="What is it, and what's it good for?"
               />
+
+              <div>
+                <p className="mb-1.5 text-sm font-medium text-neutral-200">Photos</p>
+                <div className="flex flex-wrap gap-3">
+                  {itemImages.map((file, index) => (
+                    <div key={`${file.name}-${index}`} className="group relative h-20 w-20 overflow-hidden rounded-lg border border-neutral-750 bg-neutral-950">
+                      <img src={URL.createObjectURL(file)} alt="" className="h-full w-full object-cover" />
+                      {index === 0 ? (
+                        <span className="absolute inset-x-0 bottom-0 bg-brand-500/90 py-0.5 text-center text-[10px] font-semibold text-white">Cover</span>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() => setItemImages((prev) => prev.filter((_, i) => i !== index))}
+                        className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-neutral-950/80 text-neutral-300 transition hover:bg-danger-500 hover:text-white"
+                        aria-label={`Remove image ${index + 1}`}
+                      >
+                        <X className="h-3 w-3" aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                  <label className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-neutral-750 text-neutral-400 transition hover:border-brand-500 hover:text-brand-300">
+                    <ImagePlus className="h-5 w-5" aria-hidden="true" />
+                    <span className="text-[10px] font-medium">Add</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="sr-only"
+                      onChange={(event) => {
+                        const files = Array.from(event.target.files || []);
+                        event.target.value = '';
+                        setItemImages((prev) => [...prev, ...files]);
+                      }}
+                    />
+                  </label>
+                </div>
+                <p className="mt-1.5 text-xs text-neutral-500">Optional. Uploaded to your storage — the first photo becomes the cover.</p>
+              </div>
             </div>
 
             <div className="mt-8 flex items-center justify-between">
