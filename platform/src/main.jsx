@@ -15,6 +15,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import PlatformOwnerRoute from './components/PlatformOwnerRoute';
 import AppErrorBoundary from './components/AppErrorBoundary';
 import { ToastProvider } from './components/ui';
+import Wordmark from './components/Wordmark';
 
 /**
  * Wrap a dynamic import so a failed chunk load — which happens when a new
@@ -65,10 +66,18 @@ const AdminPage = lazyWithReload(() => import('./pages/AdminPage'));
 const NotFoundPage = lazyWithReload(() => import('./pages/NotFoundPage'));
 
 const routeElement = (Component) => (
-  <Suspense fallback={<div className="p-6 text-sm text-neutral-300">Loading page...</div>}>
+  <Suspense fallback={<RouteLoading />}>
     <Component />
   </Suspense>
 );
+
+function RouteLoading() {
+  return (
+    <div className="flex min-h-[60vh] items-center justify-center">
+      <Wordmark className="motion-safe:animate-pulse" markClassName="h-8 w-8" />
+    </div>
+  );
+}
 
 function RouteError() {
   const error = useRouteError();
