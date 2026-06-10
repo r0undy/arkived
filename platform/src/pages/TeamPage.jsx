@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import { useAuth } from '../hooks/useAuth';
 import Badge from '../components/ui/Badge';
 
@@ -90,8 +91,7 @@ export default function TeamPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-      <p className="mt-2 text-sm text-neutral-400">Manage tenant staff members and admin roles.</p>
+      <PageHeader title="Team" subtitle="Manage tenant staff members and admin roles." />
 
       <form className="mt-6 grid gap-3 rounded-lg border border-neutral-750 bg-neutral-800 p-4 md:grid-cols-3" onSubmit={submitInvite}>
         <Field label="Email" type="email" value={invite.email} onChange={updateInvite('email')} required />

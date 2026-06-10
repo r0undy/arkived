@@ -1,7 +1,7 @@
 # Dashboard Redesign — Arkived
 
-> **Version:** 0.1.0
-> **Status:** Draft
+> **Version:** 0.2.0
+> **Status:** R1 (Shell) + R2 (PageHeader) landed
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
 > **References:** [frontend-arkived.md](./frontend-arkived.md) · [dsd-arkived.md](./dsd-arkived.md) · [prd-arkived.md](./prd-arkived.md)
@@ -45,13 +45,13 @@ A focused initiative to elevate the **operator dashboard** (App 1, authenticated
 
 **Target aesthetic:**
 
-- [ ] **Active state = pill + rail.** Active item gets a soft `bg-brand-500/12` fill, `text-brand-300`, and a 3px brand rail on the left edge (`absolute left-0 h-5 w-0.5 rounded-full bg-brand-500`) instead of a full solid block. Solid brand is reserved for buttons.
-- [ ] **Hover** lifts to `bg-neutral-800/70` with `text-neutral-50`; icon shifts from `neutral-400` → `neutral-200`.
-- [ ] **Grouped nav with quiet section labels.** Split into *Operations* (Overview, Equipment, Bookings, Calendar, Customers, Analytics) and *Settings* (Branding, Team) with an uppercase `text-[11px] tracking-[0.18em] text-neutral-500` label that hides when collapsed.
-- [ ] **Footer user block.** Move the avatar + email out of the top bar into a sidebar footer card: avatar, name/email, and a quiet "Sign out" with `LogOut` icon. Collapses to just the avatar.
-- [ ] **Workspace switcher header.** Replace the bare wordmark with a row showing the tenant logo/monogram + shop name + slug (`{slug}.arkived.dev` in `text-xs text-neutral-500`). Sets context immediately.
-- [ ] **Smoother collapse.** Animate width via a `transition-[grid-template-columns] duration-200`; fade labels with `opacity` rather than hard unmount so it doesn't pop.
-- [ ] **Inquiry badge polish.** Keep the count pill but use `bg-danger-500/90` with a subtle ring; in collapsed mode the dot gets a gentle `motion-safe:animate-pulse`.
+- [x] **Active state = pill + rail.** Active item gets a soft `bg-brand-500/12` fill, `text-brand-300`, and a 3px brand rail on the left edge (`absolute left-0 h-5 w-0.5 rounded-full bg-brand-500`) instead of a full solid block. Solid brand is reserved for buttons.
+- [x] **Hover** lifts to `bg-neutral-800/70` with `text-neutral-50`; icon shifts from `neutral-400` → `neutral-200`.
+- [x] **Grouped nav with quiet section labels.** Split into *Operations* (Overview, Equipment, Bookings, Calendar, Customers, Analytics) and *Settings* (Branding, Team) with an uppercase `text-[11px] tracking-[0.18em] text-neutral-500` label that hides when collapsed.
+- [x] **Footer user block.** Move the avatar + email out of the top bar into a sidebar footer card: avatar, name/email, and a quiet "Sign out" with `LogOut` icon. Collapses to just the avatar.
+- [x] **Workspace switcher header.** Replace the bare wordmark with a row showing the tenant logo/monogram + shop name + slug (`{slug}.arkived.dev` in `text-xs text-neutral-500`). Sets context immediately.
+- [x] **Smoother collapse.** Animate width via a `transition-[grid-template-columns] duration-200`; fade labels with `opacity` rather than hard unmount so it doesn't pop.
+- [x] **Inquiry badge polish.** Keep the count pill but use `bg-danger-500/90` with a subtle ring; in collapsed mode the dot gets a gentle `motion-safe:animate-pulse`.
 
 ---
 
@@ -61,17 +61,17 @@ A focused initiative to elevate the **operator dashboard** (App 1, authenticated
 
 **Target:**
 
-- [ ] **Contextual breadcrumb / page title** on the left (driven by route), replacing the static tagline. e.g. `Dashboard / Bookings`.
+- [x] **Contextual breadcrumb / page title** on the left (driven by route), replacing the static tagline. e.g. `Dashboard / Bookings`.
 - [ ] **Global quick actions** on the right: a `+ New` menu (new equipment / booking / customer), and the new-inquiry bell with the live count (reuse `useNewInquiries`).
-- [ ] **Remove duplicate identity.** With the user block in the sidebar footer, the top bar drops the email; keep only what's contextual.
-- [ ] **Sticky + blur** stays, but tighten to `h-14`, border-bottom `neutral-750`, `bg-neutral-900/80 backdrop-blur`.
+- [x] **Remove duplicate identity.** With the user block in the sidebar footer, the top bar drops the email; keep only what's contextual.
+- [x] **Sticky + blur** stays, but tighten to `h-14`, border-bottom `neutral-750`, `bg-neutral-900/80 backdrop-blur`.
 
 ---
 
 ## 5. Page-Level Patterns
 
 ### 5.1 Shared `PageHeader`
-- [ ] Extract a `PageHeader` primitive: `title`, optional `subtitle`, optional `actions` slot. Used by every dashboard page for consistent top rhythm (`mb-6`, title `text-2xl font-bold tracking-tight`).
+- [x] Extract a `PageHeader` primitive: `title`, optional `subtitle`, optional `actions` slot. Used by every dashboard page for consistent top rhythm (`mb-6`, title `text-2xl font-bold tracking-tight`). Adopted on all 8 pages (Overview, Equipment, Bookings, Calendar, Customers, Analytics, Branding, Team).
 
 ### 5.2 KPI cards (Overview)
 - [ ] Standardize the stat card: label (`text-sm text-neutral-400`), value (`text-3xl font-bold tabular-nums`), optional `Sparkline`, optional delta chip (`+12%` in `success-500` / `danger-500`). Icon in a `rounded-xl bg-brand-500/10 text-brand-300` tile.
@@ -121,13 +121,13 @@ A focused initiative to elevate the **operator dashboard** (App 1, authenticated
 
 ## 9. Phased Plan
 
-| Phase | Scope | Exit criteria |
-|---|---|---|
-| **R1 — Shell** | Sidebar (grouping, active rail, user footer, workspace header), top bar (page title, `+ New`, bell) | Shell looks intentional; collapse animates; mobile drawer matches |
-| **R2 — Page rhythm** | `PageHeader` primitive + adopt on all 8 pages; standardized KPI cards | Every page opens with consistent header + spacing |
-| **R3 — Data surfaces** | Unified table style, badges, empty/error states across lists | One table language; no blank states |
-| **R4 — Detail + polish** | Detail-page two-column rails, component audit, motion/stagger | Detail pages consistent; transitions smooth |
-| **R5 — A11y + QA** | aria sweep, contrast checks, build verification both apps | Clean build, no contrast regressions |
+| Phase | Scope | Exit criteria | Status |
+|---|---|---|---|
+| **R1 — Shell** | Sidebar (grouping, active rail, user footer, workspace header), top bar (page title, `+ New`, bell) | Shell looks intentional; collapse animates; mobile drawer matches | ✅ Done (`+ New`/bell deferred to R3) |
+| **R2 — Page rhythm** | `PageHeader` primitive + adopt on all 8 pages; standardized KPI cards | Every page opens with consistent header + spacing | ✅ PageHeader done; KPI cards pending |
+| **R3 — Data surfaces** | Unified table style, badges, empty/error states across lists | One table language; no blank states | ⏳ |
+| **R4 — Detail + polish** | Detail-page two-column rails, component audit, motion/stagger | Detail pages consistent; transitions smooth | ⏳ |
+| **R5 — A11y + QA** | aria sweep, contrast checks, build verification both apps | Clean build, no contrast regressions | ⏳ |
 
 ---
 

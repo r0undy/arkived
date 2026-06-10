@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 
 const VIEW_OPTIONS = ['month', 'week', 'day'];
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -181,8 +182,7 @@ export default function CalendarPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Calendar</h1>
-      <p className="mt-2 text-sm text-neutral-400">Month / week / day booking and maintenance visibility.</p>
+      <PageHeader title="Calendar" subtitle="Month / week / day booking and maintenance visibility." />
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div className="flex flex-wrap items-end gap-2">

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Inbox, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import ActivationWidget from '../components/ActivationWidget';
 import Badge from '../components/ui/Badge';
 import Sparkline from '../components/ui/Sparkline';
@@ -126,8 +127,7 @@ export default function DashboardHomePage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-      <p className="mt-2 text-sm text-neutral-400">Live KPI snapshot for your rental operations.</p>
+      <PageHeader title="Dashboard" subtitle="Live KPI snapshot for your rental operations." />
 
       <ActivationWidget
         tenant={tenant}

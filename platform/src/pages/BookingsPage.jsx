@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import { CalendarCheck } from 'lucide-react';
@@ -295,8 +296,7 @@ export default function BookingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Bookings</h1>
-      <p className="mt-2 text-sm text-neutral-400">Track reservation-to-return pipeline.</p>
+      <PageHeader title="Bookings" subtitle="Track reservation-to-return pipeline." />
 
       <div className="mt-6 flex flex-wrap items-end justify-between gap-3">
         <div className="grid flex-1 gap-2 sm:grid-cols-2 lg:grid-cols-5">

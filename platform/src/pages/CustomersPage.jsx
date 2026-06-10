@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Users, Search, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import EmptyState from '../components/ui/EmptyState';
 import Badge from '../components/ui/Badge';
 
@@ -65,8 +66,7 @@ export default function CustomersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Customers</h1>
-      <p className="mt-2 text-sm text-neutral-400">Searchable customer directory with booking activity.</p>
+      <PageHeader title="Customers" subtitle="Searchable customer directory with booking activity." />
 
       <div className="mt-6">
         <label className="block text-sm text-neutral-200">

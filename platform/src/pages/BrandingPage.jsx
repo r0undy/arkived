@@ -6,7 +6,7 @@ import { hasSupabaseClient } from '../lib/supabase';
 import { uploadTenantAsset } from '../lib/storage';
 import { presetToPngBlob } from '../lib/logoRender.jsx';
 import { contrastRatio, darken, readableTextColor } from '../lib/colors';
-import { Button, Card, Input, Textarea, Switch, Modal, useToast, Skeleton } from '../components/ui';
+import { Button, Card, Input, Textarea, Switch, Modal, useToast, Skeleton, PageHeader } from '../components/ui';
 import ImageUploader from '../components/ImageUploader';
 import LogoPicker from '../components/LogoPicker';
 import BusinessHoursEditor from '../components/BusinessHoursEditor';
@@ -160,10 +160,7 @@ export default function BrandingPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold tracking-tight">Branding studio</h1>
-        <p className="text-sm text-neutral-400">Customize your storefront identity. Changes preview live — save when you're happy.</p>
-      </div>
+      <PageHeader title="Branding studio" subtitle="Customize your storefront identity. Changes preview live — save when you're happy." />
 
       {loading ? (
         <div className="grid gap-6 lg:grid-cols-[1fr_420px]">

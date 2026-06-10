@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, LayoutGrid, List } from 'lucide-react';
 import { api } from '../lib/api';
+import PageHeader from '../components/ui/PageHeader';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
 import { SkeletonCard } from '../components/ui/Skeleton';
@@ -129,8 +130,7 @@ export default function EquipmentPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">Equipment</h1>
-      <p className="mt-2 text-sm text-neutral-400">Browse and manage your rental inventory.</p>
+      <PageHeader title="Equipment" subtitle="Browse and manage your rental inventory." />
 
       <div className="mt-6 grid gap-3 rounded-lg border border-neutral-750 bg-neutral-800 p-4 md:grid-cols-4">
         <Field label="Search" value={filters.q} onChange={updateFilter('q')} placeholder="Name or keyword" />
