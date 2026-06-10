@@ -1,7 +1,7 @@
 # Storefront Redesign — Arkived
 
-> **Version:** 0.1.0
-> **Status:** Draft
+> **Version:** 0.2.0
+> **Status:** Home page de-carded (S1–S3 done) — other pages pending
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
 > **References:** [frontend-arkived.md](./frontend-arkived.md) · [frontend-redesign-arkived.md](./frontend-redesign-arkived.md) · [dsd-arkived.md](./dsd-arkived.md#8-app-2-theming-system) · [prd-arkived.md](./prd-arkived.md)
@@ -44,33 +44,30 @@ The home page is **card-on-card-on-card**. Almost every section is a bordered wh
 ## 3. Section-by-Section Plan
 
 ### 3.1 Hero — keep, but ground it
-- [ ] Keep the image/parallax (or animated gradient fallback) — this is the one place a big visual belongs.
-- [ ] **Absorb the trust strip into the hero** as a thin inline row beneath the CTAs: `12 items · Fast replies · Quality maintained · Local pickup` rendered as muted text with small inline icons and dot separators — **no cards**.
-- [ ] Keep the open-now badge + contact actions (these are good, lightweight).
-- [ ] Slightly reduce hero corner rounding (`rounded-3xl` → `rounded-2xl`) so it feels grounded, or make it full-bleed within the content container.
+- [x] Keep the image/parallax (or animated gradient fallback) — this is the one place a big visual belongs.
+- [x] **Absorb the trust strip into the hero** as a thin inline row beneath the CTAs: `12 items available · Fast replies · Quality maintained · Local pickup` rendered as muted white text with small inline icons and dot separators — **no cards**.
+- [x] Keep the open-now badge + contact actions (these are good, lightweight).
+- [x] Slightly reduce hero corner rounding (`rounded-3xl` → `rounded-2xl`) so it feels grounded.
 
 ### 3.2 Remove the standalone Trust strip
-- [ ] Delete the 4-card `TrustItem` grid entirely; its content now lives inline in the hero (3.1). Removes 4 boxes immediately.
+- [x] Deleted the 4-card `TrustItem` grid entirely (and the helper); its content now lives inline in the hero (3.1).
 
 ### 3.3 Featured equipment — promote it
-- [ ] Move **Featured equipment above Categories** so products lead.
-- [ ] Keep `EquipmentCard` (cards are correct here). Section header is a plain title + "See full catalog →" link — no wrapping panel.
+- [x] Moved **Featured equipment above Categories** so products lead.
+- [x] Keep `EquipmentCard` (cards are correct here). Section header is a plain title + "See the full catalog →" link — no wrapping panel.
 - [ ] Consider a larger first row on `lg` (a 2-up "hero product" + smaller cards) for editorial weight — optional.
 
 ### 3.4 Categories — pills, not cards
-- [ ] Replace the 6 bordered category **cards** with **chips/pills**: a horizontal wrap of rounded buttons (`border-slate-200 bg-white/70 hover:border-primary`) with the label and a small leading icon or the category's first letter. Drops the "circle icon in a card" cliché and the heavy grid.
-- [ ] Place this directly under Featured as a quiet "Shop by category" filter row.
+- [x] Replaced the 6 bordered category **cards** with a wrap of **pills** (`border-slate-200 bg-white/70 hover:border-primary`) with a small monogram chip + label. Placed directly under Featured as "Shop by category."
 
 ### 3.5 How it works — inline 3-step strip
-- [ ] Remove the full **dark rounded slab**. Render the 3 steps as an open, centered row on the page background: number + title + one line, connected by a thin hairline/arrow between steps on `sm+`. No container, no dark box.
-- [ ] Numbers use `--color-primary` text; icons optional and small.
+- [x] Removed the dark rounded slab. Steps render open on the page background: brand-colored "Step n" label + title (with small icon) + one line, with a hairline connector between steps on `sm+`.
 
 ### 3.6 Why choose us — editorial, not 3 cards
-- [ ] Replace the 3 bordered **cards** with a clean 3-column (or alternating) list: small accent icon, bold one-liner, supporting sentence — separated by whitespace/hairlines, **no borders or shadows**.
-- [ ] Keep the star row, but make it subtle. Drop the per-item white box.
+- [x] Replaced the 3 bordered cards with an open 3-column list: small accent icon, bold one-liner, supporting sentence — separated by whitespace + a top hairline. Star row kept, subtler.
 
 ### 3.7 Final CTA — minimal, no gradient slab
-- [ ] Remove the **gradient card**. Replace with a centered, open CTA band on the page background: heading + one line + a single primary button (themed). Optionally a hairline top border to separate from the section above. (Mirrors the platform's de-carded CTA direction.)
+- [x] Removed the gradient card. Now a centered open band on the page background (hairline top border): heading + one line + a single themed primary button.
 
 ---
 
