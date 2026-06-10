@@ -1,6 +1,6 @@
 # Frontend Experience Roadmap — Arkived
 
-> **Version:** 1.4.0
+> **Version:** 1.5.0
 > **Status:** In Progress
 > **Last Updated:** 2026-06-10
 > **Owner:** Regalia Council
@@ -26,7 +26,7 @@ api/         # Supporting endpoints (storage signing, logo presets, branding)
 |---|---|---|
 | F0 — Foundation & primitives | ✅ Done | Full UI kit, responsive layouts, Lucide + wordmark, `Tooltip` + `Tabs` shipped. |
 | F1 — Onboarding | ✅ Done | `/welcome` wizard, persistent activation widget + floating launcher, empty states, confetti + toast at 100%. |
-| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon. Social-card preview + reset pending. |
+| F2 — Branding studio | ✅ Done | Split-screen live preview, AA meter, banner, metadata/favicon, reset-to-saved + dirty tracking. Social-card preview pending. |
 | F3 — Logo picker | ✅ Done | 12 recolorable presets + customizer. Preset-persistence API optional/pending. |
 | F4 — Supabase storage | ✅ Done | Shared uploader + compression, storefront detail lightbox. Platform multi-image drag-reorder pending. |
 | F5 — Captivating storefront | ✅ Done | Hero, sections, catalog/detail, metadata/SEO, JSON-LD, social proof, sticky CTA, share, recently-viewed. |
@@ -181,7 +181,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] Left rail: branding controls (logo, accent, banner, shop name, contact, watermark toggle)
 - [x] Right rail: a **live storefront preview** (embedded mini-render of the real storefront hero + a sample equipment card) reflecting every change instantly — no save required to preview
 - [x] Device toggle on the preview: **Desktop / Mobile** frames
-- [/] "Reset to last saved" and an explicit `Save changes` (preview is optimistic; persistence is deliberate) — explicit save shipped; "reset to last saved" pending
+- [x] "Reset to last saved" and an explicit `Save changes` (preview is optimistic; persistence is deliberate) — dirty-state tracking + instant revert-to-saved snapshot + unsaved-changes indicator shipped
 
 ### F2.2 Accent color, made delightful
 
@@ -247,7 +247,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 
 ### F4.2 Equipment images
 
-- [/] Equipment create/edit supports **multiple images** with a drag-to-reorder gallery; first image = primary — reorder/primary API wired; platform drag-reorder UI pending
+- [x] Equipment create/edit supports **multiple images** with a drag-to-reorder gallery; first image = primary — optimistic drag-reorder + arrow-key/touch fallback + primary/delete shipped
 - [x] Equipment cards (dashboard + storefront) show real photos with `loading="lazy"` and a branded placeholder when none exist
 - [x] Equipment detail page: primary image + thumbnail strip with lightbox — storefront detail has thumbnail strip + zoom lightbox
 
@@ -311,7 +311,7 @@ These are *additive* — they don't alter existing logic. Flagged so a backend o
 - [x] **Sticky inquiry bar / mobile bottom CTA** on the detail page so the call-to-action is always reachable
 - [x] **Share & save:** copy-link and "add to favorites" (localStorage) for browsing across visits
 - [x] **Search & filter persistence** via URL query params (already partially supported) so links are shareable
-- [ ] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator
+- [/] **Trust & contact affordances:** click-to-call, WhatsApp/email links, embedded map, business hours with an "open now" indicator — click-to-call, mailto, WhatsApp, and Google Maps address link shipped; business hours/"open now" pending (needs hours field)
 - [x] **Recently viewed** strip (localStorage) to aid return browsing
 
 ---

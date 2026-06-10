@@ -30,6 +30,7 @@ export default function BrandingPage() {
   const auth = useAuth();
   const toast = useToast();
   const [form, setForm] = useState(initialForm);
+  const [savedForm, setSavedForm] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState({ logo: false, banner: false });
@@ -43,7 +44,7 @@ export default function BrandingPage() {
     try {
       const result = await api.tenant();
       const tenant = result.tenant || {};
-      setForm({
+      const next = {
         name: tenant.name || '',
         logo_url: tenant.logo_url || '',
         accent_color: tenant.accent_color || '#6366f1',
@@ -55,7 +56,9 @@ export default function BrandingPage() {
         contact_phone: tenant.contact_phone || '',
         contact_address: tenant.contact_address || '',
         show_watermark: Boolean(tenant.show_watermark)
-      });
+      };
+      setForm(next);
+      setSavedForm(next);
     } catch {
       toast.push('Failed to load branding settings.', 'error');
     } finally {
@@ -83,6 +86,7 @@ export default function BrandingPage() {
       const patch = kind === 'logo' ? { logo_url: url, favicon_url: url } : { banner_image_url: url };
       setForm((prev) => ({ ...prev, ...patch }));
       await api.updateBranding(patch);
+      setSavedForm((prev) => ({ ...prev, ...patch }));
       toast.push(`${kind === 'logo' ? 'Logo' : 'Banner'} uploaded.`, 'success');
     } catch (err) {
       setUploadError((prev) => ({ ...prev, [kind]: err.message || 'Upload failed' }));
@@ -101,6 +105,7 @@ export default function BrandingPage() {
       const patch = { logo_url: url, favicon_url: url };
       setForm((prev) => ({ ...prev, ...patch }));
       await api.updateBranding(patch);
+      setSavedForm((prev) => ({ ...prev, ...patch }));
       toast.push('Logo applied.', 'success');
       setLogoPickerOpen(false);
     } catch (err) {
@@ -119,13 +124,25 @@ export default function BrandingPage() {
     setSaving(true);
     try {
       await api.updateBranding(form);
+      setSavedForm(form);
       toast.push('Branding saved.', 'success');
-      await loadBranding();
     } catch (err) {
       toast.push(err.message || 'Failed to save.', 'error');
     } finally {
       setSaving(false);
     }
+  };
+
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(savedForm),
+    [form, savedForm]
+  );
+
+  const resetToSaved = () => {
+    if (!isDirty) return;
+    setForm(savedForm);
+    setUploadError({ logo: '', banner: '' });
+    toast.push('Reverted to last saved.', 'info');
   };
 
   const metaPreview =
@@ -299,10 +316,16 @@ export default function BrandingPage() {
             ) : null}
 
             <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t border-neutral-750 bg-neutral-900/90 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-lg sm:border sm:px-4">
-              <Button type="button" variant="ghost" onClick={loadBranding} disabled={saving}>
-                Reset
+              {isDirty ? (
+                <span className="mr-auto inline-flex items-center gap-1.5 text-xs text-warning-500">
+                  <span className="h-1.5 w-1.5 rounded-full bg-warning-500" aria-hidden="true" />
+                  Unsaved changes
+                </span>
+              ) : null}
+              <Button type="button" variant="ghost" onClick={resetToSaved} disabled={saving || !isDirty}>
+                Reset to last saved
               </Button>
-              <Button type="submit" loading={saving}>
+              <Button type="submit" loading={saving} disabled={!isDirty}>
                 Save changes
               </Button>
             </div>

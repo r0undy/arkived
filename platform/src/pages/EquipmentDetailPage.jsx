@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { GripVertical, Star, Trash2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { api } from '../lib/api';
 
 const initialMaintenance = {
@@ -47,6 +48,7 @@ export default function EquipmentDetailPage() {
   const [imageStatus, setImageStatus] = useState({ loading: false, error: '' });
   const [lastFailedImageFile, setLastFailedImageFile] = useState(null);
   const [dragImageId, setDragImageId] = useState('');
+  const [dragOverImageId, setDragOverImageId] = useState('');
 
   const [maintenanceLogs, setMaintenanceLogs] = useState([]);
   const [maintenanceForm, setMaintenanceForm] = useState(initialMaintenance);
@@ -204,7 +206,28 @@ export default function EquipmentDetailPage() {
     setDragImageId(imageId);
   };
 
+  // Persist a new image order, applying it optimistically so the grid doesn't flash.
+  const persistOrder = async (orderedIds) => {
+    if (!id) return;
+    const previous = images;
+    const byId = new Map(previous.map((entry) => [entry.id, entry]));
+    const optimistic = orderedIds.map((imageId, index) => ({
+      ...byId.get(imageId),
+      display_order: index
+    }));
+    setDetail((prev) => (prev ? { ...prev, images: optimistic } : prev));
+
+    try {
+      await api.reorderEquipmentImages(id, orderedIds);
+    } catch (_error) {
+      // Roll back to the server's truth if the request fails.
+      setDetail((prev) => (prev ? { ...prev, images: previous } : prev));
+      await loadDetail();
+    }
+  };
+
   const onDropImage = async (targetImageId) => {
+    setDragOverImageId('');
     if (!id || !dragImageId || dragImageId === targetImageId) {
       setDragImageId('');
       return;
@@ -221,15 +244,19 @@ export default function EquipmentDetailPage() {
     const next = [...current];
     const [moved] = next.splice(from, 1);
     next.splice(to, 0, moved);
+    setDragImageId('');
+    await persistOrder(next);
+  };
 
-    try {
-      await api.reorderEquipmentImages(id, next);
-      await loadDetail();
-    } catch (_error) {
-      // Keep current order if request fails.
-    } finally {
-      setDragImageId('');
-    }
+  // Keyboard / touch fallback so reordering doesn't depend on HTML5 drag-and-drop.
+  const moveImage = async (imageId, direction) => {
+    const current = images.map((entry) => entry.id);
+    const index = current.indexOf(imageId);
+    const target = direction === 'left' ? index - 1 : index + 1;
+    if (index < 0 || target < 0 || target >= current.length) return;
+    const next = [...current];
+    [next[index], next[target]] = [next[target], next[index]];
+    await persistOrder(next);
   };
 
   const onSubmitMaintenance = async (event) => {
@@ -406,37 +433,84 @@ export default function EquipmentDetailPage() {
           ) : null}
         </div>
 
-        <div className="mt-2 text-xs text-neutral-400">Drag and drop image cards to reorder display.</div>
+        <div className="mt-2 text-xs text-neutral-400">Drag the cards (or use the arrows) to reorder. The first image is your primary photo.</div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {images.map((image) => (
+          {images.map((image, index) => (
             <article
               key={image.id}
-              className={`rounded-md border bg-neutral-900 p-3 ${dragImageId === image.id ? 'border-brand-500' : 'border-neutral-750'}`}
+              className={`group relative rounded-md border bg-neutral-900 p-3 transition ${
+                dragImageId === image.id
+                  ? 'border-brand-500 opacity-60'
+                  : dragOverImageId === image.id
+                    ? 'border-brand-500 ring-2 ring-brand-500/40'
+                    : 'border-neutral-750'
+              }`}
               draggable
-              onDragOver={(event) => event.preventDefault()}
+              onDragOver={(event) => {
+                event.preventDefault();
+                if (dragOverImageId !== image.id) setDragOverImageId(image.id);
+              }}
+              onDragLeave={() => setDragOverImageId((prev) => (prev === image.id ? '' : prev))}
               onDragStart={() => onDragStartImage(image.id)}
+              onDragEnd={() => {
+                setDragImageId('');
+                setDragOverImageId('');
+              }}
               onDrop={() => onDropImage(image.id)}
             >
-              <img alt={`${detail?.name || 'Equipment'} image`} className="h-32 w-full rounded object-cover" src={image.storage_url} />
+              <div className="relative">
+                <img alt={`${detail?.name || 'Equipment'} image`} className="h-32 w-full rounded object-cover" src={image.storage_url} />
+                <span
+                  className="absolute left-1.5 top-1.5 inline-flex cursor-grab items-center rounded bg-black/50 p-1 text-white opacity-0 transition group-hover:opacity-100 active:cursor-grabbing"
+                  aria-hidden="true"
+                  title="Drag to reorder"
+                >
+                  <GripVertical className="h-4 w-4" />
+                </span>
+                {image.is_primary ? (
+                  <span className="absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded bg-brand-500 px-1.5 py-0.5 text-xs font-medium text-white">
+                    <Star className="h-3 w-3 fill-current" aria-hidden="true" /> Primary
+                  </span>
+                ) : null}
+              </div>
               <div className="mt-2 flex items-center justify-between gap-2">
-                <span className="text-xs text-neutral-400">{image.is_primary ? 'Primary image' : `Order ${image.display_order}`}</span>
-                <div className="space-x-2">
+                <div className="flex items-center gap-1">
+                  <button
+                    className="rounded border border-neutral-750 p-1 text-neutral-300 hover:bg-neutral-800 disabled:opacity-40"
+                    onClick={() => moveImage(image.id, 'left')}
+                    disabled={index === 0}
+                    type="button"
+                    aria-label="Move image earlier"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    className="rounded border border-neutral-750 p-1 text-neutral-300 hover:bg-neutral-800 disabled:opacity-40"
+                    onClick={() => moveImage(image.id, 'right')}
+                    disabled={index === images.length - 1}
+                    type="button"
+                    aria-label="Move image later"
+                  >
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
                   {!image.is_primary ? (
                     <button
-                      className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
+                      className="inline-flex items-center gap-1 rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
                       onClick={() => onSetPrimaryImage(image.id)}
                       type="button"
                     >
-                      Set primary
+                      <Star className="h-3 w-3" aria-hidden="true" /> Set primary
                     </button>
                   ) : null}
                   <button
-                    className="rounded border border-neutral-750 px-2 py-1 text-xs text-neutral-200 hover:bg-neutral-800"
+                    className="inline-flex items-center gap-1 rounded border border-neutral-750 px-2 py-1 text-xs text-danger-400 hover:bg-neutral-800"
                     onClick={() => onDeleteImage(image.id)}
                     type="button"
                   >
-                    Delete
+                    <Trash2 className="h-3 w-3" aria-hidden="true" /> Delete
                   </button>
                 </div>
               </div>
