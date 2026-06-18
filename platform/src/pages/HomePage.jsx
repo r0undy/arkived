@@ -313,15 +313,15 @@ export default function HomePage() {
               </Link>
               <a
                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-neutral-750 px-6 py-3 font-semibold text-neutral-100 transition hover:bg-neutral-800"
-                href="#demo"
+                href="#features"
               >
-                Watch the demo
+                Get Started
               </a>
             </div>
             <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-neutral-400">
               {['No credit card', 'Launch in minutes', 'Your own subdomain'].map((perk) => (
                 <li key={perk} className="inline-flex items-center gap-1.5">
-                  <Check className="h-4 w-4 text-success-500" aria-hidden="true" /> {perk}
+                  {/* <Check className="h-4 w-4 text-success-500" aria-hidden="true" /> {perk} */}
                 </li>
               ))}
             </ul>
@@ -342,7 +342,7 @@ export default function HomePage() {
       </section>
 
       {/* Demo */}
-      <section id="demo" className="scroll-mt-24 border-b border-neutral-750">
+      {/* <section id="demo" className="scroll-mt-24 border-b border-neutral-750">
         <div className="mx-auto max-w-5xl px-6 py-16 lg:py-24">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-400">See it in action</p>
@@ -354,7 +354,7 @@ export default function HomePage() {
             <YouTubeEmbed videoId={DEMO_VIDEO_ID} title="Arkived product demo" />
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Capability stats band */}
       <section className="border-b border-neutral-750 bg-neutral-900">
@@ -378,7 +378,7 @@ export default function HomePage() {
       </section>
 
       {/* Features — bento */}
-      <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+      <section id="features"className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-400">Everything in one place</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">From first inquiry to final inspection</h2>
@@ -491,7 +491,7 @@ export default function HomePage() {
       </section>
 
       {/* Team */}
-      <section className="border-t border-neutral-750 bg-neutral-950/40">
+      {/* <section className="border-t border-neutral-750 bg-neutral-950/40">
         <div className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-2xl">
@@ -506,7 +506,7 @@ export default function HomePage() {
             <TeamCarousel members={TEAM} />
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* FAQ */}
       <section className="border-t border-neutral-750">
