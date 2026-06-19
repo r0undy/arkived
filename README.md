@@ -41,5 +41,3 @@ npm run dev
 - Frontends use Vite + React + Tailwind CSS v4.
 - API uses Express + Supabase client + Zod validation.
 - `.env.example` is provided for each app.
-- Supabase bootstrap guide: `docs/setup-supabase.md`.
-- Resend notification setup guide: `docs/setup-resend.md`.
