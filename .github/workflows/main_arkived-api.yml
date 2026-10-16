@@ -50,7 +50,7 @@ jobs:
           path: ./api
       
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1EDA3A67E43C40F283CBC1904CD090F2 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_729BF36FCCF74B84A52D1B3C4F642F04 }}
